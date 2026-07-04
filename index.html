@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>BLOCKSHOT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Courier New',ui-monospace,monospace;color:#fff;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hide{display:none!important}
+/* ---------- HUD ---------- */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+.hudPad{position:fixed;pointer-events:none}
+#quest{left:calc(10px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));max-width:44vw;background:rgba(0,0,0,.38);border-left:3px solid #ffb830;padding:6px 9px;font-size:12px;line-height:1.45;border-radius:0 4px 4px 0}
+#qTitle{color:#ffb830;font-weight:bold;font-size:12px}
+#qObj{color:#eee;white-space:pre-line}
+#timerHud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ff5544;text-shadow:0 0 6px #000;letter-spacing:2px}
+#killfeed{right:calc(52px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));text-align:right;font-size:11px;max-width:46vw}
+#killfeed div{background:rgba(0,0,0,.4);margin:3px 0 0 auto;padding:3px 8px;border-radius:3px;border-right:3px solid #ffb830;transition:opacity .6s;width:fit-content}
+#killfeed div.hs{border-right-color:#ff3333;color:#ffd0c0}
+#bottomBar{left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);text-align:center}
+#ammoIcons span{display:inline-block;width:7px;height:18px;background:#ffcf6e;margin:0 2px;border:1px solid #7a5a1e;border-radius:2px 2px 0 0}
+#ammoIcons span.empty{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+#ammoText{font-size:12px;color:#ddd;margin-top:2px;text-shadow:0 1px 2px #000}
+#hpWrap{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(170px + env(safe-area-inset-bottom));width:110px;height:9px;background:rgba(0,0,0,.5);border:1px solid #555;border-radius:3px}
+#hpFill{height:100%;width:100%;background:linear-gradient(#7dda58,#4a9b30);border-radius:2px;transition:width .18s}
+#breathWrap{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(154px + env(safe-area-inset-bottom));width:110px;height:6px;background:rgba(0,0,0,.5);border:1px solid #555;border-radius:3px}
+#breathFill{height:100%;width:100%;background:#5ec8ff;border-radius:2px}
+#breathWrap.pen #breathFill{background:#ff5544}
+#windFlag{right:calc(12px + env(safe-area-inset-right));top:calc(64px + env(safe-area-inset-top));text-align:right;font-size:11px;color:#cfe;text-shadow:0 1px 2px #000}
+#flagPole{display:inline-block;width:44px;height:30px;position:relative}
+#flagCloth{position:absolute;top:2px;left:3px;width:30px;height:14px;background:#ffb830;transform-origin:left center;border:1px solid #7a5a1e}
+#flagStick{position:absolute;top:0;left:0;width:3px;height:30px;background:#caa}
+/* ---------- Buttons ---------- */
+.btn{position:fixed;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:20;pointer-events:auto;font-family:inherit;text-shadow:0 1px 2px #000;transition:background .1s}
+.btn.on{background:rgba(255,190,60,.35);border-color:#ffb830}
+#btnFire{right:calc(20px + env(safe-area-inset-right));bottom:calc(66px + env(safe-area-inset-bottom));width:96px;height:96px;font-size:16px;background:rgba(255,80,60,.16);border-color:rgba(255,120,90,.55)}
+#btnAim{right:calc(30px + env(safe-area-inset-right));bottom:calc(184px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:14px}
+#btnBreath{left:calc(20px + env(safe-area-inset-left));bottom:calc(56px + env(safe-area-inset-bottom));width:84px;height:84px;font-size:13px}
+#btnPause{right:calc(8px + env(safe-area-inset-right));top:calc(6px + env(safe-area-inset-top));width:38px;height:38px;border-radius:8px;font-size:15px}
+body.lefty #btnFire{left:calc(20px + env(safe-area-inset-left));right:auto}
+body.lefty #btnAim{left:calc(30px + env(safe-area-inset-left));right:auto}
+body.lefty #btnBreath{right:calc(20px + env(safe-area-inset-right));left:auto}
+body.lefty #hpWrap,body.lefty #breathWrap{left:auto;right:calc(14px + env(safe-area-inset-right))}
+body.lefty #quest{left:auto;right:calc(10px + env(safe-area-inset-right));border-left:none;border-right:3px solid #ffb830;border-radius:4px 0 0 4px}
+body.lefty #killfeed{right:auto;left:calc(52px + env(safe-area-inset-left));text-align:left}
+body.lefty #killfeed div{margin:3px auto 0 0;border-right:none;border-left:3px solid #ffb830}
+body.lefty #btnPause{left:calc(8px + env(safe-area-inset-left));right:auto}
+body.lefty #windFlag{right:auto;left:calc(12px + env(safe-area-inset-left));text-align:left}
+/* ---------- Scope ---------- */
+#scope{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}
+#scopeMask{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 33vmin, rgba(4,4,6,.85) 35vmin, #020204 38vmin)}
+#scopeRing{position:absolute;left:50%;top:50%;width:68vmin;height:68vmin;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #111;box-shadow:inset 0 0 40px rgba(0,0,0,.9), inset 0 6vmin 9vmin rgba(80,120,200,.06)}
+#lensGlint{position:absolute;left:calc(50% + 16vmin);top:calc(50% - 20vmin);width:5vmin;height:5vmin;border-radius:50%;border:2px solid rgba(255,255,240,.35);box-shadow:0 0 8px rgba(255,255,220,.25)}
+.cross{position:absolute;background:#0a0a0a}
+#crossV{left:calc(50% - 1px);top:calc(50% - 33vmin);width:2px;height:66vmin}
+#crossH{top:calc(50% - 1px);left:calc(50% - 33vmin);height:2px;width:66vmin}
+.milDot{position:absolute;width:4px;height:4px;background:#0a0a0a;border-radius:50%;left:calc(50% - 2px)}
+.milDotH{position:absolute;width:4px;height:4px;background:#0a0a0a;border-radius:50%;top:calc(50% - 2px)}
+#scopeGrass{position:absolute;left:calc(50% - 14px);top:calc(50% + 24vmin);width:28px;height:22px;transform-origin:bottom center}
+#scopeGrass i{position:absolute;bottom:0;width:3px;background:#3f7a2e;transform-origin:bottom center;border-radius:2px 2px 0 0}
+#dropArrow{position:absolute;left:calc(50% - 10px);top:calc(50% + 40px);color:#ffe14d;font-size:20px;font-weight:bold;text-shadow:0 0 6px #000;animation:bnc 1s infinite}
+@keyframes bnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+#zoomTxt{position:absolute;left:50%;top:calc(50% - 30vmin);transform:translateX(-50%);color:#cde;font-size:12px;text-shadow:0 1px 2px #000}
+/* ---------- crosshair (hip) ---------- */
+#hip{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;pointer-events:none}
+#hip i{position:absolute;background:rgba(255,255,255,.85);box-shadow:0 0 2px #000}
+/* ---------- feedback ---------- */
+#hitmarker{position:fixed;left:50%;top:50%;width:40px;height:40px;transform:translate(-50%,-50%);z-index:16;pointer-events:none;opacity:0}
+#hitmarker i{position:absolute;width:14px;height:2.5px;background:#fff;box-shadow:0 0 3px #000}
+#hitmarker.hs i{background:#ff3020;height:3.5px}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:9;background:radial-gradient(circle,transparent 55%,rgba(0,0,0,.42) 100%)}
+#dmgVig{position:fixed;inset:0;pointer-events:none;z-index:17;box-shadow:inset 0 0 24vmin rgba(255,20,10,.85);opacity:0;transition:opacity .5s}
+#flashEdge{position:fixed;inset:0;pointer-events:none;z-index:18;border:5px solid rgba(255,255,255,.9);opacity:0}
+#banner{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(1);z-index:19;font-size:30px;font-weight:900;letter-spacing:3px;color:#ffb830;text-shadow:2px 2px 0 #6b3, -1px -1px 0 #310, 0 0 14px rgba(255,160,40,.6);opacity:0;pointer-events:none;text-align:center}
+#subBanner{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:19;font-size:14px;color:#ffe;opacity:0;pointer-events:none;text-shadow:0 1px 3px #000}
+#popups{position:fixed;inset:0;z-index:13;pointer-events:none;overflow:hidden}
+.pop{position:absolute;font-weight:bold;font-size:15px;color:#fff;text-shadow:0 1px 2px #000,0 0 5px rgba(0,0,0,.6);transition:transform .8s ease-out,opacity .8s;will-change:transform,opacity}
+.pop.gold{color:#ffd94d;font-size:18px}
+.pop.coin{color:#ffe98a;font-size:12px}
+#kcT,#kcB{position:fixed;left:0;width:100%;height:0;background:#000;z-index:21;transition:height .25s;pointer-events:none}
+#kcT{top:0}#kcB{bottom:0}
+#kcTxt{position:fixed;right:16px;top:14%;z-index:22;color:#ffb830;font-size:13px;letter-spacing:4px;opacity:0;pointer-events:none}
+#tutHint{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:19;background:rgba(0,0,0,.55);border:1px solid #ffb830;color:#ffe;padding:8px 14px;border-radius:6px;font-size:13px;max-width:80vw;text-align:center;pointer-events:none;line-height:1.5}
+#toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:40;background:rgba(0,0,0,.7);color:#ffe;padding:7px 16px;border-radius:16px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid #666}
+/* ---------- screens ---------- */
+.screen{position:fixed;inset:0;z-index:50;background:linear-gradient(#1a1626,#241b2e 60%,#3a2033);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:pan-y;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
+.screen h2{color:#ffb830;letter-spacing:3px;margin-bottom:14px;font-size:20px;text-shadow:2px 2px 0 #000}
+.mbtn{pointer-events:auto;background:linear-gradient(#4a3b63,#37294a);border:2px solid #7a6a9a;color:#ffe;font-family:inherit;font-weight:bold;font-size:15px;padding:12px 26px;border-radius:8px;margin:6px;min-width:190px;min-height:52px;text-shadow:0 1px 2px #000;box-shadow:0 3px 0 #241b30}
+.mbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #241b30}
+.mbtn.gold{background:linear-gradient(#a8742c,#7d5314);border-color:#ffcf6e}
+.mbtn.small{min-width:0;padding:8px 14px;font-size:13px;min-height:44px}
+.mbtn:disabled{opacity:.4}
+#logoCv{image-rendering:pixelated;margin-bottom:6px}
+#titleTap{color:#ffe;font-size:15px;animation:pulse 1.4s infinite;margin:16px 0 8px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ctrlRow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
+.ctrlCard{background:rgba(0,0,0,.3);border:1px solid #555;border-radius:6px;padding:7px 10px;font-size:11px;color:#ccc;text-align:center;line-height:1.5}
+.ctrlCard b{color:#ffb830}
+#chapTabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;justify-content:center}
+.chapTab{pointer-events:auto;background:#2c2440;border:2px solid #554a77;color:#cbc;padding:8px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:bold;min-height:44px}
+.chapTab.sel{background:#5a4380;border-color:#ffb830;color:#ffe}
+.chapTab.lock{opacity:.45}
+#missionList{display:flex;flex-direction:column;gap:8px;width:min(92vw,460px)}
+.miCard{pointer-events:auto;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.06);border:2px solid #665a88;border-radius:8px;padding:10px 14px;color:#ffe;font-family:inherit;font-size:13px;text-align:left;min-height:56px}
+.miCard:active{background:rgba(255,255,255,.14)}
+.miCard .stars{color:#ffd94d;font-size:15px;letter-spacing:2px}
+.miCard small{color:#aa9;display:block;font-size:10px;margin-top:2px}
+.topRow{display:flex;justify-content:space-between;align-items:center;width:min(92vw,460px);margin-bottom:10px}
+#goldTxt,#goldTxt2{color:#ffd94d;font-weight:bold;font-size:15px;text-shadow:0 1px 2px #000}
+.shopItem{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.06);border:1px solid #665a88;border-radius:8px;padding:10px 12px;width:min(92vw,440px);margin:4px 0;font-size:13px}
+.shopItem small{color:#a9a;display:block;font-size:10px;margin-top:2px}
+.buyBtn{pointer-events:auto;background:#7d5314;border:2px solid #ffcf6e;color:#ffe;font-family:inherit;font-weight:bold;padding:8px 12px;border-radius:6px;min-width:76px;min-height:44px;font-size:12px}
+.buyBtn:disabled{opacity:.4}
+.buyBtn.owned{background:#2e5a2e;border-color:#7dda58}
+.setRow{display:flex;justify-content:space-between;align-items:center;width:min(88vw,420px);margin:7px 0;font-size:13px;color:#dde}
+.setRow input[type=range]{pointer-events:auto;width:150px;height:30px}
+.segBtns{display:flex;gap:4px}
+.segBtns button{pointer-events:auto;background:#2c2440;border:1px solid #665a88;color:#cbc;font-family:inherit;padding:8px 10px;border-radius:5px;font-size:12px;min-height:40px}
+.segBtns button.sel{background:#5a4380;border-color:#ffb830;color:#ffe}
+#endStars{font-size:38px;letter-spacing:8px;color:#555;margin:8px 0}
+#endStars .got{color:#ffd94d;text-shadow:0 0 12px rgba(255,200,60,.7)}
+#endStats{font-size:13px;color:#ccc;line-height:1.8;text-align:center}
+#failReason{color:#ff6655;font-size:15px;font-weight:bold;margin:6px 0 2px}
+.statGrid{display:grid;grid-template-columns:auto auto;gap:5px 22px;font-size:13px;color:#dde;margin:8px 0}
+.statGrid b{color:#ffd94d}
+#rankBig{font-size:56px;font-weight:900;color:#ffb830;text-shadow:3px 3px 0 #000}
+#fadeBlack{position:fixed;inset:0;background:#000;z-index:60;opacity:1;transition:opacity .4s;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="vig"></div>
+  <div id="quest" class="hudPad"><div id="qTitle"></div><div id="qObj"></div></div>
+  <div id="timerHud" class="hide"></div>
+  <div id="killfeed" class="hudPad"></div>
+  <div id="windFlag" class="hudPad hide"><span id="flagPole"><i id="flagStick"></i><i id="flagCloth"></i></span><div id="windTxt"></div></div>
+  <div id="bottomBar" class="hudPad"><div id="ammoIcons"></div><div id="ammoText"></div></div>
+  <div id="hpWrap"><div id="hpFill"></div></div>
+  <div id="breathWrap"><div id="breathFill"></div></div>
+  <div id="hip"></div>
+  <div id="hitmarker"></div>
+  <div id="dmgVig"></div><div id="flashEdge"></div>
+  <div id="banner"></div><div id="subBanner"></div>
+  <div id="popups"></div>
+  <div id="tutHint" class="hide"></div>
+</div>
+<div id="scope" class="hide">
+  <div id="scopeMask"></div>
+  <div id="crossV" class="cross"></div><div id="crossH" class="cross"></div>
+  <div id="milWrap"></div>
+  <div id="scopeGrass" class="hide"></div>
+  <div id="dropArrow" class="hide">▲</div>
+  <div id="zoomTxt"></div>
+  <div id="scopeRing"></div>
+  <div id="lensGlint"></div>
+</div>
+<button class="btn" id="btnFire" data-btn="fire">발사</button>
+<button class="btn" id="btnAim" data-btn="aim">조준</button>
+<button class="btn" id="btnBreath" data-btn="breath">숨<br>참기</button>
+<button class="btn hide" id="btnPause" data-btn="pause">II</button>
+<div id="kcT"></div><div id="kcB"></div><div id="kcTxt">KILL CAM</div>
+<div id="toast"></div>
+
+<div class="screen" id="scrTitle">
+  <canvas id="logoCv" width="212" height="18"></canvas>
+  <div style="color:#b9a;font-size:11px;letter-spacing:5px;margin-bottom:4px">VOXEL SNIPER OPERATIONS</div>
+  <div id="titleTap">― 탭하여 시작 ―</div>
+  <div class="ctrlRow">
+    <div class="ctrlCard"><b>◀ 왼쪽 드래그</b><br>시점 조작</div>
+    <div class="ctrlCard"><b>조준 버튼</b><br>스코프 (핀치로 줌)</div>
+    <div class="ctrlCard"><b>발사 버튼</b><br>사격 · 볼트액션</div>
+    <div class="ctrlCard"><b>숨참기 홀드</b><br>흔들림 감소</div>
+  </div>
+  <div style="color:#776;font-size:10px;margin-top:18px">100% 독자 제작 에셋 · 외부 리소스 없음</div>
+</div>
+
+<div class="screen hide" id="scrMenu">
+  <div class="topRow"><h2 style="margin:0">작전 선택</h2><span id="goldTxt"></span></div>
+  <div id="chapTabs"></div>
+  <div id="missionList"></div>
+  <div class="ctrlRow" style="margin-top:14px">
+    <button class="mbtn small" id="btnShop">🛠 상점</button>
+    <button class="mbtn small" id="btnStats">📊 전적</button>
+    <button class="mbtn small" id="btnSettings">⚙ 설정</button>
+    <button class="mbtn small hide" id="btnEndless">∞ 무한 모드</button>
+  </div>
+</div>
+
+<div class="screen hide" id="scrShop">
+  <div class="topRow"><h2 style="margin:0">상점</h2><span id="goldTxt2"></span></div>
+  <div id="shopList"></div>
+  <button class="mbtn" id="btnShopBack">← 돌아가기</button>
+</div>
+
+<div class="screen hide" id="scrSettings">
+  <h2>설정</h2>
+  <div class="setRow"><span>감도</span><input type="range" id="setSens" min="30" max="200" value="100"></div>
+  <div class="setRow"><span>에임 어시스트</span><div class="segBtns" id="setAssist"><button data-v="0">끄기</button><button data-v="1" class="sel">약</button><button data-v="2">강</button></div></div>
+  <div class="setRow"><span>진동</span><div class="segBtns" id="setVib"><button data-v="1" class="sel">켜기</button><button data-v="0">끄기</button></div></div>
+  <div class="setRow"><span>음악 음량</span><input type="range" id="setMus" min="0" max="100" value="60"></div>
+  <div class="setRow"><span>효과음 음량</span><input type="range" id="setSfx" min="0" max="100" value="90"></div>
+  <div class="setRow"><span>왼손잡이 모드</span><div class="segBtns" id="setLefty"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
+  <div class="setRow"><span>30fps 절전 모드</span><div class="segBtns" id="setFps"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
+  <button class="mbtn" id="btnSetBack" style="margin-top:14px">← 돌아가기</button>
+</div>
+
+<div class="screen hide" id="scrStats">
+  <h2>전적</h2>
+  <div id="rankBig"></div>
+  <div class="statGrid" id="statGrid"></div>
+  <button class="mbtn" id="btnStatsBack">← 돌아가기</button>
+</div>
+
+<div class="screen hide" id="scrEnd" style="background:rgba(8,5,14,.92)">
+  <h2 id="endTitle"></h2>
+  <div id="failReason" class="hide"></div>
+  <div id="endStars"></div>
+  <div id="endStats"></div>
+  <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;justify-content:center">
+    <button class="mbtn gold" id="btnRetry">↻ 즉시 재시도</button>
+    <button class="mbtn hide" id="btnNext">다음 임무 ▶</button>
+    <button class="mbtn" id="btnToMenu">작전 목록</button>
+  </div>
+</div>
+
+<div class="screen hide" id="scrPause" style="background:rgba(8,5,14,.86)">
+  <h2>일시 정지</h2>
+  <button class="mbtn gold" id="btnResume">▶ 계속하기</button>
+  <button class="mbtn" id="btnPauseRetry">↻ 재시도</button>
+  <button class="mbtn" id="btnPauseSet">⚙ 설정</button>
+  <button class="mbtn" id="btnQuit">작전 포기</button>
+</div>
+<div id="fadeBlack"></div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script>
+'use strict';
+if(!window.THREE){
+  document.getElementById('titleTap').textContent='Three.js 로드 실패 — 네트워크를 확인 후 새로고침하세요';
+  document.getElementById('fadeBlack').style.opacity=0;
+  throw new Error('THREE not loaded');
+}
+/* =====================================================================
+   BLOCKSHOT — 복셀 모바일 스나이퍼 (단일 파일, 외부 에셋 0)
+   QA 체크리스트:
+   [1] 픽셀 텍스처 선명 (모든 CanvasTexture NearestFilter+no mipmap)
+   [2] 조준 드래그 중 발사해도 시점 안 튐 (pointerId 분리 추적)
+   [3] 전화 수신/백그라운드 시 자동 일시정지 + 오디오 suspend
+   [4] iOS 진동 미지원 → 시각 대체(히트마커 1.3배+테두리 플래시)
+   [5] 노치 대응 safe-area-inset
+   [6] 파편 풀 60개 고정 (초과 시 오래된 것 재사용)
+   [7] 튜토리얼에서 낙차 사격 학습 (밀 도트 + 안내 화살표)
+   ===================================================================== */
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rand=(a,b)=>b===undefined?Math.random()*a:a+Math.random()*(b-a);
+const randi=(a,b)=>Math.floor(rand(a,b+1));
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const easeOutQuad=t=>1-(1-t)*(1-t);
+const easeInOut=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const IS_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const CAN_VIB=('vibrate' in navigator)&&!IS_IOS;
+
+/* ---------- 설정 (세션 변수, localStorage 금지) ---------- */
+const S={sens:1,assist:1,vib:true,musicVol:.6,sfxVol:.9,lefty:false,fps30:false};
+/* ---------- 영구(세션) 진행 상태 ---------- */
+const G={
+  gold:0,tutorialDone:false,allClear:false,
+  stars:{},cleared:{},                     // key 'c-m' → 별 수 / true
+  up:{zoom:0,breath:0,speed:0,mag:0,reload:0,pierce:0,wind:0,vest:0},
+  stats:{kills:0,heads:0,shots:0,hits:0,longest:0,blocks:0,bestWave:0},
+};
+const totalStars=()=>Object.values(G.stars).reduce((a,b)=>a+b,0);
+const gMag=()=>5+(G.up.mag?2:0);
+const gSpeed=()=>G.up.speed?330:250;
+const gReload=()=>G.up.reload?1.6:2.5;
+const gBreathMax=()=>4+(G.up.breath?2:0);
+const gZoomMax=()=>G.up.zoom?12:8;
+const gWindMul=()=>G.up.wind?0.4:1;
+const gDmgMul=()=>G.up.vest?0.7:1;
+
+/* =====================================================================
+   TextureFactory — 16×16 픽셀아트, NearestFilter 강제
+   ===================================================================== */
+function px16(draw){
+  const cv=document.createElement('canvas');cv.width=cv.height=16;
+  const g=cv.getContext('2d');draw(g,cv);
+  const t=new THREE.CanvasTexture(cv);
+  t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
+  t.generateMipmaps=false;t.colorSpace=THREE.SRGBColorSpace;
+  return t;
+}
+// 명암 노이즈 + 가장자리 어두운 테두리
+function noiseTex(shades,opt={}){
+  return px16((g)=>{
+    const rng=mulberry(opt.seed||7);
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){
+      g.fillStyle=shades[Math.floor(rng()*shades.length)];
+      g.fillRect(x,y,1,1);
+    }
+    if(opt.lines){ // 판자 무늬
+      g.fillStyle=opt.lines;
+      for(let y=3;y<16;y+=4)g.fillRect(0,y,16,1);
+      g.fillRect(7,0,1,4);g.fillRect(3,4,1,4);g.fillRect(11,8,1,4);g.fillRect(6,12,1,4);
+    }
+    if(opt.brick){ // 벽돌 무늬
+      g.fillStyle=opt.brick;
+      for(let y=0;y<16;y+=4){g.fillRect(0,y,16,1);
+        for(let x=(y/4%2)*4+1;x<16;x+=8)g.fillRect(x,y,1,4);}
+    }
+    if(opt.rivet){ // 금속판 리벳
+      g.fillStyle=opt.rivet;
+      [[2,2],[13,2],[2,13],[13,13]].forEach(p=>g.fillRect(p[0],p[1],1,1));
+      g.fillStyle=opt.rivetD||'#222';g.fillRect(0,7,16,1);
+    }
+    if(opt.bark){g.fillStyle=opt.bark;for(let x=1;x<16;x+=4)g.fillRect(x,0,1,16);}
+    // 가장자리 테두리 (살짝 어둡게)
+    g.fillStyle='rgba(0,0,0,0.22)';
+    g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
+  });
+}
+/* 재질 정의: 이름 / 팔레트 / 내구도 / 타격음 종류 */
+const MATDEF=[
+ {n:'grass',hp:1,snd:'dirt', sh:['#4d8f3a','#57a044','#468234','#61ab4b'],opt:{seed:3}},
+ {n:'dirt', hp:1,snd:'dirt', sh:['#7a5a38','#6d4f30','#84633e','#5f452a'],opt:{seed:5}},
+ {n:'stone',hp:2,snd:'stone',sh:['#8d8d95','#7c7c85','#9b9ba3','#6f6f78'],opt:{seed:9}},
+ {n:'wood', hp:2,snd:'wood', sh:['#a8783f','#9a6d38','#b48347','#8f6433'],opt:{seed:11,lines:'#6b4a24'}},
+ {n:'log',  hp:2,snd:'wood', sh:['#6d4c2a','#7a5630','#5f4224','#835d34'],opt:{seed:13,bark:'#4a3018'}},
+ {n:'leaf', hp:1,snd:'dirt', sh:['#2e6b28','#37792f','#275c22','#418838'],opt:{seed:15}},
+ {n:'sand', hp:1,snd:'dirt', sh:['#d8c07c','#ccb471','#e2ca86','#c0a866'],opt:{seed:17}},
+ {n:'brick',hp:1,snd:'stone',sh:['#a05038','#94482f','#ad5a40','#8a4029'],opt:{seed:19,brick:'#5f4a42'}},
+ {n:'metal',hp:3,snd:'metal',sh:['#7e858c','#747b82','#888f96','#6a7178'],opt:{seed:21,rivet:'#c8ccd2',rivetD:'#4a5056'}},
+];
+const MI={};MATDEF.forEach((m,i)=>MI[m.n]=i);
+let MATS=[];
+function buildMaterials(){
+  MATS=MATDEF.map(d=>new THREE.MeshLambertMaterial({map:noiseTex(d.sh,d.opt),vertexColors:true}));
+}
+/* vertexColors 재질을 쓰는 일반 지오메트리용 흰색 컬러 attribute */
+function addWhiteColor(geo){
+  const n=geo.attributes.position.count;
+  geo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(n*3).fill(1),3));
+  return geo;
+}
+/* 복셀 지오메트리 — 면별 버텍스 컬러로 가짜 AO (상단 밝게 / 하단·접합부 어둡게) */
+let blockGeo=null;
+function buildBlockGeo(){
+  blockGeo=new THREE.BoxGeometry(1,1,1);
+  const pos=blockGeo.attributes.position;
+  const col=new Float32Array(pos.count*3);
+  const faceShade=[.82,.82,1.0,.5,.74,.74]; // +x -x +y -y +z -z
+  for(let i=0;i<pos.count;i++){
+    const f=Math.floor(i/4);
+    let s=faceShade[f]||.8;
+    if(f!==2&&f!==3&&pos.getY(i)<0)s*=.8; // 측면 하단 버텍스 → 접합부 어둡게
+    col[i*3]=col[i*3+1]=col[i*3+2]=s;
+  }
+  blockGeo.setAttribute('color',new THREE.BufferAttribute(col,3));
+}
+/* ---------- 적 용병 텍스처 (독자 디자인, 진영 팔레트) ---------- */
+function mercTex(base,dark,accent,face){
+  return {
+    head:px16(g=>{const rng=mulberry(31);
+      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.5?dark:base;g.fillRect(x,y,1,1);}
+      g.fillStyle=face;g.fillRect(2,6,12,4);          // 바이저 밴드
+      g.fillStyle='#e8f4ff';g.fillRect(4,7,3,2);g.fillRect(9,7,3,2); // 눈
+      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
+    }),
+    body:px16(g=>{const rng=mulberry(37);
+      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.4?dark:base;g.fillRect(x,y,1,1);}
+      g.fillStyle=accent;g.fillRect(0,10,16,2);       // 벨트
+      g.fillStyle=dark;g.fillRect(3,2,4,6);g.fillRect(9,2,4,6); // 조끼 파우치
+      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
+    }),
+    limb:px16(g=>{const rng=mulberry(41);
+      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.45?dark:base;g.fillRect(x,y,1,1);}
+      g.fillStyle=accent;g.fillRect(0,13,16,2);       // 부츠/장갑 라인
+      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
+    })
+  };
+}
+let MERC_SKINS={};
+function buildMercSkins(){
+  const mk=t=>{const m={};for(const k in t)m[k]=new THREE.MeshLambertMaterial({map:t[k]});return m;};
+  MERC_SKINS={
+    tan:   mk(mercTex('#8a7a52','#6e6140','#3d3223','#1a1a22')),
+    green: mk(mercTex('#5a7048','#465a38','#2c3a22','#141a20')),
+    desert:mk(mercTex('#b09a62','#94804e','#5c4c2a','#20180e')),
+    night: mk(mercTex('#3c4458','#2e3444','#1c2030','#0c1420')),
+    black: mk(mercTex('#38323a','#2a252c','#8a2020','#1a0808')),
+    gold:  mk(mercTex('#b08a30','#8f6f22','#5f4310','#241a04')),
+    heavy: mk(mercTex('#5e6468','#4c5156','#33383c','#14181c')),
+    runner:mk(mercTex('#7a8a8f','#61707a','#c05028','#101418')),
+    civ:   mk(mercTex('#c8c0b0','#a8a090','#6a86b8','#302a20')),
+  };
+}
+/* 표적판 텍스처 */
+let targetMat=null,targetPoleMat=null;
+function buildTargetMats(){
+  targetMat=new THREE.MeshLambertMaterial({map:px16(g=>{
+    g.fillStyle='#e8ddc8';g.fillRect(0,0,16,16);
+    g.fillStyle='#c03828';g.beginPath();g.arc(8,8,6.5,0,7);g.fill();
+    g.fillStyle='#e8ddc8';g.beginPath();g.arc(8,8,4.5,0,7);g.fill();
+    g.fillStyle='#c03828';g.beginPath();g.arc(8,8,2.5,0,7);g.fill();
+    g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
+  })});
+  targetPoleMat=new THREE.MeshLambertMaterial({color:0x6d4c2a});
+}
+/* ---------- 픽셀 로고 (5×7 비트맵 폰트, 독자 제작) ---------- */
+function drawLogo(){
+  const F={B:'11110,10001,10001,11110,10001,10001,11110',L:'10000,10000,10000,10000,10000,10000,11111',
+    O:'01110,10001,10001,10001,10001,10001,01110',C:'01111,10000,10000,10000,10000,10000,01111',
+    K:'10001,10010,10100,11000,10100,10010,10001',S:'01111,10000,10000,01110,00001,00001,11110',
+    H:'10001,10001,10001,11111,10001,10001,10001',T:'11111,00100,00100,00100,00100,00100,00100'};
+  const word='BLOCKSHOT',cv=$('logoCv'),g=cv.getContext('2d'),sc=2;
+  cv.width=word.length*6*sc*2-2*sc*2;cv.height=9*sc*2;cv.style.width=(cv.width/1.2|0)+'px';
+  g.imageSmoothingEnabled=false;
+  word.split('').forEach((ch,ci)=>{
+    const rows=F[ch].split(',');
+    rows.forEach((row,y)=>{row.split('').forEach((b,x)=>{ if(b==='1'){
+      const X=(ci*6+x)*sc*2,Y=(y+1)*sc*2;
+      g.fillStyle='#000';g.fillRect(X+sc,Y+sc,sc*2,sc*2);
+      g.fillStyle=y<3?'#ffd94d':(y<5?'#ffb830':'#e07820');
+      g.fillRect(X,Y,sc*2,sc*2);
+    }});});
+  });
+}
+/* =====================================================================
+   AudioEngine — 100% Web Audio 합성 (샘플 0개)
+   ===================================================================== */
+const AE={
+  ctx:null,master:null,sfx:null,mus:null,amb:null,duckG:null,noiseBuf:null,started:false,
+  hbTimer:null,ambNodes:[],birdTimer:null,cricketTimer:null,
+  init(){
+    if(this.started)return;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    this.ctx=new AC();
+    this.master=this.ctx.createGain();this.master.connect(this.ctx.destination);
+    this.duckG=this.ctx.createGain();this.duckG.connect(this.master);
+    this.sfx=this.ctx.createGain();this.sfx.connect(this.master);
+    this.mus=this.ctx.createGain();this.mus.connect(this.duckG);
+    this.amb=this.ctx.createGain();this.amb.connect(this.duckG);
+    this.setVols();
+    const len=this.ctx.sampleRate;
+    this.noiseBuf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const d=this.noiseBuf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+    this.started=true;
+  },
+  setVols(){if(!this.started)return;this.sfx.gain.value=S.sfxVol;this.mus.gain.value=S.musicVol*.5;this.amb.gain.value=S.sfxVol*.5;},
+  resume(){if(this.ctx&&this.ctx.state!=='running')this.ctx.resume();},
+  suspend(){if(this.ctx&&this.ctx.state==='running')this.ctx.suspend();},
+  t(){return this.ctx?this.ctx.currentTime:0},
+  /* 거리 감쇠 + 로우패스 + 스테레오 패닝 체인 생성 */
+  spatial(pos){
+    const g=this.ctx.createGain(),lp=this.ctx.createBiquadFilter(),pan=this.ctx.createStereoPanner();
+    let dist=0,side=0;
+    if(pos&&typeof camera!=='undefined'&&camera){
+      const rel=pos.clone().sub(camera.position);dist=rel.length();
+      const right=V3(1,0,0).applyQuaternion(camera.quaternion);
+      side=clamp(rel.clone().normalize().dot(right),-1,1);
+    }
+    g.gain.value=1/(1+dist/28);
+    lp.type='lowpass';lp.frequency.value=clamp(9000/(1+dist/45),500,12000);
+    pan.pan.value=side*.75;
+    g.connect(lp);lp.connect(pan);pan.connect(this.sfx);
+    return g;
+  },
+  osc(type,f0,dur,peak,dest,opt={}){
+    const o=this.ctx.createOscillator(),g=this.ctx.createGain(),t=this.t();
+    o.type=type;o.frequency.setValueAtTime(f0,t);
+    if(opt.f1)o.frequency.exponentialRampToValueAtTime(Math.max(opt.f1,1),t+dur);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+(opt.a||.005));
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(g);g.connect(dest||this.sfx);o.start(t+(opt.delay||0));o.stop(t+dur+(opt.delay||0)+.05);
+    return o;
+  },
+  noise(dur,peak,dest,opt={}){
+    const src=this.ctx.createBufferSource(),g=this.ctx.createGain(),t=this.t()+(opt.delay||0);
+    src.buffer=this.noiseBuf;src.loop=true;src.playbackRate.value=opt.rate||1;
+    let node=src;
+    if(opt.hp){const f=this.ctx.createBiquadFilter();f.type='highpass';f.frequency.value=opt.hp;node.connect(f);node=f;}
+    if(opt.bp){const f=this.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=opt.bp;f.Q.value=opt.q||1;node.connect(f);node=f;}
+    if(opt.lp){const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(opt.lp,t);
+      if(opt.lp1)f.frequency.exponentialRampToValueAtTime(opt.lp1,t+dur);node.connect(f);node=f;}
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(peak,t+(opt.a||.003));
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    node.connect(g);g.connect(dest||this.sfx);src.start(t);src.stop(t+dur+.05);
+  },
+  duck(){ // 총성 순간 음악·앰비언스 -8dB → 0.5초 복귀
+    if(!this.started)return;const t=this.t(),v=.4;
+    [this.duckG].forEach(n=>{n.gain.cancelScheduledValues(t);n.gain.setValueAtTime(v,t);n.gain.linearRampToValueAtTime(1,t+.5);});
+  },
+  /* ---------- 발사음: 크랙 + 붐 + 테일(에코 2회), 피치 ±3% ---------- */
+  shot(){
+    if(!this.started)return;this.duck();
+    const p=1+rand(-.03,.03);
+    this.noise(.02,.9,this.sfx,{hp:3000,a:.001,rate:p});                    // 크랙 5ms
+    this.osc('sine',80*p,.15,.8,this.sfx,{f1:35,a:.004});                   // 붐 80Hz
+    this.osc('triangle',150*p,.09,.5,this.sfx,{f1:60});
+    this.noise(1.2,.34,this.sfx,{lp:3000,lp1:280,a:.01,rate:p});            // 테일 로우패스 스윕
+    this.noise(.5,.13,this.sfx,{lp:1600,lp1:300,delay:.12});                // 에코 1
+    this.noise(.45,.07,this.sfx,{lp:1000,lp1:250,delay:.26});               // 에코 2
+  },
+  boltSnd(stage){
+    if(!this.started)return;
+    const f=[900,500,650,1100][stage]||800;
+    this.noise(.04,.22,this.sfx,{bp:f,q:3,a:.002});
+    this.osc('square',f*.5,.03,.06,this.sfx);
+  },
+  shellSnd(){if(this.started)this.osc('square',2400+rand(600),.06,.1,this.sfx,{f1:1500,delay:.25});},
+  reloadSnd(ph){if(this.started){this.noise(.06,.3,this.sfx,{bp:ph?1200:420,q:2});this.osc('square',ph?880:300,.05,.1,this.sfx);}},
+  dryFire(){if(this.started)this.osc('square',1300,.05,.25,this.sfx,{f1:700});},
+  /* ---------- 타격음 (재질별) ---------- */
+  hit(kind,pos){
+    if(!this.started)return;
+    const d=this.spatial(pos);
+    switch(kind){
+      case 'body': this.osc('sine',200,.12,.9,d,{f1:80});this.noise(.08,.5,d,{lp:900});break;
+      case 'head': // "띵-" 금속 + 리버브 느낌 + 2단 확인음
+        this.osc('square',1200,.4,.5,d,{f1:1150});
+        this.osc('sine',2400,.3,.25,d);
+        this.noise(.35,.2,d,{bp:1800,q:6});
+        this.osc('sine',880,.1,.4,this.sfx,{delay:.12});
+        this.osc('sine',1318,.16,.4,this.sfx,{delay:.2});
+        break;
+      case 'stone': this.noise(.12,.8,d,{bp:750,q:2,a:.001});this.osc('triangle',300,.07,.35,d,{f1:120});break;
+      case 'wood': this.osc('triangle',160,.09,.8,d,{f1:70});this.noise(.05,.5,d,{bp:2100,q:1.5});break;
+      case 'dirt': this.noise(.14,.6,d,{lp:600,a:.004});break;
+      case 'metal':{ // 링 모듈레이션 쨍
+        const t=this.t(),o1=this.ctx.createOscillator(),o2=this.ctx.createOscillator(),rg=this.ctx.createGain(),g=this.ctx.createGain();
+        o1.frequency.value=620;o2.frequency.value=173;o1.type='square';o2.type='sine';
+        o1.connect(rg);rg.gain.value=0;o2.connect(rg.gain);rg.connect(g);
+        g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.0001,t+.6);
+        g.connect(d);o1.start(t);o2.start(t);o1.stop(t+.65);o2.stop(t+.65);
+        this.noise(.06,.4,d,{hp:3500,a:.001});break;}
+      case 'helmet': // 중장갑 헬멧 "캉!"
+        this.osc('square',1500,.3,.7,d,{f1:1420});this.osc('sine',3100,.2,.3,d);
+        this.noise(.05,.5,d,{hp:2600});break;
+    }
+  },
+  whiz(){if(this.started)this.noise(.14,.25,this.sfx,{bp:4200,q:3,rate:1.6});},
+  enemyShot(pos){
+    if(!this.started)return;const d=this.spatial(pos);
+    this.noise(.03,.8,d,{hp:1800,a:.001});
+    this.osc('sine',95,.13,.7,d,{f1:40});
+    this.noise(.7,.25,d,{lp:2200,lp1:250});
+  },
+  thud(pos,pitch){ // 낙하 블록 착지
+    if(!this.started)return;const d=this.spatial(pos);
+    this.osc('sine',(pitch||90)*(1+rand(-.2,.2)),.15,.6,d,{f1:40});
+    this.noise(.08,.3,d,{lp:500});
+  },
+  collapseBoom(pos){ // 붕괴 마지막 더스트 붐
+    if(!this.started)return;const d=this.spatial(pos);
+    this.osc('sine',55,.9,.9,d,{f1:26,a:.02});
+    this.noise(.9,.6,d,{lp:420,lp1:80,a:.03});
+  },
+  glint(pos){if(!this.started)return;const d=this.spatial(pos);
+    this.osc('sine',3200,.25,.3,d,{f1:4200,a:.02});this.osc('sine',4800,.18,.15,d,{delay:.05});},
+  heartbeat(on){
+    if(!this.started)return;
+    if(on&&!this.hbTimer){const beat=()=>{this.osc('sine',60,.12,.7,this.sfx,{f1:35});this.osc('sine',55,.1,.5,this.sfx,{f1:30,delay:.18});};
+      beat();this.hbTimer=setInterval(beat,700);}
+    if(!on&&this.hbTimer){clearInterval(this.hbTimer);this.hbTimer=null;}
+  },
+  /* ---------- UI ---------- */
+  coin(){if(this.started){this.osc('square',1320,.07,.2,this.mus);this.osc('square',1760,.12,.2,this.mus,{delay:.06});}},
+  star(i){if(this.started){const f=[880,1108,1318][i]||880;this.osc('square',f,.2,.3,this.mus);this.osc('sine',f*2,.25,.15,this.mus);}},
+  fanfare(){if(!this.started)return;
+    [523,659,784,1046].forEach((f,i)=>{this.osc('square',f,.35,.22,this.mus,{delay:i*.12});this.osc('triangle',f/2,.4,.2,this.mus,{delay:i*.12});});},
+  failSnd(){if(!this.started)return;[440,392,311,233].forEach((f,i)=>this.osc('sawtooth',f,.4,.16,this.mus,{delay:i*.18,f1:f*.94}));},
+  click(){if(this.started)this.osc('square',900,.04,.12,this.sfx);},
+  banner(n){if(!this.started)return;for(let i=0;i<n;i++)this.osc('square',700*Math.pow(1.25,i),.15,.25,this.mus,{delay:i*.09});},
+  /* ---------- 앰비언스 ---------- */
+  stopAmb(){this.ambNodes.forEach(n=>{try{n.stop()}catch(e){}});this.ambNodes=[];
+    if(this.birdTimer){clearInterval(this.birdTimer);this.birdTimer=null;}
+    if(this.cricketTimer){clearInterval(this.cricketTimer);this.cricketTimer=null;}},
+  startAmb(night,windLv){
+    if(!this.started)return;this.stopAmb();
+    const t=this.t();
+    // 바람 루프 (세기 연동)
+    const src=this.ctx.createBufferSource();src.buffer=this.noiseBuf;src.loop=true;
+    const lp=this.ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=300+windLv*180;
+    const g=this.ctx.createGain();g.gain.value=.05+windLv*.06;
+    const lfo=this.ctx.createOscillator(),lg=this.ctx.createGain();
+    lfo.frequency.value=.13;lg.gain.value=.03+windLv*.03;lfo.connect(lg);lg.connect(g.gain);
+    src.connect(lp);lp.connect(g);g.connect(this.amb);src.start(t);lfo.start(t);
+    this.ambNodes.push(src,lfo);
+    if(!night){ // 새소리
+      this.birdTimer=setInterval(()=>{if(Math.random()<.5)return;
+        const f=rand(2200,3800);for(let i=0;i<randi(2,4);i++)this.osc('sine',f+rand(-300,500),.09,.05,this.amb,{delay:i*.12,f1:f*1.3});
+      },2600);
+    }else{ // 귀뚜라미 + 저음 드론
+      this.cricketTimer=setInterval(()=>{if(Math.random()<.35)return;
+        for(let i=0;i<5;i++)this.osc('sine',4400+rand(300),.03,.04,this.amb,{delay:i*.07});
+      },1400);
+      const dr=this.ctx.createOscillator(),dg=this.ctx.createGain();
+      dr.type='sawtooth';dr.frequency.value=55;dg.gain.value=.025;
+      const dlp=this.ctx.createBiquadFilter();dlp.type='lowpass';dlp.frequency.value=140;
+      dr.connect(dlp);dlp.connect(dg);dg.connect(this.amb);dr.start(t);this.ambNodes.push(dr);
+    }
+  },
+};
+/* =====================================================================
+   MusicSystem — 평시 패드 / ALERT 퍼커션 / 보스 템포업+베이스, 4초 크로스페이드
+   ===================================================================== */
+const Music={
+  state:'OFF',timer:null,step:0,gPad:null,gPerc:null,gBass:null,
+  chords:[[110,164.8,220,261.6],[87.3,130.8,174.6,220]],
+  start(){
+    if(!AE.started||this.timer)return;
+    this.gPad=AE.ctx.createGain();this.gPerc=AE.ctx.createGain();this.gBass=AE.ctx.createGain();
+    [this.gPad,this.gPerc,this.gBass].forEach(g=>{g.gain.value=0;g.connect(AE.mus);});
+    this.gPad.gain.value=1;this.state='CALM';this.step=0;
+    this.timer=setInterval(()=>this.tick(),250);
+  },
+  stop(){if(this.timer){clearInterval(this.timer);this.timer=null;}this.state='OFF';},
+  setState(s){
+    if(!AE.started||this.state===s||this.state==='OFF')return;
+    this.state=s;const t=AE.t(),F=4; // 4초 크로스페이드
+    const tgt={CALM:[1,0,0],ALERT:[.8,1,0],BOSS:[.6,1,1]}[s]||[1,0,0];
+    [this.gPad,this.gPerc,this.gBass].forEach((g,i)=>{g.gain.cancelScheduledValues(t);g.gain.setValueAtTime(g.gain.value,t);g.gain.linearRampToValueAtTime(tgt[i],t+F);});
+  },
+  tick(){
+    if(!AE.started||AE.ctx.state!=='running')return;
+    const boss=this.state==='BOSS';
+    const stepDur=boss?.214:.25, bar=16;
+    this.step++;
+    const st=this.step%bar;
+    if(st===0){ // 패드 코드 (2코드 교대, 느린 어택)
+      const ch=this.chords[(this.step/bar|0)%2];
+      ch.forEach(f=>{
+        const o=AE.ctx.createOscillator(),g=AE.ctx.createGain(),lp=AE.ctx.createBiquadFilter();
+        o.type='sawtooth';o.frequency.value=f;lp.type='lowpass';lp.frequency.value=620;
+        const t=AE.t();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+1.2);
+        g.gain.setValueAtTime(.05,t+bar*stepDur-1);g.gain.linearRampToValueAtTime(0,t+bar*stepDur);
+        o.connect(lp);lp.connect(g);g.connect(this.gPad);o.start(t);o.stop(t+bar*stepDur+.1);
+      });
+    }
+    if(this.gPerc.gain.value>.02){ // 퍼커션
+      if(st%4===0)AE.osc('sine',150,.11,.5,this.gPerc,{f1:45});          // 킥
+      if(st%4===2)AE.noise(.05,.16,this.gPerc,{hp:6000});                // 햇
+      if(boss&&st%8===4)AE.noise(.12,.3,this.gPerc,{bp:1800,q:1});       // 스네어
+    }
+    if(this.gBass.gain.value>.02){ // 보스 베이스
+      const seq=[55,55,65.4,55,73.4,55,49,55];
+      if(st%2===0)AE.osc('sawtooth',seq[(st/2)%8],.18,.3,this.gBass,{f1:seq[(st/2)%8]*.99});
+    }
+  },
+};
+/* =====================================================================
+   BlockWorld — 64×64 절차 생성, 8×8 청크 InstancedMesh, 연쇄 붕괴
+   블록 파괴: 인스턴스 scale 0 + 청크 더티 플래그 → 다음 프레임 일괄 갱신
+   ===================================================================== */
+const _m4=new THREE.Matrix4(),_zeroM=new THREE.Matrix4().makeScale(0,0,0),_c3=new THREE.Color();
+class BlockWorld{
+  constructor(){
+    this.group=new THREE.Group();
+    this.map=new Map();this.chunks=new Map();this.dirty=new Set();
+    this.structs={};this.pendingFall=[];this.falling=[];this.fallPool=[];
+    for(let i=0;i<40;i++){
+      const m=new THREE.Mesh(blockGeo,MATS[0]);m.visible=false;m.castShadow=true;
+      this.fallPool.push({mesh:m,vel:0,active:false,landY:0});this.group.add(m);
+    }
+  }
+  key(x,y,z){return x+'|'+y+'|'+z}
+  get(x,y,z){const b=this.map.get(x+'|'+y+'|'+z);return(b&&b.alive)?b:null}
+  set(x,y,z,m,opt={}){
+    this.map.set(this.key(x,y,z),{x,y,z,m,hp:MATDEF[m].hp,alive:true,terr:!!opt.terr,sid:opt.sid||null,mesh:null,idx:0});
+    if(opt.sid){
+      if(!this.structs[opt.sid])this.structs[opt.sid]={total:0,down:0,shots:0,collapsed:false,cx:0,cy:0,cz:0};
+      const s=this.structs[opt.sid];s.total++;s.cx+=x;s.cy+=y;s.cz+=z;
+    }
+  }
+  structCenter(sid){const s=this.structs[sid];return V3(s.cx/s.total,s.cy/s.total,s.cz/s.total)}
+  /* ---------- 절차 생성 ---------- */
+  generate(seed,opts={}){
+    // 기존 청크 해제
+    for(const c of this.chunks.values())c.meshes.forEach(m=>{this.group.remove(m);m.dispose();});
+    this.map.clear();this.chunks.clear();this.dirty.clear();this.structs={};
+    this.pendingFall.length=0;this.falling.forEach(f=>f.active=false,f=>f.mesh.visible=false);
+    this.falling.length=0;this.fallPool.forEach(f=>{f.active=false;f.mesh.visible=false;});
+    const rng=mulberry(seed);
+    const topM=opts.desert?MI.sand:MI.grass, subM=opts.desert?MI.sand:MI.dirt;
+    // 언덕 2개
+    const hills=[];
+    for(let i=0;i<(opts.hills??2);i++)hills.push({x:-20+rng()*40,z:-20+rng()*40,h:3+rng()*3,s:5+rng()*4});
+    const H=(x,z)=>{let h=1;for(const hl of hills){const d2=(x-hl.x)**2+(z-hl.z)**2;h+=hl.h*Math.exp(-d2/(2*hl.s*hl.s));}return Math.round(h)};
+    const hmap={};
+    for(let x=-32;x<32;x++)for(let z=-32;z<32;z++){
+      const h=clamp(H(x,z),1,7);hmap[x+'|'+z]=h;
+      for(let y=Math.max(0,h-3);y<h;y++)this.set(x,y,z,y===h-1?topM:subM,{terr:true});
+    }
+    const flat=(x,z,r)=>{let mh=0;for(let i=-r;i<=r;i++)for(let j=-r;j<=r;j++)mh=Math.max(mh,hmap[clamp(x+i,-32,31)+'|'+clamp(z+j,-32,31)]||1);return mh};
+    // 구조물 간 간격 보장 (구조물끼리 붙으면 지지 판정이 연결되므로 금지)
+    const placed=[];
+    const findSpot=(xa,xb,za,zb,r)=>{
+      for(let tr=0;tr<25;tr++){
+        const x=Math.round(xa+rng()*(xb-xa)),z=Math.round(za+rng()*(zb-za));
+        if(placed.every(p=>Math.hypot(x-p.x,z-p.z)>p.r+r+2)){placed.push({x,z,r});return{x,z};}
+      }
+      return null;
+    };
+    // 기둥 하부를 지형까지 채움 (공중 부양 방지)
+    const fillUnder=(x,z,base,mat,sid)=>{
+      const h=hmap[x+'|'+z]||1;
+      for(let y=h;y<base;y++)if(!this.get(x,y,z))this.set(x,y,z,mat,{sid});
+    };
+    // 감시탑 — 단일 마스트 구조: 기둥을 끊으면 상부 전체 붕괴 (연쇄 철거 3발 설계)
+    this.towerTops=[];
+    const nTow=opts.towers??2;
+    for(let i=0;i<nTow;i++){
+      const spot=findSpot(-22,22,-26,-4,4);if(!spot)continue;
+      const tx=spot.x,tz=spot.z,base=flat(tx,tz,2),sid='tower'+i;
+      fillUnder(tx,tz,base,MI.log,sid);
+      for(let y=base;y<base+6;y++)this.set(tx,y,tz,MI.log,{sid});
+      for(const[bx,bz]of[[-1,0],[1,0],[0,-1],[0,1]]){fillUnder(tx+bx,tz+bz,base,MI.log,sid);this.set(tx+bx,base,tz+bz,MI.log,{sid});}
+      for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++)this.set(tx+x,base+6,tz+z,MI.wood,{sid});
+      for(let x=-2;x<=2;x++)for(const z of[-2,2])if(Math.abs(x)!==1)this.set(tx+x,base+7,tz+z,MI.wood,{sid});
+      for(const x of[-2,2])for(let z=-1;z<=1;z++)if(z!==0)this.set(tx+x,base+7,tz+z,MI.wood,{sid});
+      this.towerTops.push({x:tx,y:base+7,z:tz,sid});
+    }
+    // 폐허
+    for(let i=0;i<(opts.ruins??3);i++){
+      const spot=findSpot(-24,20,-24,12,6);if(!spot)continue;
+      const rx=spot.x,rz=spot.z,base=flat(rx,rz,3),sid='ruin'+i;
+      const w=4+Math.floor(rng()*3),d=3+Math.floor(rng()*3),mat=rng()<.5?MI.brick:MI.stone;
+      for(let x=0;x<=w;x++)for(let z=0;z<=d;z++){
+        if(x>0&&x<w&&z>0&&z<d)continue;
+        const hh=rng()<.3?0:1+Math.floor(rng()*3);
+        if(hh>0)fillUnder(rx+x,rz+z,base,mat,sid);
+        for(let y=0;y<hh;y++)this.set(rx+x,base+y,rz+z,rng()<.85?mat:MI.wood,{sid});
+      }
+    }
+    // 나무
+    for(let i=0;i<(opts.trees??10);i++){
+      const spot=findSpot(-30,30,-30,24,2);if(!spot)continue;
+      const tx=spot.x,tz=spot.z,base=flat(tx,tz,0),sid='tree'+i,th=3+Math.floor(rng()*2);
+      let ok=true;for(let y=base;y<base+th;y++)if(this.get(tx,y,tz))ok=false;
+      if(!ok)continue;
+      for(let y=base;y<base+th;y++)this.set(tx,y,tz,MI.log,{sid});
+      for(let x=-1;x<=1;x++)for(let z=-1;z<=1;z++)
+        if(!(x===0&&z===0))this.set(tx+x,base+th,tz+z,MI.leaf,{sid});
+      this.set(tx,base+th,tz,MI.log,{sid});
+      for(let x=-1;x<=1;x++)this.set(tx+x,base+th+1,tz,MI.leaf,{sid});
+      for(const z of[-1,1])this.set(tx,base+th+1,tz+z,MI.leaf,{sid});
+    }
+    // 저격 둥지 (플레이어 위치, 파괴 불가 terr)
+    for(let x=-1;x<=1;x++)for(let z=71;z<=73;z++)for(let y=0;y<7;y++)this.set(x,y,z,MI.stone,{terr:true});
+    for(let x=-2;x<=2;x++)for(let z=70;z<=74;z++)this.set(x,7,z,MI.wood,{terr:true});
+    for(const x of[-2,2])for(let z=70;z<=74;z++)this.set(x,8,z,MI.log,{terr:true});
+    for(let x=-1;x<=1;x++)this.set(x,8,70,MI.log,{terr:true}); // 북쪽 낮은 난간
+    this.nestY=9; // 플랫폼 위 서는 높이
+    this.build();
+  }
+  /* ---------- 청크 인스턴싱 빌드 ---------- */
+  build(){
+    // 기존 청크 메시 해제 (재빌드 시 중복 방지)
+    for(const c of this.chunks.values())c.meshes.forEach(m=>{this.group.remove(m);m.dispose();});
+    this.chunks.clear();this.dirty.clear();
+    const groups=new Map();
+    for(const b of this.map.values()){
+      if(!b.alive)continue;
+      const cx=(b.x+128)>>3,cz=(b.z+128)>>3,k=cx+'|'+cz+'|'+b.m;
+      if(!groups.has(k))groups.set(k,[]);
+      groups.get(k).push(b);
+    }
+    for(const[k,list]of groups){
+      const[cx,cz,m]=k.split('|').map(Number);
+      const im=new THREE.InstancedMesh(blockGeo,MATS[m],list.length);
+      im.castShadow=true;im.receiveShadow=true;im.frustumCulled=false;
+      list.forEach((b,i)=>{
+        _m4.makeTranslation(b.x+.5,b.y+.5,b.z+.5);im.setMatrixAt(i,_m4);
+        // 인스턴스 AO: 이웃 수에 따라 어둡게, 상부 노출 시 밝게
+        let br=this.map.get(this.key(b.x,b.y+1,b.z))?.alive?.78:1;
+        let sides=0;
+        if(this.map.get(this.key(b.x+1,b.y,b.z))?.alive)sides++;
+        if(this.map.get(this.key(b.x-1,b.y,b.z))?.alive)sides++;
+        if(this.map.get(this.key(b.x,b.y,b.z+1))?.alive)sides++;
+        if(this.map.get(this.key(b.x,b.y,b.z-1))?.alive)sides++;
+        br*=1-sides*.04;
+        im.setColorAt(i,_c3.setScalar(br));
+        b.mesh=im;b.idx=i;
+      });
+      if(im.instanceColor)im.instanceColor.needsUpdate=true;
+      this.group.add(im);
+      const ck=cx+'|'+cz;
+      if(!this.chunks.has(ck))this.chunks.set(ck,{center:V3((cx<<3)-128+4,4,(cz<<3)-128+4),r:8,meshes:[]});
+      this.chunks.get(ck).meshes.push(im);
+    }
+  }
+  /* 카메라 뒤 청크 스킵 + 프러스텀 컬링 */
+  cull(cam,frustum){
+    const fwd=V3(0,0,-1).applyQuaternion(cam.quaternion);
+    const sph=new THREE.Sphere();
+    for(const c of this.chunks.values()){
+      const rel=c.center.clone().sub(cam.position);const d=rel.length();
+      let vis=true;
+      if(d>c.r+4&&rel.divideScalar(d).dot(fwd)<-0.25)vis=false;
+      else{sph.center.copy(c.center);sph.radius=c.r;if(!frustum.intersectsSphere(sph))vis=false;}
+      c.meshes.forEach(m=>m.visible=vis);
+    }
+  }
+  /* ---------- 파괴 ---------- */
+  removeBlock(b){
+    if(!b.alive)return;
+    b.alive=false;
+    if(b.mesh){b.mesh.setMatrixAt(b.idx,_zeroM);this.dirty.add(b.mesh);}
+    if(b.sid){
+      const s=this.structs[b.sid];s.down++;
+      if(!s.collapsed&&s.down/s.total>=0.5){s.collapsed=true;
+        AE.collapseBoom(this.structCenter(b.sid));
+        if(typeof QM!=='undefined')QM.onStructCollapse(b.sid);}
+    }
+  }
+  damageBlock(b,point,dir,dmg=1){
+    b.hp-=dmg;
+    if(b.hp>0){PS.debris(point,b.m,3,dir);PS.dust(point,3);return false;}
+    this.removeBlock(b);
+    G.stats.blocks++;
+    PS.debris(V3(b.x+.5,b.y+.5,b.z+.5),b.m,8,dir);
+    PS.dust(point,6);
+    if(typeof QM!=='undefined')QM.onBlockDestroyed(b);
+    this.checkSupport(b);
+    return true;
+  }
+  /* ---------- 지지 검사 → 0.3초 후 연쇄 낙하 ---------- */
+  checkSupport(around){
+    const dirs=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+    for(const[dx,dy,dz]of dirs){
+      const nb=this.get(around.x+dx,around.y+dy,around.z+dz);
+      if(!nb||nb.terr)continue;
+      // BFS: 이 컴포넌트가 접지돼 있는가
+      const comp=[],seen=new Set([this.key(nb.x,nb.y,nb.z)]),q=[nb];
+      let grounded=false;
+      while(q.length&&comp.length<300){
+        const c=q.pop();comp.push(c);
+        const below=this.map.get(this.key(c.x,c.y-1,c.z));
+        if(c.y===0||(below&&below.alive&&below.terr)){grounded=true;break;}
+        for(const[ax,ay,az]of dirs){
+          const k=this.key(c.x+ax,c.y+ay,c.z+az);
+          if(seen.has(k))continue;
+          const n2=this.map.get(k);
+          if(n2&&n2.alive&&!n2.terr){seen.add(k);q.push(n2);}
+          else if(n2&&n2.alive&&n2.terr){grounded=true;q.length=0;break;}
+        }
+      }
+      if(comp.length>=300)grounded=true;
+      if(!grounded)for(const c of comp)if(!c.falling){c.falling=true;this.pendingFall.push({b:c,t:.3});}
+    }
+  }
+  spawnFall(b){
+    let slot=this.fallPool.find(f=>!f.active);
+    if(!slot){slot=this.falling.shift();if(!slot)return;}
+    slot.active=true;slot.vel=0;
+    slot.mesh.material=MATS[b.m];slot.mesh.visible=true;
+    slot.mesh.position.set(b.x+.5,b.y+.5,b.z+.5);
+    slot.m=b.m;slot.landY=this.surfaceY(b.x,b.z)+.5;
+    if(!this.falling.includes(slot))this.falling.push(slot);
+  }
+  surfaceY(x,z){
+    x=Math.floor(x);z=Math.floor(z);
+    for(let y=16;y>=0;y--)if(this.get(x,y,z))return y+1;
+    return 0;
+  }
+  update(dt){
+    // 낙하 예약
+    for(let i=this.pendingFall.length-1;i>=0;i--){
+      const p=this.pendingFall[i];p.t-=dt;
+      if(p.t<=0){
+        this.pendingFall.splice(i,1);
+        if(p.b.alive){this.removeBlock(p.b);G.stats.blocks++;this.spawnFall(p.b);}
+      }
+    }
+    // 낙하 블록 물리
+    for(let i=this.falling.length-1;i>=0;i--){
+      const f=this.falling[i];
+      if(!f.active){this.falling.splice(i,1);continue;}
+      f.vel-=24*dt;f.mesh.position.y+=f.vel*dt;
+      f.mesh.rotation.x+=dt*2;f.mesh.rotation.z+=dt*1.3;
+      if(f.mesh.position.y<=f.landY){
+        f.active=false;f.mesh.visible=false;this.falling.splice(i,1);
+        PS.debris(f.mesh.position,f.m,5,V3(0,1,0));
+        PS.dust(f.mesh.position,5);
+        AE.thud(f.mesh.position,70+rand(60));
+      }
+    }
+  }
+  flush(){for(const m of this.dirty)m.instanceMatrix.needsUpdate=true;this.dirty.clear();}
+  /* ---------- DDA 복셀 레이캐스트 ---------- */
+  ray(o,dir,maxDist){
+    let x=Math.floor(o.x),y=Math.floor(o.y),z=Math.floor(o.z);
+    const sx=dir.x>0?1:-1,sy=dir.y>0?1:-1,sz=dir.z>0?1:-1;
+    const tdx=dir.x!==0?Math.abs(1/dir.x):1e30,tdy=dir.y!==0?Math.abs(1/dir.y):1e30,tdz=dir.z!==0?Math.abs(1/dir.z):1e30;
+    let tmx=dir.x!==0?(sx>0?(x+1-o.x):(o.x-x))*tdx:1e30;
+    let tmy=dir.y!==0?(sy>0?(y+1-o.y):(o.y-y))*tdy:1e30;
+    let tmz=dir.z!==0?(sz>0?(z+1-o.z):(o.z-z))*tdz:1e30;
+    let t=0,nrm=V3(0,1,0);
+    for(let it=0;it<500;it++){
+      if(tmx<tmy&&tmx<tmz){t=tmx;tmx+=tdx;x+=sx;nrm=V3(-sx,0,0);}
+      else if(tmy<tmz){t=tmy;tmy+=tdy;y+=sy;nrm=V3(0,-sy,0);}
+      else{t=tmz;tmz+=tdz;z+=sz;nrm=V3(0,0,-sz);}
+      if(t>maxDist)return null;
+      if(y<-1||y>30)return null;
+      const b=this.get(x,y,z);
+      if(b)return{b,t,point:o.clone().addScaledVector(dir,t),normal:nrm};
+    }
+    return null;
+  }
+  los(a,b){ // 시야 판정 (블록 차폐)
+    const d=b.clone().sub(a),len=d.length();
+    if(len<.001)return true;
+    d.divideScalar(len);
+    return !this.ray(a,d,len);
+  }
+}
+/* =====================================================================
+   ParticleSystem — 전부 풀링, 그림자 제외
+   ===================================================================== */
+const PS={
+  group:null,debrisPool:[],dustPool:[],shellPool:[],tracerPool:[],
+  flashMesh:null,flashLight:null,flashT:0,
+  init(scene){
+    this.group=new THREE.Group();scene.add(this.group);
+    const dg=addWhiteColor(new THREE.BoxGeometry(.24,.24,.24));
+    for(let i=0;i<60;i++){ // 파편 풀 60 고정
+      const m=new THREE.Mesh(dg,MATS[0]);m.visible=false;m.castShadow=false;m.receiveShadow=false;
+      this.group.add(m);
+      this.debrisPool.push({mesh:m,vel:V3(),ang:V3(),life:0,active:false,born:0});
+    }
+    const dustTex=px16(g=>{
+      g.clearRect(0,0,16,16);
+      for(let i=0;i<40;i++){const a=rand(6.28),r=rand(6.5);
+        g.fillStyle=`rgba(180,170,150,${rand(.25,.7)})`;
+        g.fillRect(8+Math.cos(a)*r|0,8+Math.sin(a)*r|0,2,2);}
+    });
+    for(let i=0;i<40;i++){
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:dustTex,transparent:true,depthWrite:false}));
+      sp.visible=false;this.group.add(sp);
+      this.dustPool.push({sp,vel:V3(),life:0,active:false});
+    }
+    const shellG=new THREE.BoxGeometry(.012,.012,.03),shellM=new THREE.MeshLambertMaterial({color:0xd8a838});
+    for(let i=0;i<6;i++){
+      const m=new THREE.Mesh(shellG,shellM);m.visible=false;m.castShadow=false;
+      this.group.add(m);
+      this.shellPool.push({mesh:m,vel:V3(),ang:V3(),life:0,active:false});
+    }
+    const trG=new THREE.BoxGeometry(1,1,1),trM=new THREE.MeshBasicMaterial({color:0xffeeb0,transparent:true,opacity:.85});
+    for(let i=0;i<12;i++){
+      const m=new THREE.Mesh(trG,trM.clone());m.visible=false;
+      this.group.add(m);
+      this.tracerPool.push({mesh:m,life:0,active:false});
+    }
+    const flashTex=px16(g=>{
+      g.clearRect(0,0,16,16);g.fillStyle='#fff8d0';
+      g.fillRect(6,1,4,14);g.fillRect(1,6,14,4);g.fillRect(4,4,8,8);
+      g.fillStyle='#ffb830';g.fillRect(7,0,2,16);g.fillRect(0,7,16,2);
+    });
+    this.flashMesh=new THREE.Sprite(new THREE.SpriteMaterial({map:flashTex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    this.flashMesh.scale.setScalar(.5);this.flashMesh.visible=false;this.group.add(this.flashMesh);
+    this.flashLight=new THREE.PointLight(0xffc060,0,9);this.group.add(this.flashLight);
+  },
+  debris(pos,mat,n,dir){
+    for(let i=0;i<n;i++){
+      let d=this.debrisPool.find(p=>!p.active);
+      if(!d){let old=null,ot=1e18;for(const p of this.debrisPool)if(p.born<ot){ot=p.born;old=p;}d=old;} // 초과 시 오래된 것 재사용
+      d.active=true;d.born=performance.now();d.life=2;
+      d.mesh.visible=true;d.mesh.material=MATS[mat]||MATS[0];
+      d.mesh.position.copy(pos).add(V3(rand(-.3,.3),rand(-.3,.3),rand(-.3,.3)));
+      d.mesh.scale.setScalar(rand(.5,1.1));
+      d.mesh.rotation.set(rand(6),rand(6),rand(6));
+      const base=dir?dir.clone().multiplyScalar(rand(1,3.5)):V3();
+      d.vel.set(base.x+rand(-2.5,2.5),rand(1.5,5),base.z+rand(-2.5,2.5));
+      d.ang.set(rand(-7,7),rand(-7,7),rand(-7,7));
+      d.bounces=0;
+    }
+  },
+  dust(pos,n){
+    for(let i=0;i<n;i++){
+      const d=this.dustPool.find(p=>!p.active);if(!d)return;
+      d.active=true;d.life=.55;
+      d.sp.visible=true;d.sp.position.copy(pos).add(V3(rand(-.3,.3),rand(0,.4),rand(-.3,.3)));
+      d.sp.scale.setScalar(rand(.5,.9));d.sp.material.opacity=.75;
+      d.vel.set(rand(-.6,.6),rand(.6,1.6),rand(-.6,.6));
+    }
+  },
+  shell(pos,rightDir){
+    const s=this.shellPool.find(p=>!p.active)||this.shellPool[0];
+    s.active=true;s.life=1.2;s.mesh.visible=true;
+    s.mesh.position.copy(pos);
+    s.vel.copy(rightDir).multiplyScalar(rand(1.2,1.8)).add(V3(0,rand(1.4,2),0));
+    s.ang.set(rand(-14,14),rand(-14,14),rand(-14,14));
+    AE.shellSnd();
+  },
+  tracer(a,b){
+    const t=this.tracerPool.find(p=>!p.active);if(!t)return;
+    t.active=true;t.life=.1; // 트레이서 0.1초
+    const mid=a.clone().add(b).multiplyScalar(.5),len=a.distanceTo(b);
+    t.mesh.visible=true;t.mesh.position.copy(mid);
+    t.mesh.scale.set(.035,.035,Math.max(len,.1));
+    t.mesh.lookAt(b);t.mesh.material.opacity=.85;
+  },
+  flash(pos){
+    this.flashT=.06;
+    this.flashMesh.visible=true;this.flashMesh.position.copy(pos);
+    this.flashMesh.material.rotation=rand(6.28);
+    this.flashLight.position.copy(pos);this.flashLight.intensity=6; // 1프레임 포인트라이트
+  },
+  update(dt){
+    for(const d of this.debrisPool){
+      if(!d.active)continue;
+      d.life-=dt;
+      if(d.life<=0){d.active=false;d.mesh.visible=false;continue;}
+      d.vel.y-=14*dt;
+      d.mesh.position.addScaledVector(d.vel,dt);
+      d.mesh.rotation.x+=d.ang.x*dt;d.mesh.rotation.y+=d.ang.y*dt;
+      const gy=world.surfaceY(d.mesh.position.x,d.mesh.position.z)+.1;
+      if(d.mesh.position.y<gy&&d.vel.y<0){ // 1~2회 바운스
+        if(d.bounces<2){d.bounces++;d.vel.y*=-.42;d.vel.x*=.6;d.vel.z*=.6;d.mesh.position.y=gy;}
+        else d.vel.set(0,0,0);
+      }
+      if(d.life<.5)d.mesh.scale.multiplyScalar(1-2.2*dt); // 축소 소멸
+    }
+    for(const d of this.dustPool){
+      if(!d.active)continue;
+      d.life-=dt;
+      if(d.life<=0){d.active=false;d.sp.visible=false;continue;}
+      d.sp.position.addScaledVector(d.vel,dt);
+      d.sp.scale.addScalar(2.4*dt);
+      d.sp.material.opacity=d.life*1.35;
+    }
+    for(const s of this.shellPool){
+      if(!s.active)continue;
+      s.life-=dt;
+      if(s.life<=0){s.active=false;s.mesh.visible=false;continue;}
+      s.vel.y-=9.8*dt;
+      s.mesh.position.addScaledVector(s.vel,dt);
+      s.mesh.rotation.x+=s.ang.x*dt;s.mesh.rotation.z+=s.ang.z*dt;
+    }
+    for(const t of this.tracerPool){
+      if(!t.active)continue;
+      t.life-=dt;
+      if(t.life<=0){t.active=false;t.mesh.visible=false;}
+      else t.mesh.material.opacity=t.life*8;
+    }
+    if(this.flashT>0){this.flashT-=dt;if(this.flashT<=0){this.flashMesh.visible=false;this.flashLight.intensity=0;}
+      else this.flashLight.intensity*=.4;}
+  },
+  reset(){
+    [...this.debrisPool,...this.shellPool].forEach(p=>{p.active=false;p.mesh.visible=false;});
+    this.dustPool.forEach(p=>{p.active=false;p.sp.visible=false;});
+    this.tracerPool.forEach(p=>{p.active=false;p.mesh.visible=false;});
+  }
+};
+/* =====================================================================
+   Weapon — 1인칭 복셀 볼트액션 라이플 (19 파츠), 전 애니메이션 코드 트윈
+   ===================================================================== */
+const weapon={
+  group:null,bolt:null,boltHandle:null,parts:{},muzzleRef:null,portRef:null,
+  swayX:0,swayY:0,kick:0,bobT:0,lensMat:null,
+  hipPos:V3(.30,-.26,-.50),adsPos:V3(0,-.136,-.35),
+  init(cam){
+    const wm={
+      wood:new THREE.MeshLambertMaterial({map:noiseTex(['#5f4426','#6b4e2c','#54391f','#755634'],{seed:23,lines:'#3c2a14'})}),
+      metal:new THREE.MeshLambertMaterial({color:0x2e3034}),
+      dark:new THREE.MeshLambertMaterial({color:0x1c1d20}),
+      scope:new THREE.MeshLambertMaterial({color:0x24262b}),
+    };
+    // 스코프 렌즈: 미세 하이라이트 링 (반사광 힌트와 시각 언어 통일)
+    this.lensMat=new THREE.MeshBasicMaterial({map:px16(g=>{
+      g.fillStyle='#0a1420';g.fillRect(0,0,16,16);
+      g.fillStyle='#12253d';g.beginPath();g.arc(8,8,6,0,7);g.fill();
+      g.strokeStyle='#9fd0ff';g.lineWidth=1;g.beginPath();g.arc(6.5,6.5,3.5,3.6,5.5);g.stroke();
+      g.fillStyle='#e8f6ff';g.fillRect(5,4,2,1);
+    })});
+    this.group=new THREE.Group();
+    const P=(mat,x,y,z,sx,sy,sz,name)=>{
+      const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);
+      m.position.set(x,y,z);m.castShadow=false;this.group.add(m);
+      if(name)this.parts[name]=m;return m;
+    };
+    P(wm.wood, 0,-.015,.225,.05,.10,.09);          // 개머리판 버트
+    P(wm.wood, 0,-.005,.125,.046,.076,.15);         // 스톡 몸통
+    P(wm.wood, 0,.032,.16,.04,.028,.12);            // 스톡 콤
+    P(wm.wood, 0,-.062,.06,.04,.07,.05);            // 그립
+    P(wm.metal,0,.02,0,.05,.06,.16);                // 기관부
+    P(wm.dark, 0,-.038,0,.012,.03,.06);             // 방아쇠울
+    P(wm.metal,0,-.048,-.03,.04,.05,.06);           // 탄창
+    P(wm.metal,0,.025,-.16,.03,.03,.18);            // 총열 후방
+    P(wm.metal,0,.025,-.30,.024,.024,.14);          // 총열 전방
+    P(wm.dark, 0,.025,-.385,.033,.033,.036);        // 총구
+    P(wm.dark, 0,.052,-.34,.008,.022,.02);          // 가늠쇠
+    P(wm.dark, 0,.058,-.035,.02,.032,.02);          // 스코프 마운트 F
+    P(wm.dark, 0,.058,.05,.02,.032,.02);            // 스코프 마운트 R
+    P(wm.scope,0,.085,.008,.034,.034,.16);          // 스코프 튜브
+    P(wm.scope,0,.085,-.082,.046,.046,.032);        // 대물부
+    P(wm.scope,0,.085,.10,.042,.042,.03);           // 접안부
+    P(this.lensMat,0,.085,.117,.034,.034,.004);     // 렌즈(하이라이트 링)
+    // 볼트 그룹 (4단계 조작 애니메이션)
+    this.bolt=new THREE.Group();this.bolt.position.set(0,.045,.045);
+    const bb=new THREE.Mesh(new THREE.BoxGeometry(.018,.018,.075),wm.metal);this.bolt.add(bb); // 볼트 몸통
+    this.boltHandle=new THREE.Group();
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(.034,.011,.011),wm.metal);arm.position.x=.022;this.boltHandle.add(arm);
+    const knob=new THREE.Mesh(new THREE.BoxGeometry(.016,.016,.016),wm.dark);knob.position.x=.042;this.boltHandle.add(knob);
+    this.bolt.add(this.boltHandle);
+    this.group.add(this.bolt);
+    this.muzzleRef=new THREE.Object3D();this.muzzleRef.position.set(0,.025,-.41);this.group.add(this.muzzleRef);
+    this.portRef=new THREE.Object3D();this.portRef.position.set(.04,.05,.03);this.group.add(this.portRef);
+    this.group.scale.setScalar(1.6);
+    this.group.position.copy(this.hipPos);
+    this.group.rotation.y=-.04;
+    cam.add(this.group);
+  },
+  muzzlePos(){const v=V3();this.muzzleRef.getWorldPosition(v);return v},
+  onFire(){this.kick=1;PS.flash(this.muzzlePos());},
+  update(dt,lookVX,lookVY){
+    const p=player;
+    this.bobT+=dt;
+    // 관성 스웨이 (0.1초 지연 lerp) — 시점 회전 반대 방향
+    const k=clamp(dt/0.1,0,1);
+    this.swayX=lerp(this.swayX,clamp(-lookVX*.00045,-.03,.03),k);
+    this.swayY=lerp(this.swayY,clamp(lookVY*.00045,-.03,.03),k);
+    this.kick=Math.max(0,this.kick-dt*6);
+    const ads=p.adsT;
+    // 위치: 힙 ↔ ADS + 바빙 + 스웨이 + 킥
+    const bobAmp=.02*(1-ads); // 바빙 진폭 0.02
+    const bx=Math.sin(this.bobT*1.7)*bobAmp*.4, by=Math.abs(Math.sin(this.bobT*1.7))*bobAmp*.5-.004;
+    this.group.position.lerpVectors(this.hipPos,this.adsPos,easeOutQuad(ads));
+    this.group.position.x+=bx+this.swayX*(1-ads*.8);
+    this.group.position.y+=by+this.swayY*(1-ads*.8);
+    this.group.position.z+=this.kick*.07; // 발사 시 뒤로 킥
+    this.group.rotation.x=this.kick*.14+this.swayY*1.4*(1-ads); // 위로 틸트
+    this.group.rotation.y=lerp(-.04,0,ads)+this.swayX*1.6*(1-ads);
+    // 재장전: 총 내려갔다 올라옴
+    if(p.wstate==='reload'){
+      const t=p.wstateT/gReload();
+      const dip=t<.2?easeOutQuad(t/.2):(t>.85?1-easeOutQuad((t-.85)/.15):1);
+      this.group.position.y-=dip*.16;
+      this.group.rotation.x+=dip*.55;
+      this.group.rotation.z=dip*.3;
+    }else this.group.rotation.z=0;
+    // 볼트 조작 0.9초 4단계: 위→뒤→앞→아래
+    if(p.wstate==='bolt'){
+      const t=p.wstateT/CFG_BOLT, s=Math.floor(t*4), f=(t*4)%1;
+      if(s!==this._bs){this._bs=s;AE.boltSnd(s);
+        if(s===1)PS.shell(this.portRef.getWorldPosition(V3()),V3(1,0,0).applyQuaternion(camera.quaternion));}
+      if(s===0){this.boltHandle.rotation.z=-1.05*easeOutQuad(f);this.bolt.position.z=.045;}
+      else if(s===1){this.boltHandle.rotation.z=-1.05;this.bolt.position.z=.045+.05*easeOutQuad(f);}
+      else if(s===2){this.boltHandle.rotation.z=-1.05;this.bolt.position.z=.095-.05*easeOutQuad(f);}
+      else{this.boltHandle.rotation.z=-1.05*(1-easeOutQuad(f));this.bolt.position.z=.045;}
+    }else{this._bs=-1;this.boltHandle.rotation.z=0;this.bolt.position.z=.045;}
+    // 완전 조준 시(스코프 오버레이 전환) 무기 숨김
+    this.group.visible=ads<.92;
+  },
+};
+const CFG_BOLT=0.9;
+/* =====================================================================
+   Enemy — 복셀 용병 5종 + AI (IDLE→ALERT→ATTACK), 래그돌, 붕괴 낙사
+   ===================================================================== */
+const ENEMY_DEF={
+  grunt:{hp:100,speed:1.6},sniper:{hp:100,speed:0},officer:{hp:120,speed:1.8},
+  heavy:{hp:160,speed:1.1,helmet:true},runner:{hp:80,speed:4.6},
+};
+/* 선분-AABB 판정 (로컬) → t 또는 null */
+function segBox(p0,d,len,c,s){
+  let t0=0,t1=len;
+  for(const ax of['x','y','z']){
+    const lo=c[ax]-s[ax]/2,hi=c[ax]+s[ax]/2;
+    if(Math.abs(d[ax])<1e-9){if(p0[ax]<lo||p0[ax]>hi)return null;}
+    else{
+      let ta=(lo-p0[ax])/d[ax],tb=(hi-p0[ax])/d[ax];
+      if(ta>tb)[ta,tb]=[tb,ta];
+      t0=Math.max(t0,ta);t1=Math.min(t1,tb);
+      if(t0>t1)return null;
+    }
+  }
+  return t0;
+}
+const PARTS_L=[
+  {n:'head', c:{x:0,y:1.51,z:0},s:{x:.42,y:.42,z:.42}},
+  {n:'torso',c:{x:0,y:.95,z:0}, s:{x:.5,y:.72,z:.34}},
+  {n:'armL', c:{x:-.35,y:.95,z:0},s:{x:.18,y:.62,z:.18}},
+  {n:'armR', c:{x:.35,y:.95,z:0}, s:{x:.18,y:.62,z:.18}},
+  {n:'legL', c:{x:-.13,y:.3,z:0}, s:{x:.2,y:.62,z:.2}},
+  {n:'legR', c:{x:.13,y:.3,z:0},  s:{x:.2,y:.62,z:.2}},
+];
+let ENEMY_ID=0;
+class Enemy{
+  constructor(type,x,z,opts={}){
+    this.id=ENEMY_ID++;this.type=type;
+    const def=ENEMY_DEF[type];
+    this.hp=def.hp*(opts.hpMul||DD.hpMul);this.speed=def.speed;
+    this.helmet=!!def.helmet;this.dmg=opts.dmg||DD.dmg;
+    this.state='idle';this.stateT=0;this.alertT=0;
+    this.peekT=0;this.peeking=false;this.atkT=rand(1,2);
+    this.fallV=0;this.fallFrom=0;this.dead=false;this.flee=false;
+    this.zigT=0;this.zigDir=1;this.glint=!!opts.glint;this.glintT=rand(2);
+    this.noMove=!!opts.noMove||type==='sniper';
+    this.skin=MERC_SKINS[opts.skin||{grunt:DD.skin,sniper:DD.skin,officer:'gold',heavy:'heavy',runner:'runner'}[type]]||MERC_SKINS.tan;
+    this.pos=V3(x,opts.y!==undefined?opts.y:world.surfaceY(x,z),z);
+    this.yaw=rand(6.28);this.crouch=0;this.walkT=0;
+    this.home=this.pos.clone();
+    this.patrol=[this.home.clone()];
+    if(!this.noMove)for(let i=0;i<2;i++)this.patrol.push(this.home.clone().add(V3(rand(-7,7),0,rand(-7,7))));
+    this.pi=0;this.coverPos=null;
+    this.build();
+  }
+  build(){
+    const g=new THREE.Group(),sk=this.skin;
+    const B=(mat,x,y,z,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;};
+    this.mTorso=B(sk.body,0,.95,0,.5,.72,.34);
+    this.headG=new THREE.Group();this.headG.position.y=1.3;g.add(this.headG);
+    this.mHead=new THREE.Mesh(new THREE.BoxGeometry(.42,.42,.42),sk.head);this.mHead.position.y=.21;this.mHead.castShadow=true;this.headG.add(this.mHead);
+    if(this.helmet){this.mHelm=new THREE.Mesh(new THREE.BoxGeometry(.48,.3,.48),MATS[MI.metal].clone());this.mHelm.material.vertexColors=false;this.mHelm.position.y=.34;this.headG.add(this.mHelm);}
+    const limb=(mat,x,sy)=>{const grp=new THREE.Group();grp.position.set(x,sy,0);
+      const m=new THREE.Mesh(new THREE.BoxGeometry(.18,.6,.18),mat);m.position.y=-.3;m.castShadow=true;grp.add(m);g.add(grp);return grp;};
+    this.armL=limb(sk.limb,-.35,1.26);this.armR=limb(sk.limb,.35,1.26);
+    this.legL=limb(sk.limb,-.13,.62);this.legR=limb(sk.limb,.13,.62);
+    this.mGun=B(new THREE.MeshLambertMaterial({color:0x22242a}),.2,1.02,-.3,.08,.1,.7);
+    if(this.type==='officer'){const cap=B(new THREE.MeshLambertMaterial({color:0xc8a030}),0,1.78,0,.46,.1,.46);this.capMesh=cap;}
+    if(this.glint){
+      this.glintSp=new THREE.Sprite(new THREE.SpriteMaterial({map:PS.flashMesh.material.map,color:0xcfe8ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      this.glintSp.scale.setScalar(1.6);this.glintSp.position.set(0,1.55,-.4);this.glintSp.visible=false;g.add(this.glintSp);
+    }
+    g.position.copy(this.pos);g.rotation.y=this.yaw;
+    this.group=g;EnemyMgr.group.add(g);
+  }
+  eyePos(){return this.pos.clone().add(V3(0,1.5-this.crouch*.55,0))}
+  /* 선분 히트 판정 → {t, part} */
+  segHit(p0,dir,len){
+    const inv=this.pos.clone().multiplyScalar(-1);
+    const lp=p0.clone().add(inv).applyAxisAngle(V3(0,1,0),-this.yaw);
+    const ld=dir.clone().applyAxisAngle(V3(0,1,0),-this.yaw);
+    if(this.crouch>0)lp.y+=this.crouch*.55;
+    let best=null;
+    for(const P of PARTS_L){
+      const t=segBox(lp,ld,len,P.c,P.s);
+      if(t!==null&&(!best||t<best.t))best={t,part:P.n};
+    }
+    return best;
+  }
+  onAlert(){if(this.state==='idle'&&!this.dead){this.state='alert';this.stateT=0;this.findCover();}}
+  findCover(){
+    if(this.noMove){this.coverPos=null;return;}
+    let best=null,bd=1e9;
+    const pe=player.eyePos();
+    for(let i=0;i<10;i++){
+      const a=rand(6.28),r=rand(2.5,9);
+      const cx=this.pos.x+Math.cos(a)*r,cz=this.pos.z+Math.sin(a)*r;
+      if(cx<-31||cx>31||cz<-31||cz>31)continue;
+      const cy=world.surfaceY(cx,cz);
+      if(cy>this.pos.y+2)continue;
+      const eye=V3(cx,cy+1.1,cz);
+      if(!world.los(pe,eye)){const d=r;if(d<bd){bd=d;best=V3(cx,cy,cz);}}
+    }
+    this.coverPos=best;
+  }
+  moveToward(target,dt,sp){
+    const d=target.clone().sub(this.pos);d.y=0;
+    const len=d.length();
+    if(len<.15)return true;
+    d.divideScalar(len);
+    this.yaw=Math.atan2(d.x,d.z);
+    this.pos.addScaledVector(d,Math.min(sp*dt,len));
+    this.pos.y=world.surfaceY(this.pos.x,this.pos.z);
+    this.walkT+=dt*sp*2.4;
+    return false;
+  }
+  update(dt){
+    if(this.dead)return;
+    this.stateT+=dt;
+    // 지지 상실 → 낙하 (감시탑 붕괴 처치)
+    const gy=world.surfaceY(this.pos.x,this.pos.z);
+    if(this.pos.y>gy+.08){
+      if(this.fallV===0)this.fallFrom=this.pos.y;
+      this.fallV+=20*dt;this.pos.y-=this.fallV*dt;
+      if(this.pos.y<=gy){
+        this.pos.y=gy;const fd=this.fallFrom-gy;this.fallV=0;
+        if(fd>3){this.die(false,V3(0,1,0),'붕괴');return;}
+      }
+      this.sync();return;
+    }
+    if(this.glint){ // 카운터 스나이퍼 렌즈 반사광
+      this.glintT-=dt;
+      if(this.glintT<=-.45){this.glintT=4;this.glintSp.visible=false;}
+      else if(this.glintT<=0){if(!this.glintSp.visible){this.glintSp.visible=true;AE.glint(this.pos);}}
+    }
+    const pe=player.eyePos(),dist=this.pos.distanceTo(player.pos);
+    if(this.flee){ // VIP 도주
+      const away=this.pos.clone().sub(V3(0,0,40));away.y=0;away.normalize();
+      this.moveToward(this.pos.clone().add(away.multiplyScalar(5)),dt,4);
+      this.animWalk(dt,1);this.sync();return;
+    }
+    switch(this.state){
+      case 'idle':{
+        this.crouch=lerp(this.crouch,0,dt*5);
+        if(!this.noMove){
+          const tgt=this.patrol[this.pi];
+          if(this.moveToward(tgt,dt,this.speed*.6)){this.pi=(this.pi+1)%this.patrol.length;}
+          this.animWalk(dt,.5);
+        }else this.animWalk(dt,0);
+        // 시체 발견
+        if(this.stateT%.31<dt)for(const c of EnemyMgr.corpses){
+          if(this.pos.distanceTo(c.pos)<12&&world.los(this.eyePos(),c.pos.clone().add(V3(0,.4,0)))){
+            QM.onCorpseSeen();EnemyMgr.alert(this.pos,18);break;
+          }
+        }
+        break;}
+      case 'alert':{
+        this.crouch=lerp(this.crouch,1,dt*6);
+        if(this.type==='runner'){this.state='attack';break;}
+        if(this.coverPos&&!this.moveToward(this.coverPos,dt,this.speed*2)){this.animWalk(dt,1);this.crouch=0;}
+        else if(this.stateT>DD.alertToAtk){this.state='attack';this.stateT=0;this.peekT=0;this.peeking=false;}
+        break;}
+      case 'attack':{
+        this.yaw=Math.atan2(pe.x-this.pos.x,pe.z-this.pos.z);
+        if(this.type==='runner'){ // 지그재그 질주 — 리드샷 필요
+          if(dist>16){
+            this.zigT-=dt;
+            if(this.zigT<=0){this.zigT=rand(.5,.9);this.zigDir*=-1;}
+            const fwd=pe.clone().sub(this.pos);fwd.y=0;fwd.normalize();
+            const side=V3(-fwd.z,0,fwd.x).multiplyScalar(this.zigDir*.8);
+            this.moveToward(this.pos.clone().add(fwd.add(side).multiplyScalar(4)),dt,this.speed);
+            this.animWalk(dt,1.6);
+          }else{this.crouch=0;this.fireAtPlayer(dt,1.5);this.animWalk(dt,0);}
+          break;
+        }
+        // 엄폐 → 머리만 내밀고 반격
+        this.peekT-=dt;
+        if(this.peekT<=0){this.peeking=!this.peeking;this.peekT=this.peeking?.95:rand(1.2,2.2);}
+        this.crouch=lerp(this.crouch,this.peeking?0.25:1,dt*7);
+        if(this.peeking)this.fireAtPlayer(dt,1);
+        this.animWalk(dt,0);
+        break;}
+    }
+    this.sync();
+  }
+  fireAtPlayer(dt,rate){
+    this.atkT-=dt*rate;
+    if(this.atkT>0)return;
+    this.atkT=rand(1.3,2.1);
+    const pe=player.eyePos(),eye=this.eyePos();
+    if(!world.los(eye,pe))return;
+    AE.enemyShot(this.pos);
+    const dist=eye.distanceTo(pe);
+    const miss=V3(rand(-1,1),rand(-1,1),rand(-1,1)).multiplyScalar(1.2);
+    PS.tracer(eye.clone().add(V3(0,0,0)),pe.clone().add(miss.multiplyScalar(Math.random()<DD.acc?0:1)));
+    const p=clamp(DD.acc*(1.15-dist/170),.04,.85);
+    if(Math.random()<p)player.damage(this.dmg*rand(.85,1.2),this.pos);
+    else AE.whiz();
+  }
+  animWalk(dt,amp){
+    const s=Math.sin(this.walkT);
+    this.armL.rotation.x=s*.8*amp;this.armR.rotation.x=-s*.8*amp;
+    this.legL.rotation.x=-s*.9*amp;this.legR.rotation.x=s*.9*amp;
+    if(amp===0){this.armL.rotation.x=this.armR.rotation.x=-1.1;} // 총 든 자세
+  }
+  sync(){
+    this.group.position.copy(this.pos);
+    this.group.position.y-=this.crouch*.55;
+    this.group.rotation.y=this.yaw;
+  }
+  /* 피격 → {killed, head, deflect} */
+  hit(part,dir,dist){
+    if(this.dead)return{killed:false};
+    if(part==='head'){
+      if(this.helmet){ // 첫 헤드샷: 헬멧만 "캉!"
+        this.helmet=false;
+        AE.hit('helmet',this.pos);
+        const hp=this.mHelm.getWorldPosition(V3());
+        this.headG.remove(this.mHelm);
+        PS.debris(hp,MI.metal,4,V3(dir.x,1.5,dir.z));
+        this.onAlert();EnemyMgr.alert(this.pos,15);
+        return{killed:false,head:false,deflect:true};
+      }
+      this.die(true,dir);return{killed:true,head:true,dmg:999};
+    }
+    const dmg=part==='torso'?60:30;
+    this.hp-=dmg;
+    AE.hit('body',this.pos);
+    this.onAlert();EnemyMgr.alert(this.pos,15);
+    // 넉백
+    this.pos.addScaledVector(V3(dir.x,0,dir.z).normalize(),.25);
+    if(this.hp<=0){this.die(false,dir);return{killed:true,head:false,dmg};}
+    return{killed:false,head:false,dmg};
+  }
+  die(head,dir,cause){
+    if(this.dead)return;
+    this.dead=true;
+    EnemyMgr.group.remove(this.group);
+    EnemyMgr.corpses.push({pos:this.pos.clone(),t:0});
+    // 래그돌: 파츠 분리 튕김
+    const push=V3(dir.x,0,dir.z).normalize().multiplyScalar(head?3:2);
+    this.group.traverse(o=>{
+      if(!o.isMesh||o===this.mHelm)return;
+      if(head&&o===this.mHead){ // 헤드샷: 머리 폭발
+        PS.debris(this.pos.clone().add(V3(0,1.5,0)),MI.brick,12,V3(dir.x,2,dir.z));return;
+      }
+      const wp=o.getWorldPosition(V3()),m=new THREE.Mesh(o.geometry,o.material);
+      m.position.copy(wp);m.rotation.copy(o.rotation);m.castShadow=false;
+      EnemyMgr.group.add(m);
+      EnemyMgr.ragdolls.push({mesh:m,vel:V3(push.x+rand(-1.5,1.5),rand(2,4.5),push.z+rand(-1.5,1.5)),
+        ang:V3(rand(-8,8),rand(-8,8),rand(-8,8)),life:7,gy:world.surfaceY(wp.x,wp.z)});
+    });
+    EnemyMgr.alert(this.pos,10);
+    EnemyMgr.onDeath(this,head,cause);
+  }
+}
+/* ---------- EnemyMgr ---------- */
+const EnemyMgr={
+  list:[],corpses:[],ragdolls:[],group:null,boss:null,props:[],
+  init(scene){this.group=new THREE.Group();scene.add(this.group);},
+  clear(){
+    this.list.forEach(e=>{if(e.group)this.group.remove(e.group);});
+    this.ragdolls.forEach(r=>this.group.remove(r.mesh));
+    this.props.forEach(p=>p.dispose&&p.dispose());
+    if(this.boss)this.boss.dispose();
+    this.list=[];this.corpses=[];this.ragdolls=[];this.props=[];this.boss=null;
+  },
+  spawn(type,x,z,opts={}){const e=new Enemy(type,x,z,opts);this.list.push(e);return e;},
+  alive(){return this.list.filter(e=>!e.dead)},
+  alert(pos,r){
+    for(const e of this.list)if(!e.dead&&e.pos.distanceTo(pos)<r)
+      setTimeout(()=>e.onAlert(),(DD.alertDelay+rand(.5))*1000);
+    if(this.alive().some(e=>e.state!=='idle'))Music.setState(this.boss&&!this.boss.dead?'BOSS':'ALERT');
+  },
+  update(dt){
+    for(const e of this.list)e.update(dt);
+    if(this.boss)this.boss.update(dt);
+    for(const p of this.props)p.update&&p.update(dt);
+    for(let i=this.ragdolls.length-1;i>=0;i--){
+      const r=this.ragdolls[i];
+      r.life-=dt;
+      if(r.life<=0){this.group.remove(r.mesh);this.ragdolls.splice(i,1);continue;}
+      r.vel.y-=13*dt;
+      r.mesh.position.addScaledVector(r.vel,dt);
+      r.mesh.rotation.x+=r.ang.x*dt;r.mesh.rotation.z+=r.ang.z*dt;
+      if(r.mesh.position.y<r.gy+.15){r.mesh.position.y=r.gy+.15;r.vel.multiplyScalar(.3);r.vel.y=0;r.ang.multiplyScalar(.5);}
+      if(r.life<1)r.mesh.scale.setScalar(Math.max(r.life,.01));
+    }
+    for(const c of this.corpses)c.t+=dt;
+    if(Music.state==='ALERT'&&!this.alive().some(e=>e.state!=='idle'))Music.setState('CALM');
+  },
+  /* 탄도 선분 vs 모든 대상 → 최소 t */
+  trace(p0,dir,len){
+    let best=null;
+    for(const e of this.list){
+      if(e.dead)continue;
+      if(e.pos.distanceTo(p0)>len+2)continue;
+      const h=e.segHit(p0,dir,len);
+      if(h&&(!best||h.t<best.t))best={t:h.t,kind:'enemy',e,part:h.part};
+    }
+    if(this.boss&&!this.boss.dead){
+      const h=this.boss.segHit(p0,dir,len);
+      if(h&&(!best||h.t<best.t))best={t:h.t,kind:'boss',part:h.part};
+    }
+    for(const p of this.props){
+      const h=p.segHit&&p.segHit(p0,dir,len);
+      if(h&&(!best||h.t<best.t))best={t:h.t,kind:p.kind,prop:p,part:h.part};
+    }
+    return best;
+  },
+  onDeath(e,head,cause){QM.onKill(e,head,cause);},
+};
+/* ---------- 표적판 (튜토리얼) ---------- */
+class TargetBoard{
+  constructor(x,y,z){
+    this.kind='target';this.done=false;this.flipT=0;
+    this.pos=V3(x,y,z);
+    this.group=new THREE.Group();
+    const pole=new THREE.Mesh(new THREE.BoxGeometry(.15,1.2,.15),targetPoleMat);pole.position.y=.6;this.group.add(pole);
+    this.board=new THREE.Mesh(new THREE.BoxGeometry(1,1,.1),targetMat);this.board.position.y=1.7;this.board.castShadow=true;this.group.add(this.board);
+    this.group.position.copy(this.pos);
+    this.group.lookAt(V3(player.pos.x,y,player.pos.z));
+    EnemyMgr.group.add(this.group);
+    EnemyMgr.props.push(this);
+  }
+  segHit(p0,dir,len){
+    if(this.done)return null;
+    const c=this.pos.clone();c.y+=1.7;
+    const t=segBox(p0.clone().sub(c),dir,len,{x:0,y:0,z:0},{x:1.1,y:1.1,z:1.1});
+    return t!==null?{t}:null;
+  }
+  onHit(){
+    this.done=true;
+    AE.hit('metal',this.pos);AE.star(2);
+    QM.onTargetHit(this);
+  }
+  update(dt){if(this.done&&this.flipT<1){this.flipT+=dt*3;this.board.rotation.x=-1.4*easeOutQuad(Math.min(this.flipT,1));}}
+  dispose(){EnemyMgr.group.remove(this.group);}
+}
+/* ---------- 인질 ---------- */
+class Hostage{
+  constructor(x,z){
+    this.kind='hostage';
+    const y=world.surfaceY(x,z);
+    this.pos=V3(x,y,z);
+    const sk=MERC_SKINS.civ;
+    this.group=new THREE.Group();
+    const B=(mat,px,py,pz,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(px,py,pz);m.castShadow=true;this.group.add(m);};
+    B(sk.body,0,.72,0,.5,.66,.34);B(sk.head,0,1.28,0,.42,.42,.42);
+    B(sk.limb,-.33,.95,0,.16,.5,.16);B(sk.limb,.33,.95,0,.16,.5,.16); // 손 든 팔
+    B(sk.limb,-.13,.2,.1,.2,.4,.44);B(sk.limb,.13,.2,.1,.2,.4,.44);   // 무릎 꿇음
+    this.group.position.copy(this.pos);
+    this.group.rotation.y=Math.atan2(player.pos.x-x,player.pos.z-z);
+    EnemyMgr.group.add(this.group);
+    EnemyMgr.props.push(this);
+  }
+  segHit(p0,dir,len){
+    const t=segBox(p0.clone().sub(this.pos),dir,len,{x:0,y:.8,z:0},{x:.9,y:1.7,z:.8});
+    return t!==null?{t}:null;
+  }
+  onHit(){QM.onHostageHit();}
+  update(){}
+  dispose(){EnemyMgr.group.remove(this.group);}
+}
+/* ---------- 호송 차량 ---------- */
+class Truck{
+  constructor(){
+    this.kind='truck';this.hp=8;this.dead=false;this.x=-46;this.z=8;
+    this.group=new THREE.Group();
+    const mBody=new THREE.MeshLambertMaterial({color:0x4a5a3a}),mDark=new THREE.MeshLambertMaterial({color:0x1e2018});
+    const B=(mat,px,py,pz,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(px,py,pz);m.castShadow=true;this.group.add(m);return m;};
+    B(mBody,1.9,1.2,0,1.6,1.4,2);                        // 캐빈
+    this.engine=B(mBody,3.1,.9,0,1,.8,1.8);              // 엔진(약점)
+    B(mBody,-.8,1.5,0,3.4,1.8,2.2);                      // 카고
+    [[-2,-.9],[-2,.9],[1.2,-.9],[1.2,.9],[2.6,-.9],[2.6,.9]].forEach(w=>B(mDark,w[0],.4,w[1],.7,.7,.3));
+    this.driver=B(MERC_SKINS.tan.head,1.9,2.05,.5,.4,.4,.4); // 운전병 머리
+    EnemyMgr.group.add(this.group);
+    EnemyMgr.props.push(this);
+  }
+  get pos(){return V3(this.x,world.surfaceY(this.x,this.z)+.3,this.z)}
+  segHit(p0,dir,len){
+    if(this.dead)return null;
+    const base=this.pos;
+    const lp=p0.clone().sub(base);
+    const hDrv=segBox(lp,dir,len,{x:1.9,y:2.05,z:.5},{x:.45,y:.45,z:.45});
+    if(hDrv!==null)return{t:hDrv,part:'driver'};
+    const hEng=segBox(lp,dir,len,{x:3.1,y:.9,z:0},{x:1.1,y:.9,z:1.9});
+    if(hEng!==null)return{t:hEng,part:'engine'};
+    const hBody=segBox(lp,dir,len,{x:0,y:1.3,z:0},{x:6.6,y:2.4,z:2.3});
+    if(hBody!==null)return{t:hBody,part:'body'};
+    return null;
+  }
+  onHit(part,point,dir){
+    if(this.dead)return;
+    if(part==='driver'){this.dead=true;AE.hit('head',this.pos);QM.onTruckStopped(true);return;}
+    AE.hit('metal',this.pos);
+    PS.debris(point,MI.metal,4,dir);
+    if(part==='engine'){this.hp--;
+      if(this.hp<=0){this.dead=true;
+        PS.debris(this.pos.clone().add(V3(2,1,0)),MI.metal,14,V3(0,2,0));
+        PS.dust(this.pos,8);AE.collapseBoom(this.pos);
+        QM.onTruckStopped(false);
+      }
+    }
+  }
+  update(dt){
+    if(this.dead)return;
+    this.x+=5.2*dt;
+    this.group.position.set(this.x,world.surfaceY(this.x,this.z)+.05,this.z);
+    if(this.x>44){this.dead=true;QM.fail('호송 차량이 통과했습니다');}
+  }
+  dispose(){EnemyMgr.group.remove(this.group);}
+}
+/* ---------- 보스: 강철거인 ---------- */
+class Boss{
+  constructor(){
+    this.kind='boss';this.dead=false;this.coreHits=12;this.phase=1;
+    this.state='walk';this.stateT=0;this.speed=1.1;
+    this.pos=V3(0,0,-24);this.pos.y=world.surfaceY(0,-24);
+    this.yaw=0;this.walkT=0;this.rocks=[];
+    const mSteel=new THREE.MeshLambertMaterial({map:noiseTex(['#5a6068','#4c5258','#666c74','#41464c'],{seed:29,rivet:'#9aa2aa'})});
+    const mDark=new THREE.MeshLambertMaterial({color:0x22262c});
+    this.group=new THREE.Group();
+    const B=(mat,px,py,pz,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(px,py,pz);m.castShadow=true;this.group.add(m);return m;};
+    B(mSteel,0,2.7,0,1.9,2.2,1.2);                        // 몸통
+    B(mSteel,0,4.35,0,1.1,1,1.1);                         // 머리
+    this.armLG=new THREE.Group();this.armLG.position.set(-1.35,3.5,0);this.group.add(this.armLG);
+    this.armRG=new THREE.Group();this.armRG.position.set(1.35,3.5,0);this.group.add(this.armRG);
+    [this.armLG,this.armRG].forEach(gr=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.7,2.2,.7),mSteel);m.position.y=-1;m.castShadow=true;gr.add(m);});
+    B(mDark,-.55,.8,0,.8,1.6,.8);B(mDark,.55,.8,0,.8,1.6,.8); // 다리
+    this.coreMesh=B(new THREE.MeshBasicMaterial({color:0xff2818}),0,2.8,.75,.8,.8,.25); // 등의 붉은 코어
+    this.coreGlow=new THREE.PointLight(0xff3020,1.2,7);this.coreGlow.position.set(0,2.8,1.2);this.group.add(this.coreGlow);
+    this.group.position.copy(this.pos);
+    EnemyMgr.group.add(this.group);
+    Music.setState('BOSS');
+  }
+  segHit(p0,dir,len){
+    const lp=p0.clone().sub(this.pos).applyAxisAngle(V3(0,1,0),-this.yaw);
+    const ld=dir.clone().applyAxisAngle(V3(0,1,0),-this.yaw);
+    const hCore=segBox(lp,ld,len,{x:0,y:2.8,z:.8},{x:.85,y:.85,z:.4});
+    const hBody=segBox(lp,ld,len,{x:0,y:2.5,z:0},{x:2.2,y:4.4,z:1.4});
+    if(hCore!==null&&(hBody===null||hCore<=hBody+.01))return{t:hCore,part:'core'};
+    if(hBody!==null)return{t:hBody,part:'armor'};
+    return null;
+  }
+  onHit(part,point,dir){
+    if(this.dead)return;
+    if(part==='core'){
+      this.coreHits--;
+      AE.hit('head',this.pos);
+      PS.debris(point,MI.brick,8,dir);
+      HUD.popup(point,'코어 명중!','gold');
+      if(this.coreHits<=0){this.dieBoss();return;}
+      if((this.coreHits===8&&this.phase===1)||(this.coreHits===4&&this.phase===2)){
+        this.phase++;this.speed*=1.35;
+        AE.collapseBoom(this.pos);
+        HUD.banner('페이즈 '+this.phase,'');
+        const n=this.phase; // 부하 소환
+        for(let i=0;i<n;i++)EnemyMgr.spawn(i%2?'runner':'grunt',this.pos.x+rand(-6,6),this.pos.z+rand(-4,4));
+      }
+    }else{
+      AE.hit('metal',this.pos);
+      PS.debris(point,MI.metal,3,dir);
+      HUD.popup(point,'장갑!','');
+    }
+  }
+  update(dt){
+    if(this.dead)return;
+    this.stateT+=dt;
+    const distV=player.pos.clone().sub(this.pos);distV.y=0;
+    const dist=distV.length();
+    switch(this.state){
+      case 'walk':
+        this.yaw=Math.atan2(distV.x,distV.z);
+        if(dist>26)this.pos.addScaledVector(distV.normalize(),this.speed*dt);
+        this.walkT+=dt*3;
+        this.armLG.rotation.x=Math.sin(this.walkT)*.5;this.armRG.rotation.x=-Math.sin(this.walkT)*.5;
+        if(this.stateT>4/this.phase*1.4){this.state='throw';this.stateT=0;}
+        break;
+      case 'throw':
+        this.armRG.rotation.x=-2.4*easeOutQuad(Math.min(this.stateT/.5,1));
+        if(this.stateT>=.5&&!this._thrown){
+          this._thrown=true;
+          const org=this.pos.clone().add(V3(0,4.5,0));
+          const tgt=player.eyePos(),fl=1.4;
+          const vel=tgt.clone().sub(org).divideScalar(fl);vel.y+=.5*9.8*fl;
+          const rock=new THREE.Mesh(addWhiteColor(new THREE.BoxGeometry(.8,.8,.8)),MATS[MI.stone]);
+          rock.position.copy(org);EnemyMgr.group.add(rock);
+          this.rocks.push({mesh:rock,vel,life:4});
+          AE.enemyShot(this.pos);
+        }
+        if(this.stateT>1){this.state='turn';this.stateT=0;this._thrown=false;}
+        break;
+      case 'turn': // 뒤돌아 바위 집기 — 코어 노출 2.5초
+        this.yaw=Math.atan2(distV.x,distV.z)+Math.PI;
+        this.armLG.rotation.x=this.armRG.rotation.x=-.9;
+        if(this.stateT>2.5){this.state='walk';this.stateT=0;}
+        break;
+    }
+    for(let i=this.rocks.length-1;i>=0;i--){
+      const r=this.rocks[i];
+      r.life-=dt;r.vel.y-=9.8*dt;
+      r.mesh.position.addScaledVector(r.vel,dt);
+      r.mesh.rotation.x+=dt*5;
+      const dp=r.mesh.position.distanceTo(player.eyePos());
+      if(dp<2.6){player.damage(25,r.mesh.position);player.trauma(.6);r.life=0;}
+      if(r.life<=0||r.mesh.position.y<world.surfaceY(r.mesh.position.x,r.mesh.position.z)){
+        PS.debris(r.mesh.position,MI.stone,6,V3(0,1,0));AE.thud(r.mesh.position,60);
+        EnemyMgr.group.remove(r.mesh);this.rocks.splice(i,1);
+      }
+    }
+    this.group.position.copy(this.pos);this.group.rotation.y=this.yaw;
+    this.coreMesh.material.color.setHex(this.state==='turn'?0xff6040:0xb01810);
+  }
+  dieBoss(){
+    this.dead=true;
+    for(let i=0;i<3;i++)setTimeout(()=>{if(this.group.parent){
+      PS.debris(this.pos.clone().add(V3(rand(-1,1),rand(1,4),rand(-1,1))),MI.metal,10,V3(0,2,0));
+      AE.collapseBoom(this.pos);}},i*350);
+    setTimeout(()=>{EnemyMgr.group.remove(this.group);},1100);
+    player.slowmo(1.2);
+    QM.onBossDown();
+  }
+  dispose(){EnemyMgr.group.remove(this.group);this.rocks.forEach(r=>EnemyMgr.group.remove(r.mesh));}
+}
+/* =====================================================================
+   DifficultyDirector — 챕터별 수치
+   ===================================================================== */
+const DD={
+  ch:1,hpMul:1,dmg:8,acc:.25,alertDelay:2.2,alertToAtk:2,skin:'tan',playerDmgMul:1,
+  apply(ch,wave){
+    this.ch=ch;
+    const i=clamp(ch-1,0,4);
+    this.alertDelay=[2.2,1.6,1.3,1.0,0.7][i];
+    this.alertToAtk=[2.4,2,1.6,1.3,1][i];
+    this.acc=[.25,.35,.45,.55,.7][i];
+    this.dmg=[8,10,12,15,50][i];               // 5장: 피격 2방 사망
+    this.hpMul=[1,1,1.1,1.2,1.5][i];
+    this.skin=['tan','green','desert','night','black'][i];
+    this.playerDmgMul=1;
+    if(wave){this.hpMul*=1+wave*.05;this.acc=clamp(.3+wave*.03,.3,.8);this.dmg=8+wave;}
+  }
+};
+/* ---------- 진동 (iOS 미지원 → 시각 대체) ---------- */
+function vib(kind){
+  if(!S.vib)return;
+  const pat={shot:30,hit:20,head:[30,20,50],collapse:[10,10,10,40],dmg:90}[kind]||20;
+  if(CAN_VIB){navigator.vibrate(pat);return;}
+  // 시각 대체: 화면 테두리 1프레임 플래시 (히트마커 확대는 HUD.hitmarker에서)
+  const f=$('flashEdge');f.style.opacity=kind==='dmg'?.0:.55;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>f.style.opacity=0));
+}
+/* =====================================================================
+   Player
+   ===================================================================== */
+const player={
+  pos:V3(0,8,72),yaw:0,pitch:0,hp:100,maxHp:100,
+  ads:false,adsT:0,zoom:3.75,ammo:5,reserve:Infinity,
+  wstate:'ready',wstateT:0,
+  breath:4,breathHold:false,breathPen:0,
+  traumaV:0,recoil:0,swayT:0,lastHurt:0,
+  slowmoT:0,dead:false,
+  reset(){
+    this.pos.set(0,world.nestY,72);this.yaw=0;this.pitch=0;
+    this.hp=this.maxHp=DD.ch>=5?100:100;this.dead=false;
+    this.ads=false;this.adsT=0;this.zoom=3.75;
+    this.ammo=gMag();this.reserve=Infinity;
+    this.wstate='ready';this.wstateT=0;
+    this.breath=gBreathMax();this.breathPen=0;this.breathHold=false;
+    this.traumaV=0;this.recoil=0;this.slowmoT=0;
+    bullets.length=0;
+  },
+  eyePos(){return V3(this.pos.x,this.pos.y+1.6,this.pos.z)},
+  trauma(n){this.traumaV=Math.min(1,this.traumaV+n)},
+  slowmo(dur){this.slowmoT=dur;$('kcT').style.height='12%';$('kcB').style.height='12%';$('kcTxt').style.opacity=1;},
+  toggleAds(){this.ads=!this.ads;AE.click();if(!this.ads)this.zoom=clamp(this.zoom,2,gZoomMax());},
+  fire(){
+    if(this.dead||QM.state!=='playing')return;
+    if(this.wstate!=='ready'){return;}
+    if(this.ammo<=0){AE.dryFire();this.startReload();return;}
+    this.ammo--;
+    HUD.ammo();
+    // 발사 방향 = 현재 카메라 방향(흔들림 포함) — 힙파이어는 탄퍼짐
+    const dir=V3();camera.getWorldDirection(dir);
+    if(this.adsT<.6){
+      const sp=.03*(1-this.adsT);
+      dir.add(V3(rand(-sp,sp),rand(-sp,sp),rand(-sp,sp))).normalize();
+    }
+    fireBullet(camera.position.clone().addScaledVector(dir,.5),dir);
+    AE.shot();weapon.onFire();vib('shot');
+    this.recoil+=.026;              // 카메라 킥 1.5도
+    this.trauma(.32);               // trauma 셰이크 0.15초
+    G.stats.shots++;QM.onShot();
+    EnemyMgr.alert(this.pos,QM.earR);
+    if(this.ammo>0){this.wstate='bolt';this.wstateT=0;}
+    else setTimeout(()=>{if(this.ammo===0)this.startReload();},350);
+  },
+  startReload(){
+    if(this.wstate==='reload'||this.ammo>=gMag()||this.reserve<=0)return;
+    this.wstate='reload';this.wstateT=0;
+    AE.reloadSnd(0);
+    setTimeout(()=>AE.reloadSnd(1),gReload()*600);
+  },
+  damage(n,from){
+    if(this.dead||QM.state!=='playing')return;
+    this.hp-=n*gDmgMul()*DD.playerDmgMul;
+    this.lastHurt=0;
+    QM.onPlayerDamage();
+    const dv=$('dmgVig');dv.style.transition='none';dv.style.opacity=.9;
+    requestAnimationFrame(()=>{dv.style.transition='opacity .6s';dv.style.opacity=Math.max(0,(1-this.hp/this.maxHp)*.5);});
+    vib('dmg');this.trauma(.4);
+    HUD.hp();
+    if(this.hp<=0){this.dead=true;QM.fail('전사했습니다');}
+  },
+  update(dt){
+    // ADS 전환 0.15s easeOutQuad
+    const tgt=this.ads?1:0;
+    this.adsT=clamp(this.adsT+(tgt?1:-1)*dt/.15,0,1);
+    const e=easeOutQuad(this.adsT);
+    const fovT=lerp(75,75/this.zoom,e);
+    if(Math.abs(camera.fov-fovT)>.01){camera.fov=fovT;camera.updateProjectionMatrix();}
+    HUD.scopeVis(this.adsT);
+    // 무기 상태 머신
+    this.wstateT+=dt;
+    if(this.wstate==='bolt'&&this.wstateT>=CFG_BOLT){this.wstate='ready';this.wstateT=0;}
+    if(this.wstate==='reload'&&this.wstateT>=gReload()){
+      const take=Math.min(gMag(),this.reserve);
+      this.ammo=take;
+      if(this.reserve!==Infinity)this.reserve-=take;
+      this.wstate='ready';this.wstateT=0;HUD.ammo();
+    }
+    // 숨참기: 게이지 4초, 소진 시 2초 페널티+심장박동
+    if(this.breathHold&&this.breathPen<=0){
+      this.breath-=dt;
+      if(this.breath<=0){this.breath=0;this.breathPen=2;this.breathHold=false;AE.heartbeat(true);}
+    }else{
+      this.breath=Math.min(gBreathMax(),this.breath+dt*1.1);
+      if(this.breathPen>0){this.breathPen-=dt;if(this.breathPen<=0)AE.heartbeat(false);}
+    }
+    HUD.breath();
+    // 호흡 흔들림: 사인파 0.3도 / 3초 주기 (ADS 시)
+    this.swayT+=dt;
+    let amp=.0052*e;
+    if(this.breathHold&&this.breathPen<=0)amp*=.1;   // 숨참기 90%↓
+    if(this.breathPen>0)amp*=2.2;                     // 페널티
+    const swP=Math.sin(this.swayT*Math.PI*2/3)*amp;
+    const swY=Math.sin(this.swayT*Math.PI*2/3*.77+1.3)*amp*.8;
+    // 반동 회복
+    this.recoil=Math.max(0,this.recoil-dt*.12);
+    // trauma 셰이크
+    this.traumaV=Math.max(0,this.traumaV-dt*2.2);
+    const sh=this.traumaV*this.traumaV*.02;
+    const shP=rand(-sh,sh),shY=rand(-sh,sh);
+    // HP 재생
+    this.lastHurt+=dt;
+    if(this.lastHurt>5&&this.hp<this.maxHp&&!this.dead){this.hp=Math.min(this.maxHp,this.hp+10*dt);HUD.hp();
+      $('dmgVig').style.opacity=Math.max(0,(1-this.hp/this.maxHp)*.5);}
+    // 슬로모 (킬캠)
+    if(this.slowmoT>0){this.slowmoT-=dt/Math.max(timeScale,.01)*.25;
+      if(this.slowmoT<=0){timeScale=1;$('kcT').style.height='0';$('kcB').style.height='0';$('kcTxt').style.opacity=0;}
+      else timeScale=.25;
+    }
+    // 카메라 합성
+    camera.position.copy(this.eyePos());
+    camera.rotation.set(this.pitch+this.recoil+swP+shP,this.yaw+swY+shY,0,'YXZ');
+  },
+};
+/* =====================================================================
+   InputManager — 멀티터치 identifier 분리 추적
+   좌측 시작 터치만 시점 회전. 버튼 터치는 별도 → 발사해도 시점 안 튐
+   ===================================================================== */
+const input={
+  lookId:null,lx:0,ly:0,lookVX:0,lookVY:0,_vx:0,_vy:0,
+  pinchIds:null,pinchD0:0,pinchZ0:1,assistMul:1,breathId:null,
+  init(){
+    window.addEventListener('pointerdown',e=>this.down(e),{passive:false});
+    window.addEventListener('pointermove',e=>this.move(e),{passive:false});
+    window.addEventListener('pointerup',e=>this.up(e));
+    window.addEventListener('pointercancel',e=>this.up(e));
+    document.addEventListener('contextmenu',e=>e.preventDefault());
+  },
+  inLookZone(x){const w=innerWidth;return S.lefty?x>w*.45:x<w*.55;},
+  down(e){
+    AE.init();AE.resume();
+    const btn=e.target.closest?e.target.closest('[data-btn]'):null;
+    if(btn){
+      const b=btn.dataset.btn;
+      if(QM.state==='playing'){
+        if(b==='fire')player.fire();
+        else if(b==='aim')player.toggleAds();
+        else if(b==='breath'&&player.breathPen<=0){player.breathHold=true;this.breathId=e.pointerId;btn.classList.add('on');}
+        else if(b==='pause')pauseGame();
+      }
+      return;
+    }
+    if(e.target.closest&&e.target.closest('.screen'))return; // 메뉴 UI
+    if(this.inLookZone(e.clientX)){
+      if(this.lookId===null){this.lookId=e.pointerId;this.lx=e.clientX;this.ly=e.clientY;}
+      else if(player.ads&&!this.pinchIds){ // 핀치 줌 (조준 중)
+        this.pinchIds=[this.lookId,e.pointerId];
+        this._p2={x:e.clientX,y:e.clientY};
+        this.pinchD0=Math.hypot(e.clientX-this.lx,e.clientY-this.ly);
+        this.pinchZ0=player.zoom;
+      }
+    }
+  },
+  move(e){
+    if(this.pinchIds){
+      if(e.pointerId===this.pinchIds[0]){this.lx=e.clientX;this.ly=e.clientY;}
+      else if(e.pointerId===this.pinchIds[1])this._p2={x:e.clientX,y:e.clientY};
+      else return;
+      const d=Math.hypot(this._p2.x-this.lx,this._p2.y-this.ly);
+      if(this.pinchD0>10){
+        player.zoom=clamp(this.pinchZ0*d/this.pinchD0,2,gZoomMax());
+        HUD.zoomTxt();
+      }
+      return;
+    }
+    if(e.pointerId!==this.lookId)return;
+    const dx=e.clientX-this.lx,dy=e.clientY-this.ly;
+    this.lx=e.clientX;this.ly=e.clientY;
+    if(QM.state!=='playing')return;
+    let sens=.0026*S.sens;
+    if(player.adsT>.5)sens*=.25*(3.75/player.zoom); // 조준 중 감도 1/4 + 줌 비례
+    sens*=this.assistMul;                            // 에임 어시스트(끈적임)
+    player.yaw-=dx*sens;
+    player.pitch=clamp(player.pitch-dy*sens,-1.45,1.45);
+    this._vx+=dx;this._vy+=dy;
+  },
+  up(e){
+    if(e.pointerId===this.lookId){this.lookId=null;this.pinchIds=null;}
+    if(this.pinchIds&&e.pointerId===this.pinchIds[1])this.pinchIds=null;
+    if(e.pointerId===this.breathId){player.breathHold=false;this.breathId=null;$('btnBreath').classList.remove('on');}
+  },
+  tick(dt){ // 초당 픽셀 속도 (무기 스웨이용)
+    this.lookVX=lerp(this.lookVX,this._vx/Math.max(dt,.001),.5);
+    this.lookVY=lerp(this.lookVY,this._vy/Math.max(dt,.001),.5);
+    this._vx=0;this._vy=0;
+    // 에임 어시스트: 십자선이 몸통 30px 이내 → 감도 추가 감소 (자동 조준 아님)
+    this.assistMul=1;
+    if(S.assist>0&&QM.state==='playing'){
+      const cx=innerWidth/2,cy=innerHeight/2;
+      for(const en of EnemyMgr.list){
+        if(en.dead)continue;
+        const sp=worldToScreen(en.pos.clone().add(V3(0,1,0)));
+        if(!sp)continue;
+        if(Math.hypot(sp.x-cx,sp.y-cy)<30){this.assistMul=S.assist===1?.6:.45;break;}
+      }
+    }
+  },
+};
+function worldToScreen(v){
+  const p=v.clone().project(camera);
+  if(p.z>1)return null;
+  return{x:(p.x+1)/2*innerWidth,y:(-p.y+1)/2*innerHeight};
+}
+/* =====================================================================
+   Ballistics — 발사체 + 중력 + 바람 + 트레이서
+   ===================================================================== */
+const bullets=[];
+function fireBullet(origin,dir){
+  bullets.push({p:origin.clone(),v:dir.clone().multiplyScalar(gSpeed()),life:2.5,killed:false,org:origin.clone()});
+}
+function updateBullets(dt){
+  const windA=QM.windVec.clone().multiplyScalar(1.6*gWindMul());
+  for(let i=bullets.length-1;i>=0;i--){
+    const b=bullets[i];
+    b.life-=dt;
+    if(b.life<=0){finishBullet(b,i);continue;}
+    const steps=Math.ceil(gSpeed()*dt/4);
+    let removed=false;
+    for(let s=0;s<steps&&!removed;s++){
+      const sdt=dt/steps;
+      b.v.y-=9.8*sdt;
+      b.v.addScaledVector(windA,sdt);
+      const prev=b.p.clone();
+      b.p.addScaledVector(b.v,sdt);
+      const seg=b.p.clone().sub(prev),len=seg.length(),dirn=seg.clone().divideScalar(len);
+      const hE=EnemyMgr.trace(prev,dirn,len);
+      const hB=world.ray(prev,dirn,len);
+      let hit=null;
+      if(hE&&(!hB||hE.t<hB.t))hit=hE;else if(hB)hit={t:hB.t,kind:'block',hB};
+      if(hit){
+        const point=prev.clone().addScaledVector(dirn,hit.t);
+        removed=resolveHit(b,hit,point,dirn);
+        if(removed){finishBullet(b,i);break;}
+      }
+      PS.tracer(prev,b.p);
+      if(b.p.y<=0.02){ // 지면 착탄 퍼프 — 어디로 빗나갔는지 보인다
+        PS.dust(V3(b.p.x,.1,b.p.z),5);
+        AE.hit('dirt',b.p);
+        EnemyMgr.alert(b.p,10);
+        finishBullet(b,i);removed=true;
+      }
+    }
+  }
+}
+function finishBullet(b,i){
+  bullets.splice(i,1);
+  if(!b.killed)QM.onBulletMiss();
+}
+function resolveHit(b,hit,point,dirn){
+  const dist=point.distanceTo(b.org);
+  if(hit.kind==='enemy'){
+    const r=hit.e.hit(hit.part,dirn,dist);
+    G.stats.hits++;QM.onHit();
+    HUD.hitmarker(r.head);
+    vib(r.head?'head':'hit');
+    if(r.deflect){HUD.popup(point,'헬멧 관통 불가!','');return true;}
+    HUD.popup(point,r.head?'즉사':''+r.dmg,r.head?'gold':'');
+    if(r.killed){b.killed=true;hit.e.killInfo={head:r.head,dist};}
+    if(G.up.pierce&&!b.pierced){b.pierced=true;return false;} // 관통탄
+    return true;
+  }
+  if(hit.kind==='boss'){
+    EnemyMgr.boss.onHit(hit.part,point,dirn);
+    G.stats.hits++;QM.onHit();
+    HUD.hitmarker(hit.part==='core');
+    vib(hit.part==='core'?'head':'hit');
+    if(hit.part==='core')b.killed=true;
+    return true;
+  }
+  if(hit.kind==='target'){hit.prop.onHit();b.killed=true;G.stats.hits++;HUD.hitmarker(false);return true;}
+  if(hit.kind==='hostage'){hit.prop.onHit();return true;}
+  if(hit.kind==='truck'){hit.prop.onHit(hit.part,point,dirn);G.stats.hits++;QM.onHit();HUD.hitmarker(hit.part==='driver');b.killed=true;return true;}
+  // 블록
+  const blk=hit.hB.b;
+  AE.hit(MATDEF[blk.m].snd,point);
+  if(blk.sid)QM.onStructHit(blk.sid);
+  const destroyed=world.damageBlock(blk,point,dirn);
+  EnemyMgr.alert(point,10);
+  vib('hit');
+  if(destroyed&&G.up.pierce&&!b.pierced){b.pierced=true;return false;}
+  if(destroyed&&MATDEF[blk.m].snd==='wood'&&!b.pierced){b.pierced=true;return false;} // 나무 관통
+  return true;
+}
+/* =====================================================================
+   HUD
+   ===================================================================== */
+const HUD={
+  init(){
+    // 힙 십자선
+    const hip=$('hip');
+    [[0,-9,2,6],[0,5,2,6],[-9,0,6,2],[5,0,6,2]].forEach(v=>{
+      const i=document.createElement('i');
+      i.style.cssText=`left:${v[0]-1}px;top:${v[1]-1}px;width:${v[2]}px;height:${v[3]}px`;
+      hip.appendChild(i);
+    });
+    // 밀 도트
+    const mw=$('milWrap');mw.innerHTML='';
+    for(let i=1;i<=5;i++){const d=document.createElement('div');d.className='milDot';d.style.top=`calc(50% + ${i*26}px)`;mw.appendChild(d);}
+    for(let i=1;i<=2;i++){const d=document.createElement('div');d.className='milDot';d.style.top=`calc(50% - ${i*26}px)`;mw.appendChild(d);}
+    for(let i=1;i<=3;i++)for(const s of[-1,1]){const d=document.createElement('div');d.className='milDotH';d.style.left=`calc(50% + ${s*i*26}px)`;mw.appendChild(d);}
+    // 스코프 풀잎
+    const sg=$('scopeGrass');sg.innerHTML='';
+    for(let i=0;i<5;i++){const b=document.createElement('i');b.style.left=(i*6)+'px';b.style.height=(10+rand(10))+'px';sg.appendChild(b);}
+    this.ammo();this.hp();this.breath();
+  },
+  ammo(){
+    const ic=$('ammoIcons');ic.innerHTML='';
+    for(let i=0;i<gMag();i++){const s=document.createElement('span');if(i>=player.ammo)s.className='empty';ic.appendChild(s);}
+    $('ammoText').textContent=player.ammo+' / '+(player.reserve===Infinity?'∞':player.reserve);
+  },
+  hp(){$('hpFill').style.width=Math.max(0,player.hp/player.maxHp*100)+'%';},
+  breath(){
+    $('breathFill').style.width=(player.breath/gBreathMax()*100)+'%';
+    $('breathWrap').classList.toggle('pen',player.breathPen>0);
+  },
+  quest(t,o){$('qTitle').textContent=t;$('qObj').textContent=o;},
+  killfeed(txt,hs){
+    const kf=$('killfeed'),d=document.createElement('div');
+    if(hs)d.className='hs';
+    d.textContent=txt;kf.prepend(d);
+    while(kf.children.length>4)kf.lastChild.remove();
+    setTimeout(()=>{d.style.opacity=0;setTimeout(()=>d.remove(),700);},3200);
+  },
+  banner(txt,sub){
+    const b=$('banner');b.textContent=txt;
+    b.style.transition='none';b.style.opacity=1;b.style.transform='translate(-50%,-50%) scale(1.25)';
+    requestAnimationFrame(()=>{b.style.transition='all .25s';b.style.transform='translate(-50%,-50%) scale(1)';});
+    clearTimeout(this._bt);this._bt=setTimeout(()=>{b.style.transition='opacity .5s';b.style.opacity=0;},1400);
+    if(sub!==undefined){const s=$('subBanner');s.textContent=sub;s.style.opacity=1;
+      clearTimeout(this._st);this._st=setTimeout(()=>s.style.opacity=0,1800);}
+  },
+  popup(wp,txt,cls){
+    const sp=worldToScreen(wp);if(!sp)return;
+    const el=document.createElement('div');
+    el.className='pop '+(cls||'');el.textContent=txt;
+    el.style.left=(sp.x+rand(-14,14))+'px';el.style.top=sp.y+'px';
+    $('popups').appendChild(el);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transform='translateY(-46px)';el.style.opacity=0;}));
+    setTimeout(()=>el.remove(),850);
+  },
+  hitmarker(hs){
+    const h=$('hitmarker');
+    h.className=hs?'hs':'';h.innerHTML='';
+    const big=(hs?1.5:1)*((!CAN_VIB&&S.vib)?1.3:1); // iOS 시각 대체: 1.3배
+    [[45],[135],[225],[315]].forEach(a=>{
+      const i=document.createElement('i');
+      i.style.cssText=`left:20px;top:19px;transform:rotate(${a[0]}deg) translateX(${9*big}px);width:${13*big}px`;
+      h.appendChild(i);
+    });
+    h.style.transition='none';h.style.opacity=1;
+    clearTimeout(this._hm);this._hm=setTimeout(()=>{h.style.transition='opacity .25s';h.style.opacity=0;},70);
+    if(hs){const v=$('vig');v.style.transition='none';v.style.opacity=.5;  // 비네트 펄스
+      setTimeout(()=>{v.style.transition='opacity .4s';v.style.opacity=1;},60);}
+  },
+  scopeVis(t){
+    const sc=$('scope');
+    if(t>.9){sc.classList.remove('hide');sc.style.opacity=(t-.9)/.1;$('hip').style.opacity=0;}
+    else{sc.style.opacity=0;if(t<=0)sc.classList.add('hide');$('hip').style.opacity=1-t;}
+    this.zoomTxt();
+  },
+  zoomTxt(){$('zoomTxt').textContent=player.zoom.toFixed(1)+'x';},
+  wind(show){
+    $('windFlag').classList.toggle('hide',!show);
+    $('scopeGrass').classList.toggle('hide',!show);
+  },
+  windAnim(t){
+    if(!QM.windOn)return;
+    const w=QM.windVec.x,a=Math.abs(w);
+    $('flagCloth').style.transform=`scaleX(${clamp(a/3,.25,1)*(w<0?-1:1)}) skewY(${Math.sin(t*6)*7}deg)`;
+    $('windTxt').textContent=(w<0?'← ':'→ ')+a.toFixed(1)+'m/s';
+    const blades=$('scopeGrass').children;
+    for(let i=0;i<blades.length;i++)blades[i].style.transform=`rotate(${w*8+Math.sin(t*5+i)*4}deg)`;
+  },
+  timer(v){
+    const t=$('timerHud');
+    if(v===null){t.classList.add('hide');return;}
+    t.classList.remove('hide');t.textContent=Math.max(0,v).toFixed(1);
+    t.style.color=v<10?'#ff4433':'#ffb830';
+  },
+  toast(txt){
+    const t=$('toast');t.textContent=txt;t.style.opacity=1;
+    clearTimeout(this._tt);this._tt=setTimeout(()=>t.style.opacity=0,1900);
+  },
+  hint(txt){
+    const h=$('tutHint');
+    if(!txt){h.classList.add('hide');return;}
+    h.classList.remove('hide');h.textContent=txt;
+  },
+};
+/* =====================================================================
+   챕터 & 미션 데이터
+   ===================================================================== */
+const CH_ENV=[
+  {top:0x2a1a4a,mid:0xb8506a,bot:0xff9a4a,sun:0xffd94d,fog:0xc58a7a,night:false,desert:false,amb:.85},
+  {top:0x2858b8,mid:0x6aa8e8,bot:0xbcd8f0,sun:0xfff2c0,fog:0xa8c4dc,night:false,desert:false,amb:1},
+  {top:0x5a70b0,mid:0xd8a45a,bot:0xf0d090,sun:0xffe8a0,fog:0xd8b888,night:false,desert:true,amb:.95},
+  {top:0x060a18,mid:0x101a34,bot:0x1a2440,sun:0xb0c8ff,fog:0x0a0f1e,night:true,desert:false,amb:.3},
+  {top:0x180820,mid:0x58182a,bot:0x903a24,sun:0xff6030,fog:0x4a2028,night:false,desert:false,amb:.6},
+];
+const CHAPTERS=[
+ {name:'1장 · 신병',gate:0,missions:[
+  {n:'첫 발자국',type:'elim',count:4,par:75,desc:'용병 4명을 섬멸하라'},
+  {n:'헤드샷 계약',type:'head',count:3,par:90,desc:'헤드샷으로 3명 처치'},
+  {n:'철거 명령',type:'demolish',par:60,desc:'감시탑을 붕괴시켜라\n(기둥을 노려라)'}]},
+ {name:'2장 · 계약',gate:5,missions:[
+  {n:'타임어택',type:'timed',count:5,limit:60,par:50,desc:'60초 내 5명 처치'},
+  {n:'원샷 원킬',type:'oneshot',count:5,par:150,desc:'연속 5발 킬\n(빗나가면 리셋)'},
+  {n:'VIP 암살',type:'vip',par:90,desc:'금장 장교를 암살하라\n(호위 사살 시 30초 내 도주)'}]},
+ {name:'3장 · 바람의 계곡',gate:11,missions:[
+  {n:'장거리 계약',type:'longrange',count:3,par:150,desc:'120m 이상 저격 3회'},
+  {n:'마지막 탄창',type:'ammo',count:6,par:100,desc:'적 6명 · 탄약 7발'},
+  {n:'연쇄 철거',type:'chain',par:150,desc:'구조물 3개를 각 3발 이내로 붕괴'}]},
+ {name:'4장 · 야간 작전',gate:18,missions:[
+  {n:'침묵의 밤',type:'silent',count:5,par:180,desc:'시체가 발견되면 실패\n(처치 순서를 계획하라)'},
+  {n:'인질 구출',type:'hostage',count:4,par:100,desc:'납치범 4명 제거\n인질을 맞추면 즉시 실패'},
+  {n:'카운터 스나이퍼',type:'counter',par:150,desc:'적 저격수 제거\n렌즈 반사광이 유일한 힌트'},
+  {n:'호송 저지',type:'convoy',par:60,desc:'차량 통과 전 저지\n(운전병 또는 엔진)'}]},
+ {name:'5장 · 전설',gate:26,missions:[
+  {n:'전설의 시험',type:'elim',count:8,elite:true,par:180,desc:'전 유형 정예 8명 섬멸\n피격 2방이면 죽는다'},
+  {n:'강철거인',type:'boss',par:300,desc:'등의 붉은 코어가 유일한 약점\n3페이즈 · 부하 소환'}]},
+];
+const SHOP=[
+ {k:'zoom',n:'줌 강화',p:100,d:'최대 배율 8x → 12x'},
+ {k:'breath',n:'숨참기 +2초',p:150,d:'게이지 4초 → 6초'},
+ {k:'speed',n:'탄속 업',p:200,d:'250 → 330m/s (낙차·바람 감소)'},
+ {k:'mag',n:'탄창 +2',p:250,d:'5발 → 7발'},
+ {k:'reload',n:'재장전 단축',p:200,d:'2.5초 → 1.6초'},
+ {k:'vest',n:'방탄 조끼',p:300,d:'받는 피해 30% 감소'},
+ {k:'wind',n:'방풍 배럴',p:350,d:'바람 영향 60% 감소'},
+ {k:'pierce',n:'관통탄',p:400,d:'블록·적 1회 관통'},
+];
+/* =====================================================================
+   QuestManager
+   ===================================================================== */
+const QM={
+  state:'idle',mode:'mission',ci:0,mi:0,m:null,
+  ms:null,windVec:V3(),windOn:false,night:false,earR:55,
+  tutStep:0,wave:0,waveT:0,vipTimer:-1,oneStreak:0,
+  key(){return this.ci+'-'+this.mi},
+  /* ---------- 시작 ---------- */
+  begin(ci,mi){
+    this.mode='mission';this.ci=ci;this.mi=mi;
+    this.m=CHAPTERS[ci].missions[mi];
+    DD.apply(ci+1);
+    this._common(ci*100+mi*10+7,CH_ENV[ci]);
+    this.setup[this.m.type](this,this.m);
+    HUD.quest(CHAPTERS[ci].name+' — '+this.m.n,this.m.desc);
+    this.state='playing';
+  },
+  beginTutorial(){
+    this.mode='tutorial';this.ci=0;this.mi=-1;this.m={type:'tutorial',n:'미션 0 · 훈련',par:9999};
+    DD.apply(1);
+    this._common(4242,CH_ENV[0]);
+    this.tutStep=0;this.tutKills=0;
+    this.spawnTutStep();
+    HUD.quest('미션 0 · 훈련','교관의 지시를 따르라');
+    this.state='playing';
+  },
+  beginEndless(){
+    this.mode='endless';this.wave=1;this.m={type:'endless',n:'무한 모드',par:9999};
+    DD.apply(2,this.wave);
+    this._common(randi(1,9999),CH_ENV[1]);
+    this.spawnWave();
+    HUD.quest('무한 모드 — WAVE 1','생존하며 웨이브를 넘겨라');
+    this.state='playing';
+  },
+  _common(seed,env){
+    showScreen(null);
+    $('btnPause').classList.remove('hide');
+    this.ms={shots:0,hits:0,kills:0,heads:0,dmg:0,t:0,count:0};
+    this.mkTimer=0;this.mkCount=0;this.vipTimer=-1;this.oneStreak=0;this.earR=55;
+    this.night=env.night;
+    // 바람: 3장+
+    const chN=this.ci+1;
+    if(this.mode==='mission'&&chN>=3){const sp=rand(0,3)*(Math.random()<.5?-1:1);this.windVec.set(sp,0,0);this.windOn=Math.abs(sp)>.15;}
+    else{this.windVec.set(0,0,0);this.windOn=false;}
+    HUD.wind(this.windOn);
+    world.generate(seed,{desert:env.desert,towers:this.m&&this.m.type==='chain'?3:2});
+    EnemyMgr.clear();PS.reset();
+    applyEnv(env);
+    player.reset();
+    if(this.m&&this.m.type==='ammo'){player.reserve=2;} // 5+2=7발
+    HUD.ammo();HUD.hp();HUD.hint(null);HUD.timer(null);
+    $('dropArrow').classList.add('hide');AE.heartbeat(false);
+    AE.startAmb(env.night,Math.abs(this.windVec.x));
+    Music.start();Music.setState('CALM');
+    if(DD.ch>=5)DD.playerDmgMul=1; // dmg 50 → 2방 사망은 dmg 수치로 처리
+  },
+  /* ---------- 미션별 셋업 ---------- */
+  spawnField(n,types){
+    const spots=[];
+    for(let i=0;i<n;i++){
+      let x,z,ok=false,tries=0;
+      while(!ok&&tries++<30){
+        x=rand(-28,28);z=rand(-28,18);ok=true;
+        for(const s of spots)if(Math.hypot(x-s[0],z-s[1])<6)ok=false;
+      }
+      spots.push([x,z]);
+      EnemyMgr.spawn(types[i%types.length],x,z);
+    }
+  },
+  chTypes(){
+    const ch=this.ci+1;
+    if(this.m&&this.m.elite)return['grunt','runner','heavy','sniper','officer','grunt','runner','heavy'];
+    if(ch>=3)return['grunt','grunt','heavy','runner'];
+    if(ch>=2)return['grunt','grunt','runner'];
+    return['grunt'];
+  },
+  setup:{
+    elim(q,m){
+      q.spawnField(m.count-(world.towerTops.length?1:0),q.chTypes());
+      if(world.towerTops.length){const t=world.towerTops[0];EnemyMgr.spawn('sniper',t.x,t.z,{y:t.y});}
+    },
+    head(q,m){q.spawnField(m.count+1,['grunt']);},
+    demolish(q,m){
+      const t=world.towerTops[0];EnemyMgr.spawn('sniper',t.x,t.z,{y:t.y});
+      q.spawnField(2,['grunt']);
+      q.targetSid='tower0';
+    },
+    timed(q,m){q.spawnField(6,q.chTypes());q.timeLeft=m.limit;},
+    oneshot(q,m){q.spawnField(7,['grunt','grunt','runner']);},
+    vip(q,m){
+      const x=rand(-16,16),z=rand(-24,-10);
+      q.vip=EnemyMgr.spawn('officer',x,z);
+      q.guards=[EnemyMgr.spawn('grunt',x-3,z+2),EnemyMgr.spawn('grunt',x+3,z+2)];
+    },
+    longrange(q,m){
+      for(let i=0;i<3;i++)EnemyMgr.spawn('grunt',rand(-24,24),rand(-62,-50),{y:0}); // 122~137m
+      q.spawnField(2,['grunt']);
+      q.lrKills=0;
+    },
+    ammo(q,m){q.spawnField(m.count,['grunt','grunt','runner']);},
+    chain(q,m){
+      world.towerTops.forEach((t,i)=>{if(i<1)EnemyMgr.spawn('sniper',t.x,t.z,{y:t.y});});
+      q.spawnField(1,['grunt']);
+    },
+    silent(q,m){q.earR=25;q.spawnField(m.count,['grunt']);},
+    hostage(q,m){
+      const x=rand(-14,14),z=rand(-22,-8);
+      q.hostage=new Hostage(x,z);
+      for(let i=0;i<m.count;i++){
+        const a=i/m.count*6.28;
+        EnemyMgr.spawn('grunt',x+Math.cos(a)*rand(2.5,4),z+Math.sin(a)*rand(2.5,4),{noMove:i<2});
+      }
+    },
+    counter(q,m){
+      let far=world.towerTops[0],fd=0;
+      for(const t of world.towerTops){const d=Math.hypot(t.x,t.z-72);if(d>fd){fd=d;far=t;}}
+      q.csniper=EnemyMgr.spawn('sniper',far.x,far.z,{y:far.y,glint:true,dmg:40});
+      q.csniper.state='attack';
+      q.spawnField(2,['grunt']);
+    },
+    convoy(q,m){q.truck=new Truck();q.spawnField(2,['runner']);},
+    boss(q,m){EnemyMgr.boss=new Boss();},
+  },
+  spawnTutStep(){
+    HUD.hint(['[1/3] 조준 버튼으로 스코프를 열고, 30m 표적 3개를 맞혀라',
+      '[2/3] 150m 표적: 탄환은 떨어진다.\n스코프의 밀 도트 1~2칸 위(▲)를 노려라',
+      '[3/3] 나무 블록은 2발이면 뚫린다.\n엄폐물 뒤 표적을 관통 사격하라'][this.tutStep]);
+    this.tutCount=0;
+    if(this.tutStep===0){
+      new TargetBoard(-6,world.surfaceY(-6,42),42);
+      new TargetBoard(0,world.surfaceY(0,40),40);
+      new TargetBoard(6,world.surfaceY(6,42),42);
+      this.tutNeed=3;
+    }else if(this.tutStep===1){
+      new TargetBoard(0,0,-78);this.tutNeed=1;
+      $('dropArrow').classList.remove('hide');
+    }else{
+      $('dropArrow').classList.add('hide');
+      const x=8,z=44,y=world.surfaceY(x,z);
+      new TargetBoard(x,y,z);
+      for(let yy=0;yy<3;yy++)for(let xx=-1;xx<=1;xx++)world.set(x+xx,y+yy,z+2,MI.wood,{sid:'tutwall'});
+      world.build(); // 벽 추가 재빌드 (튜토리얼 한정)
+      this.tutNeed=1;
+    }
+  },
+  /* ---------- 이벤트 ---------- */
+  onShot(){this.ms.shots++;},
+  onHit(){/* 명중률 집계는 ms.hits에서 */this.ms.hits++;},
+  onBulletMiss(){
+    if(this.m&&this.m.type==='oneshot'&&this.state==='playing'&&this.oneStreak>0){
+      this.oneStreak=0;HUD.toast('스트릭 리셋!');HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'연속 킬 0 / 5');
+    }
+  },
+  onTargetHit(t){
+    if(this.mode!=='tutorial')return;
+    this.tutCount++;
+    HUD.popup(t.pos.clone().add(V3(0,2,0)),'명중!','gold');
+    if(this.tutCount>=this.tutNeed){
+      this.tutStep++;
+      if(this.tutStep>=3){G.tutorialDone=true;this.win();}
+      else this.spawnTutStep();
+    }
+  },
+  onKill(e,head,cause){
+    if(this.state!=='playing')return;
+    const dist=e.killInfo?e.killInfo.dist:player.pos.distanceTo(e.pos);
+    this.ms.kills++;if(head)this.ms.heads++;
+    G.stats.kills++;if(head)G.stats.heads++;
+    G.stats.longest=Math.max(G.stats.longest,dist|0);
+    // 골드: 킬 10 / 헤드샷 +5
+    const gold=10+(head?5:0);
+    G.gold+=gold;
+    HUD.popup(e.pos.clone().add(V3(0,2.2,0)),'+'+gold+'G','coin');
+    AE.coin();
+    HUD.killfeed((head?'헤드샷':cause==='붕괴'?'붕괴 처치':'처치')+' · '+(dist|0)+'m',head);
+    // 멀티킬
+    this.mkCount=(this.mkTimer>0)?this.mkCount+1:1;
+    this.mkTimer=1.2;
+    if(this.mkCount===2){HUD.banner('DOUBLE KILL');AE.banner(2);}
+    else if(this.mkCount>=3){HUD.banner('TRIPLE KILL');AE.banner(3);}
+    // 킬캠: 100m+ 헤드샷, 5킬당 1회
+    if(head&&dist>=100&&G.stats.kills%5===0)player.slowmo(.8);
+    vib(head?'head':'hit');
+    // 미션별
+    const T=this.m?this.m.type:'';
+    if(T==='oneshot'){this.oneStreak++;HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'연속 킬 '+this.oneStreak+' / 5');
+      if(this.oneStreak>=5)this.win();}
+    if(T==='longrange'&&dist>=120){this.lrKills++;HUD.toast('장거리 킬 '+this.lrKills+'/3 ('+(dist|0)+'m)');
+      if(this.lrKills>=3)this.win();}
+    if(T==='vip'){
+      if(e===this.vip)this.win();
+      else if(this.guards&&this.guards.includes(e)&&this.vip&&!this.vip.dead&&this.vipTimer<0){
+        this.vip.flee=true;this.vipTimer=30;
+        HUD.banner('VIP 도주!','30초 내 사살하라');
+      }
+    }
+    if(T==='head'){
+      HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'헤드샷 '+this.ms.heads+' / '+this.m.count);
+      if(this.ms.heads>=this.m.count)this.win();
+    }
+  },
+  onBlockDestroyed(b){},
+  onStructHit(sid){
+    if(this.m&&this.m.type==='chain'&&sid.startsWith('tower')){
+      const s=world.structs[sid];
+      if(s.collapsed)return;
+      s.shots++;
+      HUD.toast(sid.replace('tower','감시탑 ')+': '+s.shots+' / 3발');
+      if(s.shots>3)this.fail('사격 횟수 초과 (구조물당 3발)');
+    }
+  },
+  onStructCollapse(sid){
+    if(this.state!=='playing')return;
+    if(sid.startsWith('tower')){HUD.banner('구조물 붕괴!');vib('collapse');player.trauma(.5);}
+    const T=this.m?this.m.type:'';
+    if(T==='demolish'&&sid===this.targetSid)setTimeout(()=>this.win(),800);
+    if(T==='chain'&&world.towerTops.every(t=>world.structs[t.sid].collapsed))setTimeout(()=>this.win(),800);
+  },
+  onHostageHit(){this.fail('인질이 피격되었습니다');},
+  onTruckStopped(driver){HUD.banner(driver?'운전병 사살':'차량 파괴');setTimeout(()=>this.win(),600);},
+  onBossDown(){HUD.banner('강철거인 격파!');setTimeout(()=>this.win(),1400);},
+  onCorpseSeen(){
+    if(this.m&&this.m.type==='silent')this.fail('시체가 발견되었습니다');
+  },
+  onPlayerDamage(){this.ms.dmg++;},
+  /* ---------- 진행 체크 ---------- */
+  update(dt){
+    if(this.state!=='playing')return;
+    this.ms.t+=dt;
+    if(this.mkTimer>0)this.mkTimer-=dt;
+    const T=this.m?this.m.type:'';
+    const alive=EnemyMgr.alive().length;
+    if(this.mode==='tutorial')return;
+    if(this.mode==='endless'){
+      if(alive===0&&this.waveT<=0){this.waveT=4;HUD.banner('WAVE '+this.wave+' 클리어');player.hp=player.maxHp;HUD.hp();}
+      if(this.waveT>0){this.waveT-=dt;
+        if(this.waveT<=0){this.wave++;G.stats.bestWave=Math.max(G.stats.bestWave,this.wave);
+          DD.apply(2,this.wave);this.spawnWave();
+          HUD.quest('무한 모드 — WAVE '+this.wave,'적 '+EnemyMgr.alive().length+'명');}}
+      return;
+    }
+    switch(T){
+      case 'elim':case 'silent':case 'hostage':case 'ammo':
+        if(alive===0)this.win();
+        if(T==='ammo'&&player.reserve+player.ammo<=0&&bullets.length===0&&alive>0)this.fail('탄약 소진');
+        break;
+      case 'head':
+        if(alive===0&&this.ms.heads<this.m.count)this.fail('헤드샷이 부족합니다');
+        break;
+      case 'timed':
+        this.timeLeft-=dt;HUD.timer(this.timeLeft);
+        if(this.ms.kills>=this.m.count)this.win();
+        else if(this.timeLeft<=0)this.fail('시간 초과');
+        break;
+      case 'oneshot':
+        if(alive===0&&this.oneStreak<5)this.fail('연속 킬 실패 — 적이 남지 않았다');
+        break;
+      case 'longrange':
+        if(alive===0&&this.lrKills<3)this.fail('120m+ 저격이 부족합니다');
+        break;
+      case 'vip':
+        if(this.vipTimer>0){this.vipTimer-=dt;HUD.timer(this.vipTimer);
+          if(this.vipTimer<=0||(this.vip&&Math.abs(this.vip.pos.x)>31))this.fail('VIP가 도주했습니다');}
+        break;
+      case 'counter':
+        if(alive===0)this.win();
+        break;
+    }
+  },
+  spawnWave(){
+    const n=3+this.wave;
+    const types=this.wave<2?['grunt']:this.wave<4?['grunt','runner']:['grunt','runner','heavy'];
+    this.spawnField(Math.min(n,10),types);
+    if(this.wave>=3&&world.towerTops.length){const t=world.towerTops[this.wave%world.towerTops.length];
+      EnemyMgr.spawn('sniper',t.x,t.z,{y:t.y});}
+  },
+  /* ---------- 승패 ---------- */
+  starsEarned(){
+    if(this.mode!=='mission')return 0;
+    let s=0;
+    if(this.ms.t<=this.m.par)s++;
+    if(this.ms.shots>0&&this.ms.hits/this.ms.shots>=.6)s++;
+    if(this.ms.dmg===0)s++;
+    return Math.max(s,1);
+  },
+  win(){
+    if(this.state!=='playing')return;
+    this.state='won';
+    Music.setState('CALM');AE.fanfare();AE.heartbeat(false);
+    HUD.timer(null);HUD.hint(null);
+    $('btnPause').classList.add('hide');
+    if(this.mode==='tutorial'){
+      setTimeout(()=>{showEnd(true,3,'훈련 완료! 이제 실전이다.');},900);
+      return;
+    }
+    const stars=this.starsEarned(),key=this.key();
+    const prev=G.stars[key]||0,newStars=Math.max(0,stars-prev);
+    G.stars[key]=Math.max(prev,stars);
+    let gold=0;
+    if(!G.cleared[key])gold+=50*(this.ci+1);       // 미션 완료 50×챕터
+    gold+=newStars*20;                              // 신규 별 1개당 +20
+    G.cleared[key]=true;
+    G.gold+=gold;
+    // 전체 클리어 → 무한 모드
+    if(!G.allClear&&CHAPTERS.every((c,ci)=>c.missions.every((m,mi)=>G.cleared[ci+'-'+mi]))){
+      G.allClear=true;
+      setTimeout(()=>HUD.toast('무한 모드 해금!'),2500);
+    }
+    setTimeout(()=>showEnd(true,stars,null,gold),1100);
+  },
+  fail(reason){
+    if(this.state!=='playing')return;
+    this.state='failed';
+    Music.setState('CALM');AE.failSnd();AE.heartbeat(false);
+    HUD.timer(null);HUD.hint(null);
+    $('btnPause').classList.add('hide');
+    if(this.mode==='endless'){
+      G.stats.bestWave=Math.max(G.stats.bestWave,this.wave);
+      setTimeout(()=>showEnd(false,0,'WAVE '+this.wave+'에서 전사 (최고 기록 '+G.stats.bestWave+')'),1000);
+      return;
+    }
+    setTimeout(()=>showEnd(false,0,reason),1000);
+  },
+  restart(){
+    if(this.mode==='tutorial')this.beginTutorial();
+    else if(this.mode==='endless')this.beginEndless();
+    else this.begin(this.ci,this.mi);
+  },
+};
+/* =====================================================================
+   씬 / 렌더러 / 하늘 / 조명
+   ===================================================================== */
+let renderer,scene,camera,sunLight,hemi,skyMat,groundMat,world;
+let timeScale=1,paused=false,ready=false,envFx=[];
+function init3D(){
+  renderer=new THREE.WebGLRenderer({canvas:$('c'),antialias:false}); // 픽셀아트: AA 끔
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFShadowMap;
+  scene=new THREE.Scene();
+  scene.fog=new THREE.Fog(0xc58a7a,80,280);
+  camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.05,900);
+  scene.add(camera);
+  hemi=new THREE.HemisphereLight(0xcfd8ff,0x5a4a3a,.85);scene.add(hemi);
+  sunLight=new THREE.DirectionalLight(0xffe8c0,1.15);
+  sunLight.position.set(45,70,35);
+  sunLight.castShadow=true;
+  sunLight.shadow.mapSize.set(1024,1024);       // shadowMap 1024
+  sunLight.shadow.camera.left=-70;sunLight.shadow.camera.right=70;
+  sunLight.shadow.camera.top=90;sunLight.shadow.camera.bottom=-70;
+  sunLight.shadow.camera.far=260;
+  sunLight.shadow.bias=-0.0015;                  // acne 방지
+  sunLight.shadow.normalBias=.03;
+  scene.add(sunLight);scene.add(sunLight.target);
+  // 하늘: 구체 내부 셰이더 그라데이션 + 픽셀 태양 + 야간 별
+  skyMat=new THREE.ShaderMaterial({
+    side:THREE.BackSide,depthWrite:false,fog:false,
+    uniforms:{
+      uTop:{value:new THREE.Color(0x2a1a4a)},uMid:{value:new THREE.Color(0xb8506a)},
+      uBot:{value:new THREE.Color(0xff9a4a)},uSunCol:{value:new THREE.Color(0xffd94d)},
+      uSun:{value:V3(.42,.34,-.84).normalize()},uNight:{value:0},
+    },
+    vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+    fragmentShader:`
+      uniform vec3 uTop,uMid,uBot,uSunCol,uSun;uniform float uNight;varying vec3 vP;
+      float hash(vec3 p){return fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453);}
+      void main(){
+        vec3 d=normalize(vP);
+        vec3 col=mix(uBot,uMid,smoothstep(-.06,.22,d.y));
+        col=mix(col,uTop,smoothstep(.22,.75,d.y));
+        vec3 r=normalize(cross(vec3(0.,1.,0.),uSun));vec3 u=cross(uSun,r);
+        float ang=dot(d,uSun);
+        if(ang>0.){
+          vec2 p=vec2(dot(d,r),dot(d,u));
+          float m=max(abs(p.x),abs(p.y));
+          col=mix(col,uSunCol,step(m,.038));               // 픽셀(사각) 태양
+          col+=uSunCol*.3*smoothstep(.11,.038,m);
+        }
+        if(uNight>.5){
+          vec3 g=floor(d*90.);
+          float s=step(.9975,hash(g));
+          col+=vec3(s*.8*(.5+.5*hash(g+1.)));
+        }
+        gl_FragColor=vec4(col,1.);
+      }`,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(600,24,16),skyMat));
+  // 지평선 지면 (필드 밖)
+  const gTex=noiseTex(['#4d8f3a','#57a044','#468234','#5a9a45'],{seed:44});
+  gTex.wrapS=gTex.wrapT=THREE.RepeatWrapping;gTex.repeat.set(220,220);
+  groundMat=new THREE.MeshLambertMaterial({map:gTex});
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),groundMat);
+  ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;
+  scene.add(ground);
+}
+function applyEnv(env){
+  skyMat.uniforms.uTop.value.setHex(env.top);
+  skyMat.uniforms.uMid.value.setHex(env.mid);
+  skyMat.uniforms.uBot.value.setHex(env.bot);
+  skyMat.uniforms.uSunCol.value.setHex(env.sun);
+  skyMat.uniforms.uNight.value=env.night?1:0;
+  scene.fog.color.setHex(env.fog);
+  scene.fog.near=env.night?25:80;
+  scene.fog.far=env.night?110:280;               // 야간 시야 제한
+  hemi.intensity=env.amb;
+  sunLight.intensity=env.night?.22:1.15;
+  sunLight.color.setHex(env.night?0x8098d8:0xffe8c0);
+  groundMat.color.setHex(env.desert?0xd8c088:env.night?0x40486a:0xffffff);
+  // 이전 환경 이펙트 제거
+  envFx.forEach(f=>scene.remove(f.grp));envFx=[];
+  if(env.night){ // 모닥불 2개 — 적 추적의 광원
+    for(let i=0;i<2;i++){
+      const grp=new THREE.Group();
+      const x=rand(-22,22),z=rand(-24,6),y=world.surfaceY(x,z);
+      for(let k=0;k<3;k++){const log=new THREE.Mesh(addWhiteColor(new THREE.BoxGeometry(.9,.22,.22)),MATS[MI.log]);
+        log.rotation.y=k*1.05;log.position.y=.12;grp.add(log);}
+      const fl=new THREE.Mesh(new THREE.BoxGeometry(.4,.5,.4),new THREE.MeshBasicMaterial({color:0xffa030}));
+      fl.position.y=.4;grp.add(fl);
+      const li=new THREE.PointLight(0xff9030,2.2,16);li.position.y=1;grp.add(li);
+      grp.position.set(x,y,z);scene.add(grp);
+      envFx.push({grp,li,fl,t:rand(9)});
+    }
+  }
+}
+/* 야간 손전등: 적 스폰 후킹 */
+const _spawnOrig=EnemyMgr.spawn.bind(EnemyMgr);
+EnemyMgr.spawn=function(type,x,z,opts){
+  const e=_spawnOrig(type,x,z,opts);
+  if(QM.night){
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:PS.flashMesh.material.map,color:0xffe9a0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    sp.scale.setScalar(.9);sp.position.set(.2,1.05,-.6);e.group.add(sp);
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(.5,3.4,6,1,true),
+      new THREE.MeshBasicMaterial({color:0xffe9a0,transparent:true,opacity:.09,side:THREE.DoubleSide,depthWrite:false}));
+    cone.rotation.x=-Math.PI/2;cone.position.set(.2,1.0,-2.3);e.group.add(cone);
+  }
+  return e;
+};
+/* =====================================================================
+   화면 전환 & 메뉴 UI
+   ===================================================================== */
+const SCREENS=['scrTitle','scrMenu','scrShop','scrSettings','scrStats','scrEnd','scrPause'];
+function showScreen(id){
+  SCREENS.forEach(s=>$(s).classList.toggle('hide',s!==id));
+  $('hud').style.visibility=id&&id!=='scrPause'?'hidden':'visible';
+}
+let selCh=0,setBack='scrMenu';
+function renderMenu(){
+  $('goldTxt').textContent='● '+G.gold+' G';
+  const tabs=$('chapTabs');tabs.innerHTML='';
+  CHAPTERS.forEach((c,i)=>{
+    const locked=totalStars()<c.gate;
+    const b=document.createElement('button');
+    b.className='chapTab'+(i===selCh?' sel':'')+(locked?' lock':'');
+    b.textContent=(i+1)+'장'+(locked?' 🔒':'');
+    b.onclick=()=>{AE.click();if(locked){HUD.toast('별 '+c.gate+'개 필요 (현재 '+totalStars()+'개)');return;}selCh=i;renderMenu();};
+    tabs.appendChild(b);
+  });
+  const list=$('missionList');list.innerHTML='';
+  const ch=CHAPTERS[selCh];
+  const chLocked=totalStars()<ch.gate;
+  ch.missions.forEach((m,mi)=>{
+    const key=selCh+'-'+mi,st=G.stars[key]||0;
+    const card=document.createElement('button');
+    card.className='miCard';
+    card.innerHTML='<span>'+m.n+'<small>'+m.desc.split('\n')[0]+' · 별 조건 '+m.par+'초</small></span>'
+      +'<span class="stars">'+'★'.repeat(st)+'<span style="color:#555">'+'★'.repeat(3-st)+'</span></span>';
+    card.onclick=()=>{if(chLocked)return;AE.click();QM.begin(selCh,mi);};
+    list.appendChild(card);
+  });
+  $('btnEndless').classList.toggle('hide',!G.allClear);
+}
+function renderShop(){
+  $('goldTxt2').textContent='● '+G.gold+' G';
+  const list=$('shopList');list.innerHTML='';
+  SHOP.forEach(it=>{
+    const owned=!!G.up[it.k];
+    const row=document.createElement('div');row.className='shopItem';
+    row.innerHTML='<span>'+it.n+'<small>'+it.d+'</small></span>';
+    const btn=document.createElement('button');
+    btn.className='buyBtn'+(owned?' owned':'');
+    btn.textContent=owned?'보유중':it.p+' G';
+    btn.disabled=owned||G.gold<it.p;
+    btn.onclick=()=>{
+      if(owned||G.gold<it.p)return;
+      G.gold-=it.p;G.up[it.k]=1;AE.coin();AE.star(1);
+      HUD.toast(it.n+' 구매!');renderShop();
+    };
+    row.appendChild(btn);list.appendChild(row);
+  });
+}
+function renderStats(){
+  const st=G.stats,acc=st.shots?st.hits/st.shots:0,hs=st.kills?st.heads/st.kills:0;
+  const score=acc*50+hs*50;
+  $('rankBig').textContent=score>=70?'S':score>=55?'A':score>=40?'B':'C';
+  $('statGrid').innerHTML=
+    '<span>총 킬</span><b>'+st.kills+'</b><span>헤드샷률</span><b>'+(hs*100|0)+'%</b>'
+    +'<span>명중률</span><b>'+(acc*100|0)+'%</b><span>최장 거리</span><b>'+st.longest+'m</b>'
+    +'<span>파괴한 블록</span><b>'+st.blocks+'</b><span>최고 웨이브</span><b>'+st.bestWave+'</b>'
+    +'<span>누적 별</span><b>'+totalStars()+' / '+CHAPTERS.reduce((a,c)=>a+c.missions.length*3,0)+'</b>'
+    +'<span>골드</span><b>'+G.gold+' G</b>';
+}
+function showEnd(won,stars,msg,gold){
+  showScreen('scrEnd');
+  $('endTitle').textContent=won?'임무 완수':'임무 실패';
+  $('endTitle').style.color=won?'#ffb830':'#ff5544';
+  const fr=$('failReason');
+  if(!won&&msg){fr.classList.remove('hide');fr.textContent='실패 원인: '+msg;}
+  else if(msg){fr.classList.remove('hide');fr.style.color='#7dda58';fr.textContent=msg;}
+  else fr.classList.add('hide');
+  const es=$('endStars');es.innerHTML='';
+  if(won&&QM.mode==='mission'){
+    for(let i=0;i<3;i++){
+      const sp=document.createElement('span');sp.textContent='★';es.appendChild(sp);
+      if(i<stars)setTimeout(()=>{sp.className='got';AE.star(i);},500+i*420); // 별 획득 피치 상승
+    }
+  }
+  const ms=QM.ms,acc=ms.shots?(ms.hits/ms.shots*100|0):0;
+  $('endStats').innerHTML=(QM.mode==='mission'?
+    '시간 '+ms.t.toFixed(1)+'초 (별 조건 '+QM.m.par+'초) · 명중률 '+acc+'% · 피격 '+ms.dmg+'회<br>':'')
+    +'킬 '+ms.kills+' · 헤드샷 '+ms.heads+(gold?'<br><span style="color:#ffd94d">+'+gold+' G 획득</span>':'');
+  // 다음 임무 버튼
+  const nx=$('btnNext');nx.classList.add('hide');
+  if(won&&QM.mode==='mission'){
+    let nc=QM.ci,nm=QM.mi+1;
+    if(nm>=CHAPTERS[nc].missions.length){nc++;nm=0;}
+    if(nc<CHAPTERS.length&&totalStars()>=CHAPTERS[nc].gate){
+      nx.classList.remove('hide');
+      nx.onclick=()=>{AE.click();QM.begin(nc,nm);};
+    }
+  }
+  if(won&&QM.mode==='tutorial'){
+    nx.classList.remove('hide');nx.textContent='작전 개시 ▶';
+    nx.onclick=()=>{AE.click();renderMenu();showScreen('scrMenu');};
+  }
+}
+function pauseGame(){
+  if(paused||QM.state!=='playing')return;
+  paused=true;AE.suspend();showScreen('scrPause');
+}
+function resumeGame(){paused=false;AE.resume();showScreen(null);}
+function wireUI(){
+  $('scrTitle').addEventListener('pointerdown',()=>{
+    AE.init();AE.resume();Music.start();AE.click();
+    if(!G.tutorialDone)QM.beginTutorial();
+    else{renderMenu();showScreen('scrMenu');}
+  },{once:false});
+  $('btnShop').onclick=()=>{AE.click();renderShop();showScreen('scrShop');};
+  $('btnShopBack').onclick=()=>{AE.click();renderMenu();showScreen('scrMenu');};
+  $('btnStats').onclick=()=>{AE.click();renderStats();showScreen('scrStats');};
+  $('btnStatsBack').onclick=()=>{AE.click();renderMenu();showScreen('scrMenu');};
+  $('btnSettings').onclick=()=>{AE.click();setBack='scrMenu';showScreen('scrSettings');};
+  $('btnSetBack').onclick=()=>{AE.click();
+    if(setBack==='scrPause')showScreen('scrPause');
+    else{renderMenu();showScreen('scrMenu');}};
+  $('btnEndless').onclick=()=>{AE.click();QM.beginEndless();};
+  $('btnRetry').onclick=()=>{AE.click();QM.restart();};        // 로딩 없이 즉시 재시도
+  $('btnToMenu').onclick=()=>{AE.click();QM.state='idle';renderMenu();showScreen('scrMenu');};
+  $('btnResume').onclick=()=>{AE.click();resumeGame();};
+  $('btnPauseRetry').onclick=()=>{AE.click();paused=false;AE.resume();QM.restart();};
+  $('btnPauseSet').onclick=()=>{AE.click();setBack='scrPause';showScreen('scrSettings');};
+  $('btnQuit').onclick=()=>{AE.click();paused=false;AE.resume();QM.state='idle';renderMenu();showScreen('scrMenu');};
+  // 설정 바인딩
+  $('setSens').oninput=e=>S.sens=e.target.value/100;
+  $('setMus').oninput=e=>{S.musicVol=e.target.value/100;AE.setVols();};
+  $('setSfx').oninput=e=>{S.sfxVol=e.target.value/100;AE.setVols();};
+  const seg=(id,fn)=>{const el=$(id);el.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    el.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+    b.classList.add('sel');fn(+b.dataset.v);AE.click();});};
+  seg('setAssist',v=>S.assist=v);
+  seg('setVib',v=>S.vib=!!v);
+  seg('setLefty',v=>{S.lefty=!!v;document.body.classList.toggle('lefty',S.lefty);});
+  seg('setFps',v=>S.fps30=!!v);
+  // 백그라운드 → 자동 일시정지 + 오디오 suspend
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){AE.suspend();if(QM.state==='playing'&&!paused)pauseGame();}
+    else if(!paused)AE.resume();
+  });
+  const onResize=()=>{
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  };
+  window.addEventListener('resize',onResize);
+  window.addEventListener('orientationchange',()=>setTimeout(onResize,300));
+}
+/* =====================================================================
+   메인 루프
+   ===================================================================== */
+const _frustum=new THREE.Frustum(),_pv=new THREE.Matrix4();
+let _last=performance.now(),_acc30=0;
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt=Math.min((now-_last)/1000,.06);_last=now;
+  if(!ready)return;
+  if(S.fps30){_acc30+=dt;if(_acc30<1/31)return;dt=Math.min(_acc30,.08);_acc30=0;} // 절전 모드
+  if(paused)return;
+  const dts=dt*timeScale;
+  if(QM.state==='playing'){
+    input.tick(dt);
+    player.update(dt);
+    weapon.update(dt,input.lookVX,input.lookVY);
+    updateBullets(dts);
+    EnemyMgr.update(dts);
+    QM.update(dt);
+  }
+  world.update(dts);
+  PS.update(dts);
+  world.flush();
+  HUD.windAnim(now/1000);
+  for(const f of envFx){f.t+=dt;f.li.intensity=2+Math.sin(f.t*11)*.5+Math.sin(f.t*23)*.3;
+    f.fl.scale.y=1+Math.sin(f.t*13)*.25;}
+  _pv.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);
+  _frustum.setFromProjectionMatrix(_pv);
+  world.cull(camera,_frustum);
+  renderer.render(scene,camera);
+}
+/* =====================================================================
+   부트스트랩
+   ===================================================================== */
+function boot(){
+  if(!window.THREE){
+    $('titleTap').textContent='Three.js 로드 실패 — 네트워크를 확인하세요';
+    $('fadeBlack').style.opacity=0;return;
+  }
+  buildMaterials();buildBlockGeo();buildMercSkins();buildTargetMats();drawLogo();
+  init3D();
+  world=new BlockWorld();scene.add(world.group);
+  PS.init(scene);EnemyMgr.init(scene);
+  world.generate(4242,{}); // 타이틀 배경
+  applyEnv(CH_ENV[0]);
+  player.reset();
+  weapon.init(camera);
+  input.init();HUD.init();wireUI();
+  camera.position.copy(player.eyePos());
+  ready=true;
+  showScreen('scrTitle');
+  $('fadeBlack').style.opacity=0;
+  requestAnimationFrame(frame);
+}
+boot();
+</script>
+</body>
+</html>
