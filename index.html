@@ -119,6 +119,19 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
 #kcTxt{position:fixed;right:20px;top:13.5%;z-index:22;color:var(--amber);font-family:var(--fn);font-weight:700;font-size:13px;letter-spacing:6px;opacity:0;pointer-events:none}
 #tutHint{position:fixed;left:50%;bottom:calc(152px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:19;background:var(--panel);border:1px solid var(--line2);border-top:2px solid var(--amber);color:#e4e9ee;padding:9px 16px;font-size:12.5px;max-width:82vw;text-align:center;pointer-events:none;line-height:1.6;letter-spacing:.3px}
 #toast{position:fixed;left:50%;top:13%;transform:translateX(-50%);z-index:40;background:var(--panel);color:#e8edf1;padding:7px 18px;font-size:12px;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--line2);border-left:2px solid var(--amber)}
+/* 미션 브리핑 오버레이 */
+#briefing{position:fixed;left:0;top:29%;z-index:19;pointer-events:none;background:linear-gradient(90deg,rgba(8,10,13,.86),rgba(8,10,13,0));border-left:3px solid var(--amber);padding:10px 46px 12px 22px;opacity:0;transform:translateX(-28px);transition:all .35s ease-out;max-width:70vw}
+#briefing.show{opacity:1;transform:none}
+#brCode{font-family:var(--fn);font-weight:700;font-size:11px;letter-spacing:4px;color:var(--amber)}
+#brName{font-family:var(--fd);font-size:24px;letter-spacing:3px;color:#f0f3f6;margin:1px 0 2px;text-transform:uppercase}
+#brObj{font-size:12px;color:#aab4bc;letter-spacing:.4px;white-space:pre-line}
+/* 피격 방향 인디케이터 */
+#dmgDirWrap{position:fixed;left:50%;top:50%;z-index:14;pointer-events:none;opacity:0;transition:opacity .55s}
+#dmgDir{position:absolute;left:-11px;top:-98px;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:15px solid rgba(226,64,46,.92);filter:drop-shadow(0 0 4px rgba(226,64,46,.5))}
+/* 재장전 경고 */
+#reloadHint{position:fixed;left:50%;bottom:calc(58px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:14;font-family:var(--fn);font-weight:700;font-size:15px;letter-spacing:5px;color:var(--red);animation:pulse .9s infinite;pointer-events:none;text-shadow:0 1px 5px #000}
+/* 언어 토글 (타이틀) */
+#btnLang{position:fixed;top:calc(12px + env(safe-area-inset-top));right:calc(14px + env(safe-area-inset-right));z-index:55;pointer-events:auto;background:rgba(10,13,16,.55);border:1px solid var(--line);color:#cdd4da;font-family:var(--fb);font-weight:700;font-size:11px;letter-spacing:1px;padding:9px 14px;min-height:40px}
 /* ================= 스크린 공통 ================= */
 .screen{position:fixed;inset:0;z-index:50;background:linear-gradient(90deg,rgba(6,8,10,.88) 0%,rgba(6,8,10,.72) 55%,rgba(6,8,10,.55) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:pan-y;overflow-y:auto;padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));animation:scrIn .22s ease-out}
 @keyframes scrIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -128,7 +141,7 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
 .scrHead h2{font-family:var(--fd);font-weight:400;color:#eef1f4;letter-spacing:4px;font-size:24px;line-height:1}
 .scrHead .sub{font-family:var(--fn);font-weight:600;font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase}
 .scrHead::after{content:'';flex:1;height:1px;background:var(--line2);align-self:center}
-.goldChip{font-family:var(--fn);font-weight:700;font-size:15px;color:var(--amber2);letter-spacing:1px;background:rgba(255,158,27,.08);border:1px solid rgba(255,158,27,.3);padding:3px 12px;align-self:center}
+.goldChip{font-family:var(--fn);font-weight:700;font-size:15px;color:var(--amber2);letter-spacing:1px;background:rgba(255,158,27,.08);border:1px solid rgba(255,158,27,.3);padding:3px 12px;align-self:center;white-space:nowrap}
 /* 버튼 */
 .mbtn{pointer-events:auto;background:var(--panel2);border:1px solid var(--line);color:#dde4ea;font-family:var(--fb);font-weight:700;font-size:13.5px;letter-spacing:2px;padding:0 26px;margin:5px;min-width:180px;min-height:50px;clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px);transition:background .12s,border-color .12s,color .12s;position:relative}
 .mbtn:active{background:#2c353d;border-color:var(--dim)}
@@ -210,6 +223,9 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
   <div id="banner"></div><div id="subBanner"></div>
   <div id="popups"></div>
   <div id="tutHint" class="hide"></div>
+  <div id="briefing"><div id="brCode"></div><div id="brName"></div><div id="brObj"></div></div>
+  <div id="dmgDirWrap"><div id="dmgDir"></div></div>
+  <div id="reloadHint" class="hide"></div>
 </div>
 <div id="scope" class="hide">
   <div id="scopeMask"></div>
@@ -221,62 +237,64 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
   <div id="scopeRing"></div>
   <div id="lensGlint"></div>
 </div>
-<button class="btn" id="btnFire" data-btn="fire"><i class="ci"></i><b>발사</b></button>
-<button class="btn" id="btnAim" data-btn="aim"><b>조준</b><small>ADS</small></button>
-<button class="btn" id="btnBreath" data-btn="breath"><b>숨참기</b><small>HOLD</small></button>
+<button class="btn" id="btnFire" data-btn="fire"><i class="ci"></i><b data-i18n="fire">FIRE</b></button>
+<button class="btn" id="btnAim" data-btn="aim"><b data-i18n="aim">AIM</b><small>ADS</small></button>
+<button class="btn" id="btnBreath" data-btn="breath"><b data-i18n="breath">BREATH</b><small>HOLD</small></button>
 <button class="btn hide" id="btnPause" data-btn="pause">II</button>
 <div id="kcT"></div><div id="kcB"></div><div id="kcTxt">KILL CAM</div>
 <div id="toast"></div>
 
 <div class="screen" id="scrTitle">
+  <button id="btnLang">한국어</button>
   <canvas id="logoCv" width="212" height="18"></canvas>
   <div id="titleSub">TACTICAL <b>VOXEL</b> OPERATIONS</div>
   <div id="titleRule"></div>
-  <div id="titleTap"><i>[</i> 화면을 터치해 작전 개시 <i>]</i></div>
+  <div id="titleTap" data-i18n="tap">[ TAP TO DEPLOY ]</div>
   <div class="ctrlRow">
-    <div class="ctrlCard"><b>좌측 드래그</b>시점 조작</div>
-    <div class="ctrlCard"><b>조준</b>스코프 · 핀치 줌</div>
-    <div class="ctrlCard"><b>발사</b>사격 · 볼트액션</div>
-    <div class="ctrlCard"><b>숨참기</b>홀드 시 안정</div>
+    <div class="ctrlCard"><b data-i18n="ctrl_look">LEFT DRAG</b><span data-i18n="ctrl_look_d">Aim view</span></div>
+    <div class="ctrlCard"><b data-i18n="ctrl_aim">AIM</b><span data-i18n="ctrl_aim_d">Scope · pinch zoom</span></div>
+    <div class="ctrlCard"><b data-i18n="ctrl_fire">FIRE</b><span data-i18n="ctrl_fire_d">Shoot · bolt action</span></div>
+    <div class="ctrlCard"><b data-i18n="ctrl_breath">HOLD BREATH</b><span data-i18n="ctrl_breath_d">Steady the shot</span></div>
   </div>
-  <div id="titleVer"><b>BLOCKSHOT</b> · 100% 독자 제작 에셋 · V 1.1</div>
+  <div id="titleVer"><b>BLOCKSHOT</b> · <span data-i18n="ver">100% ORIGINAL ASSETS · V 1.2</span></div>
 </div>
 
 <div class="screen left hide" id="scrMenu">
-  <div class="scrHead"><h2>작전 선택</h2><span class="sub">Operations</span><span class="goldChip" id="goldTxt"></span></div>
+  <div class="scrHead"><h2 data-i18n="menu_h">OPERATIONS</h2><span class="sub">Select Mission</span><span class="goldChip" id="rankChip"></span><span class="goldChip" id="goldTxt"></span></div>
   <div id="chapTabs"></div>
   <div id="missionList"></div>
   <div class="menuBtnRow">
-    <button class="mbtn small" id="btnShop">상점</button>
-    <button class="mbtn small" id="btnStats">전적</button>
-    <button class="mbtn small" id="btnSettings">설정</button>
-    <button class="mbtn small gold hide" id="btnEndless">무한 모드</button>
+    <button class="mbtn small" id="btnShop" data-i18n="shop_h">ARMORY</button>
+    <button class="mbtn small" id="btnStats" data-i18n="rec_h">RECORD</button>
+    <button class="mbtn small" id="btnSettings" data-i18n="set_h">SETTINGS</button>
+    <button class="mbtn small gold hide" id="btnEndless" data-i18n="endless">ENDLESS MODE</button>
   </div>
 </div>
 
 <div class="screen left hide" id="scrShop">
-  <div class="scrHead"><h2>상점</h2><span class="sub">Armory</span><span class="goldChip" id="goldTxt2"></span></div>
+  <div class="scrHead"><h2 data-i18n="shop_h">ARMORY</h2><span class="sub">Upgrades</span><span class="goldChip" id="goldTxt2"></span></div>
   <div id="shopList"></div>
-  <button class="mbtn" id="btnShopBack" style="margin-top:12px">돌아가기</button>
+  <button class="mbtn" id="btnShopBack" data-i18n="back" style="margin-top:12px">BACK</button>
 </div>
 
 <div class="screen left hide" id="scrSettings">
-  <div class="scrHead"><h2>설정</h2><span class="sub">Settings</span></div>
-  <div class="setRow"><span>감도</span><input type="range" id="setSens" min="30" max="200" value="100"></div>
-  <div class="setRow"><span>에임 어시스트</span><div class="segBtns" id="setAssist"><button data-v="0">끄기</button><button data-v="1" class="sel">약</button><button data-v="2">강</button></div></div>
-  <div class="setRow"><span>진동</span><div class="segBtns" id="setVib"><button data-v="1" class="sel">켜기</button><button data-v="0">끄기</button></div></div>
-  <div class="setRow"><span>음악 음량</span><input type="range" id="setMus" min="0" max="100" value="60"></div>
-  <div class="setRow"><span>효과음 음량</span><input type="range" id="setSfx" min="0" max="100" value="90"></div>
-  <div class="setRow"><span>왼손잡이 모드</span><div class="segBtns" id="setLefty"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
-  <div class="setRow"><span>30fps 절전 모드</span><div class="segBtns" id="setFps"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
-  <button class="mbtn" id="btnSetBack" style="margin-top:16px">돌아가기</button>
+  <div class="scrHead"><h2 data-i18n="set_h">SETTINGS</h2><span class="sub">Options</span></div>
+  <div class="setRow"><span data-i18n="set_lang">Language</span><div class="segBtns" id="setLang"><button data-v="en" class="sel">ENGLISH</button><button data-v="ko">한국어</button></div></div>
+  <div class="setRow"><span data-i18n="set_sens">Sensitivity</span><input type="range" id="setSens" min="30" max="200" value="100"></div>
+  <div class="setRow"><span data-i18n="set_assist">Aim assist</span><div class="segBtns" id="setAssist"><button data-v="0" data-i18n="off">OFF</button><button data-v="1" class="sel" data-i18n="low">LOW</button><button data-v="2" data-i18n="high">HIGH</button></div></div>
+  <div class="setRow"><span data-i18n="set_vib">Vibration</span><div class="segBtns" id="setVib"><button data-v="1" class="sel" data-i18n="on">ON</button><button data-v="0" data-i18n="off">OFF</button></div></div>
+  <div class="setRow"><span data-i18n="set_mus">Music volume</span><input type="range" id="setMus" min="0" max="100" value="60"></div>
+  <div class="setRow"><span data-i18n="set_sfx">SFX volume</span><input type="range" id="setSfx" min="0" max="100" value="90"></div>
+  <div class="setRow"><span data-i18n="set_lefty">Left-handed mode</span><div class="segBtns" id="setLefty"><button data-v="0" class="sel" data-i18n="off">OFF</button><button data-v="1" data-i18n="on">ON</button></div></div>
+  <div class="setRow"><span data-i18n="set_fps">30fps battery saver</span><div class="segBtns" id="setFps"><button data-v="0" class="sel" data-i18n="off">OFF</button><button data-v="1" data-i18n="on">ON</button></div></div>
+  <button class="mbtn" id="btnSetBack" data-i18n="back" style="margin-top:16px">BACK</button>
 </div>
 
 <div class="screen hide" id="scrStats">
-  <div class="scrHead" style="width:auto"><h2>전적</h2><span class="sub">Service Record</span></div>
+  <div class="scrHead" style="width:auto"><h2 data-i18n="rec_h">RECORD</h2><span class="sub">Service Record</span></div>
   <div id="rankBig"></div>
   <div class="statGrid" id="statGrid"></div>
-  <button class="mbtn" id="btnStatsBack">돌아가기</button>
+  <button class="mbtn" id="btnStatsBack" data-i18n="back">BACK</button>
 </div>
 
 <div class="screen hide" id="scrEnd">
@@ -285,18 +303,18 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
   <div id="endStars"></div>
   <div id="endStats"></div>
   <div style="display:flex;gap:4px;margin-top:16px;flex-wrap:wrap;justify-content:center">
-    <button class="mbtn gold" id="btnRetry">즉시 재시도</button>
-    <button class="mbtn hide" id="btnNext">다음 임무</button>
-    <button class="mbtn" id="btnToMenu">작전 목록</button>
+    <button class="mbtn gold" id="btnRetry" data-i18n="retry">RETRY</button>
+    <button class="mbtn hide" id="btnNext" data-i18n="next">NEXT MISSION</button>
+    <button class="mbtn" id="btnToMenu" data-i18n="to_menu">OPERATIONS</button>
   </div>
 </div>
 
 <div class="screen hide" id="scrPause">
-  <div class="scrHead" style="width:auto"><h2>일시 정지</h2><span class="sub">Paused</span></div>
-  <button class="mbtn gold" id="btnResume">계속하기</button>
-  <button class="mbtn" id="btnPauseRetry">재시도</button>
-  <button class="mbtn" id="btnPauseSet">설정</button>
-  <button class="mbtn" id="btnQuit">작전 포기</button>
+  <div class="scrHead" style="width:auto"><h2 data-i18n="pause_h">PAUSED</h2><span class="sub">Stand By</span></div>
+  <button class="mbtn gold" id="btnResume" data-i18n="resume">RESUME</button>
+  <button class="mbtn" id="btnPauseRetry" data-i18n="retry">RETRY</button>
+  <button class="mbtn" id="btnPauseSet" data-i18n="set_h">SETTINGS</button>
+  <button class="mbtn" id="btnQuit" data-i18n="quit">ABANDON OP</button>
 </div>
 <div id="fadeBlack"></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
@@ -330,6 +348,98 @@ const V3=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
 function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const IS_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const CAN_VIB=('vibrate' in navigator)&&!IS_IOS;
+
+/* =====================================================================
+   i18n — 영어 기본 / 한국어 토글
+   ===================================================================== */
+let LANG='en';
+const I18N={
+en:{
+  tap:'[ TAP TO DEPLOY ]',ver:'100% ORIGINAL ASSETS · V 1.2',
+  ctrl_look:'LEFT DRAG',ctrl_look_d:'Aim view',
+  ctrl_aim:'AIM',ctrl_aim_d:'Scope · pinch zoom',
+  ctrl_fire:'FIRE',ctrl_fire_d:'Shoot · bolt action',
+  ctrl_breath:'HOLD BREATH',ctrl_breath_d:'Steady the shot',
+  fire:'FIRE',aim:'AIM',breath:'BREATH',
+  menu_h:'OPERATIONS',shop_h:'ARMORY',rec_h:'RECORD',set_h:'SETTINGS',endless:'ENDLESS MODE',
+  back:'BACK',locked_toast:'Requires {0}★ — you have {1}★',star_req:'target {0}s',rank:'RANK',
+  owned:'OWNED',bought:'{0} acquired',
+  set_sens:'Sensitivity',set_assist:'Aim assist',set_vib:'Vibration',set_mus:'Music volume',
+  set_sfx:'SFX volume',set_lefty:'Left-handed mode',set_fps:'30fps battery saver',set_lang:'Language',
+  off:'OFF',on:'ON',low:'LOW',high:'HIGH',
+  st_kills:'Kills',st_hsr:'Headshot rate',st_acc:'Accuracy',st_long:'Longest kill',
+  st_blocks:'Blocks destroyed',st_wave:'Best wave',st_stars:'Stars',st_gold:'Gold',
+  win:'MISSION COMPLETE',fail:'MISSION FAILED',cause:'CAUSE: {0}',
+  retry:'RETRY',next:'NEXT MISSION',to_menu:'OPERATIONS',deploy_btn:'DEPLOY',
+  end_line1:'TIME {0}s (target {1}s) · ACC {2}% · HITS TAKEN {3}',
+  end_line2:'KILLS {0} · HEADSHOTS {1}',end_gold:'+{0} G EARNED',
+  tut_done:'Training complete. Time for the real thing.',
+  pause_h:'PAUSED',resume:'RESUME',quit:'ABANDON OP',
+  reload:'RELOAD',reloading:'RELOADING…',
+  kf_hs:'HEADSHOT',kf_kill:'KILL',kf_crush:'CRUSHED',
+  pop_kill:'LETHAL',pop_helmet:'HELMET!',pop_core:'CORE HIT!',pop_armor:'ARMOR',pop_hit:'HIT!',
+  tut_t:'MISSION 0 · TRAINING',tut_o:'Follow the instructor',
+  tut_h1:'[1/3] Open the scope with AIM and hit all 3 targets at 30m',
+  tut_h2:'[2/3] 150m target: bullets drop.\nAim 1–2 mil dots high (▲)',
+  tut_h3:'[3/3] Wood breaks after 2 hits.\nPunch through the cover',
+  endless_t:'ENDLESS — WAVE {0}',endless_o:'Survive the waves',
+  wave_clear:'WAVE {0} CLEAR',endless_unlock:'ENDLESS MODE UNLOCKED',
+  obj_left:'Hostiles remaining: {0}',obj_hs:'Headshots {0} / {1}',obj_streak:'Kill streak {0} / 5',
+  obj_lr:'Long-range kills {0} / 3 ({1}m)',streak_reset:'STREAK RESET',
+  vip_flee:'VIP FLEEING!',vip_flee_s:'30 seconds to take the shot',
+  collapse:'STRUCTURE DOWN',phase:'PHASE {0}',
+  driver_kill:'DRIVER DOWN',truck_kill:'VEHICLE DESTROYED',boss_kill:'COLOSSUS DOWN',
+  tower_shots:'Structure {0}: {1} / 3 shots',
+  f_kia:'K.I.A.',f_hostage:'The hostage was hit',f_seen:'A body was discovered',
+  f_shots:'Shot limit exceeded (3 per structure)',f_ammo:'Out of ammo',f_time:'Time expired',
+  f_hs:'Not enough headshots',f_streak:'Streak broken — no hostiles left',
+  f_lr:'Not enough 120m+ kills',f_vip:'The VIP escaped',f_truck:'The convoy got through',
+  f_wave:'K.I.A. on wave {0} (best: {1})',
+},
+ko:{
+  tap:'[ 화면을 터치해 작전 개시 ]',ver:'100% 독자 제작 에셋 · V 1.2',
+  ctrl_look:'좌측 드래그',ctrl_look_d:'시점 조작',
+  ctrl_aim:'조준',ctrl_aim_d:'스코프 · 핀치 줌',
+  ctrl_fire:'발사',ctrl_fire_d:'사격 · 볼트액션',
+  ctrl_breath:'숨참기',ctrl_breath_d:'홀드 시 안정',
+  fire:'발사',aim:'조준',breath:'숨참기',
+  menu_h:'작전 선택',shop_h:'상점',rec_h:'전적',set_h:'설정',endless:'무한 모드',
+  back:'돌아가기',locked_toast:'별 {0}개 필요 · 현재 {1}개',star_req:'별 조건 {0}초',rank:'랭크',
+  owned:'보유',bought:'{0} 구매 완료',
+  set_sens:'감도',set_assist:'에임 어시스트',set_vib:'진동',set_mus:'음악 음량',
+  set_sfx:'효과음 음량',set_lefty:'왼손잡이 모드',set_fps:'30fps 절전 모드',set_lang:'언어',
+  off:'끄기',on:'켜기',low:'약',high:'강',
+  st_kills:'총 킬',st_hsr:'헤드샷률',st_acc:'명중률',st_long:'최장 거리',
+  st_blocks:'파괴한 블록',st_wave:'최고 웨이브',st_stars:'누적 별',st_gold:'골드',
+  win:'임무 완수',fail:'임무 실패',cause:'실패 원인: {0}',
+  retry:'즉시 재시도',next:'다음 임무',to_menu:'작전 목록',deploy_btn:'작전 개시',
+  end_line1:'시간 {0}초 (별 조건 {1}초) · 명중률 {2}% · 피격 {3}회',
+  end_line2:'킬 {0} · 헤드샷 {1}',end_gold:'+{0} G 획득',
+  tut_done:'훈련 완료! 이제 실전이다.',
+  pause_h:'일시 정지',resume:'계속하기',quit:'작전 포기',
+  reload:'재장전',reloading:'재장전 중…',
+  kf_hs:'헤드샷',kf_kill:'처치',kf_crush:'붕괴 처치',
+  pop_kill:'즉사',pop_helmet:'헬멧!',pop_core:'코어 명중!',pop_armor:'장갑',pop_hit:'명중!',
+  tut_t:'미션 0 · 훈련',tut_o:'교관의 지시를 따르라',
+  tut_h1:'[1/3] 조준 버튼으로 스코프를 열고, 30m 표적 3개를 맞혀라',
+  tut_h2:'[2/3] 150m 표적: 탄환은 떨어진다.\n밀 도트 1~2칸 위(▲)를 노려라',
+  tut_h3:'[3/3] 나무 블록은 2발이면 뚫린다.\n엄폐물을 관통 사격하라',
+  endless_t:'무한 모드 — WAVE {0}',endless_o:'생존하며 웨이브를 넘겨라',
+  wave_clear:'WAVE {0} 클리어',endless_unlock:'무한 모드 해금!',
+  obj_left:'남은 적: {0}',obj_hs:'헤드샷 {0} / {1}',obj_streak:'연속 킬 {0} / 5',
+  obj_lr:'장거리 킬 {0} / 3 ({1}m)',streak_reset:'스트릭 리셋!',
+  vip_flee:'VIP 도주!',vip_flee_s:'30초 내 사살하라',
+  collapse:'구조물 붕괴!',phase:'페이즈 {0}',
+  driver_kill:'운전병 사살',truck_kill:'차량 파괴',boss_kill:'강철거인 격파!',
+  tower_shots:'구조물 {0}: {1} / 3발',
+  f_kia:'전사했습니다',f_hostage:'인질이 피격되었습니다',f_seen:'시체가 발견되었습니다',
+  f_shots:'사격 횟수 초과 (구조물당 3발)',f_ammo:'탄약 소진',f_time:'시간 초과',
+  f_hs:'헤드샷이 부족합니다',f_streak:'연속 킬 실패 — 적이 남지 않았다',
+  f_lr:'120m+ 저격이 부족합니다',f_vip:'VIP가 도주했습니다',f_truck:'호송 차량이 통과했습니다',
+  f_wave:'WAVE {0}에서 전사 (최고 기록 {1})',
+}};
+const T=(k,...a)=>{let s=(I18N[LANG]&&I18N[LANG][k])??I18N.en[k]??k;a.forEach((v,i)=>{s=s.split('{'+i+'}').join(v);});return s;};
+const tx=o=>(o&&typeof o==='object')?(o[LANG]??o.en):o;
 
 /* ---------- 설정 (세션 변수, localStorage 금지) ---------- */
 const S={sens:1,assist:1,vib:true,musicVol:.6,sfxVol:.9,lefty:false,fps30:false};
@@ -713,6 +823,13 @@ const AE={
     [523,659,784,1046].forEach((f,i)=>{this.osc('square',f,.35,.22,this.mus,{delay:i*.12});this.osc('triangle',f/2,.4,.2,this.mus,{delay:i*.12});});},
   failSnd(){if(!this.started)return;[440,392,311,233].forEach((f,i)=>this.osc('sawtooth',f,.4,.16,this.mus,{delay:i*.18,f1:f*.94}));},
   click(){if(this.started)this.osc('square',900,.04,.12,this.sfx);},
+  radio(){ // 브리핑 무전: 크랙 + 삑 2회
+    if(!this.started)return;
+    this.noise(.09,.12,this.mus,{bp:1800,q:1.2});
+    this.osc('square',1180,.05,.12,this.mus,{delay:.1});
+    this.osc('square',1560,.07,.1,this.mus,{delay:.19});
+    this.noise(.06,.08,this.mus,{bp:2200,q:1.5,delay:.28});
+  },
   banner(n){if(!this.started)return;for(let i=0;i<n;i++)this.osc('square',700*Math.pow(1.25,i),.15,.25,this.mus,{delay:i*.09});},
   /* ---------- 앰비언스 ---------- */
   stopAmb(){this.ambNodes.forEach(n=>{try{n.stop()}catch(e){}});this.ambNodes=[];
@@ -1255,7 +1372,7 @@ const weapon={
     cam.add(this.group);
   },
   muzzlePos(){const v=V3();this.muzzleRef.getWorldPosition(v);return v},
-  onFire(){this.kick=1;PS.flash(this.muzzlePos());},
+  onFire(){this.kick=1;const mp=this.muzzlePos();PS.flash(mp);PS.dust(mp,2);}, // 섬광 + 총구 연기
   update(dt,lookVX,lookVY){
     const p=player;
     this.bobT+=dt;
@@ -1432,7 +1549,7 @@ class Enemy{
       this.fallV+=20*dt;this.pos.y-=this.fallV*dt;
       if(this.pos.y<=gy){
         this.pos.y=gy;const fd=this.fallFrom-gy;this.fallV=0;
-        if(fd>3){this.die(false,V3(0,1,0),'붕괴');return;}
+        if(fd>3){this.die(false,V3(0,1,0),'crush');return;}
       }
       this.sync();return;
     }
@@ -1717,7 +1834,7 @@ class Truck{
     if(this.dead)return;
     this.x+=5.2*dt;
     this.group.position.set(this.x,world.surfaceY(this.x,this.z)+.05,this.z);
-    if(this.x>44){this.dead=true;QM.fail('호송 차량이 통과했습니다');}
+    if(this.x>44){this.dead=true;QM.fail(T('f_truck'));}
   }
   dispose(){EnemyMgr.group.remove(this.group);}
 }
@@ -1759,19 +1876,19 @@ class Boss{
       this.coreHits--;
       AE.hit('head',this.pos);
       PS.debris(point,MI.brick,8,dir);
-      HUD.popup(point,'코어 명중!','gold');
+      HUD.popup(point,T('pop_core'),'gold');
       if(this.coreHits<=0){this.dieBoss();return;}
       if((this.coreHits===8&&this.phase===1)||(this.coreHits===4&&this.phase===2)){
         this.phase++;this.speed*=1.35;
         AE.collapseBoom(this.pos);
-        HUD.banner('페이즈 '+this.phase,'');
+        HUD.banner(T('phase',this.phase),'');
         const n=this.phase; // 부하 소환
         for(let i=0;i<n;i++)EnemyMgr.spawn(i%2?'runner':'grunt',this.pos.x+rand(-6,6),this.pos.z+rand(-4,4));
       }
     }else{
       AE.hit('metal',this.pos);
       PS.debris(point,MI.metal,3,dir);
-      HUD.popup(point,'장갑!','');
+      HUD.popup(point,T('pop_armor'),'');
     }
   }
   update(dt){
@@ -2014,7 +2131,7 @@ const player={
   startReload(){
     if(this.wstate==='reload'||this.ammo>=gMag()||this.reserve<=0)return;
     this.wstate='reload';this.wstateT=0;
-    AE.reloadSnd(0);
+    AE.reloadSnd(0);HUD.reloadHint();
     setTimeout(()=>AE.reloadSnd(1),gReload()*600);
   },
   damage(n,from){
@@ -2022,11 +2139,12 @@ const player={
     this.hp-=n*gDmgMul()*DD.playerDmgMul;
     this.lastHurt=0;
     QM.onPlayerDamage();
+    HUD.dmgDir(from); // 피격 방향 인디케이터
     const dv=$('dmgVig');dv.style.transition='none';dv.style.opacity=.9;
     requestAnimationFrame(()=>{dv.style.transition='opacity .6s';dv.style.opacity=Math.max(0,(1-this.hp/this.maxHp)*.5);});
     vib('dmg');this.trauma(.4);
     HUD.hp();
-    if(this.hp<=0){this.dead=true;QM.fail('전사했습니다');}
+    if(this.hp<=0){this.dead=true;QM.fail(T('f_kia'));}
   },
   update(dt){
     // ADS 전환 0.15s easeOutQuad
@@ -2222,8 +2340,8 @@ function resolveHit(b,hit,point,dirn){
     G.stats.hits++;QM.onHit();
     HUD.hitmarker(r.head);
     vib(r.head?'head':'hit');
-    if(r.deflect){HUD.popup(point,'헬멧 관통 불가!','');return true;}
-    HUD.popup(point,r.head?'즉사':''+r.dmg,r.head?'gold':'');
+    if(r.deflect){HUD.popup(point,T('pop_helmet'),'');return true;}
+    HUD.popup(point,r.head?T('pop_kill'):''+r.dmg,r.head?'gold':'');
     if(r.killed){b.killed=true;hit.e.killInfo={head:r.head,dist};}
     if(G.up.pierce&&!b.pierced){b.pierced=true;return false;} // 관통탄
     return true;
@@ -2277,6 +2395,14 @@ const HUD={
     const ic=$('ammoIcons');ic.innerHTML='';
     for(let i=0;i<gMag();i++){const s=document.createElement('span');if(i>=player.ammo)s.className='empty';ic.appendChild(s);}
     $('ammoText').textContent=player.ammo+' / '+(player.reserve===Infinity?'∞':player.reserve);
+    $('ammoText').style.color=player.ammo===0?'#ff7364':player.ammo===1?'#ffc668':'#e8edf1';
+    this.reloadHint();
+  },
+  reloadHint(){ // RELOAD 경고
+    const r=$('reloadHint');
+    if(QM.state==='playing'&&player.wstate==='reload'){r.classList.remove('hide');r.textContent=T('reloading');}
+    else if(QM.state==='playing'&&player.ammo===0&&player.reserve>0){r.classList.remove('hide');r.textContent=T('reload');}
+    else r.classList.add('hide');
   },
   hp(){$('hpFill').style.width=Math.max(0,player.hp/player.maxHp*100)+'%';},
   breath(){
@@ -2284,6 +2410,21 @@ const HUD={
     $('breathWrap').classList.toggle('pen',player.breathPen>0);
   },
   quest(t,o){$('qTitle').textContent=t;$('qObj').textContent=o;},
+  briefing(code,name,obj){ // 미션 브리핑 오버레이 (무전 연출)
+    $('brCode').textContent=code;$('brName').textContent=name;$('brObj').textContent=obj;
+    const b=$('briefing');b.classList.add('show');
+    AE.radio();
+    clearTimeout(this._bft);this._bft=setTimeout(()=>b.classList.remove('show'),3000);
+  },
+  dmgDir(from){ // 피격 방향 인디케이터
+    if(!from)return;
+    const dx=from.x-player.pos.x,dz=from.z-player.pos.z;
+    const rel=Math.atan2(dx,dz)-(player.yaw+Math.PI);
+    const w=$('dmgDirWrap');
+    w.style.transform='rotate('+(-rel*180/Math.PI)+'deg)';
+    w.style.transition='none';w.style.opacity=1;
+    clearTimeout(this._ddt);this._ddt=setTimeout(()=>{w.style.transition='opacity .55s';w.style.opacity=0;},350);
+  },
   killfeed(txt,hs){
     const kf=$('killfeed'),d=document.createElement('div');
     if(hs)d.className='hs';
@@ -2345,7 +2486,7 @@ const HUD={
     const t=$('timerHud');
     if(v===null){t.classList.add('hide');return;}
     t.classList.remove('hide');t.textContent=Math.max(0,v).toFixed(1);
-    t.style.color=v<10?'#ff4433':'#ffb830';
+    t.style.color=v<10?'#ff4433':'#ff9e1b';
   },
   toast(txt){
     const t=$('toast');t.textContent=txt;t.style.opacity=1;
@@ -2358,7 +2499,7 @@ const HUD={
   },
 };
 /* =====================================================================
-   챕터 & 미션 데이터
+   챕터 & 미션 데이터 (영/한)
    ===================================================================== */
 const CH_ENV=[
   {top:0x2a1a4a,mid:0xb8506a,bot:0xff9a4a,sun:0xffd94d,fog:0xc58a7a,night:false,desert:false,amb:.85},
@@ -2368,36 +2509,51 @@ const CH_ENV=[
   {top:0x180820,mid:0x58182a,bot:0x903a24,sun:0xff6030,fog:0x4a2028,night:false,desert:false,amb:.6},
 ];
 const CHAPTERS=[
- {name:'1장 · 신병',gate:0,missions:[
-  {n:'첫 발자국',type:'elim',count:4,par:75,desc:'용병 4명을 섬멸하라'},
-  {n:'헤드샷 계약',type:'head',count:3,par:90,desc:'헤드샷으로 3명 처치'},
-  {n:'철거 명령',type:'demolish',par:60,desc:'감시탑을 붕괴시켜라\n(기둥을 노려라)'}]},
- {name:'2장 · 계약',gate:5,missions:[
-  {n:'타임어택',type:'timed',count:5,limit:60,par:50,desc:'60초 내 5명 처치'},
-  {n:'원샷 원킬',type:'oneshot',count:5,par:150,desc:'연속 5발 킬\n(빗나가면 리셋)'},
-  {n:'VIP 암살',type:'vip',par:90,desc:'금장 장교를 암살하라\n(호위 사살 시 30초 내 도주)'}]},
- {name:'3장 · 바람의 계곡',gate:11,missions:[
-  {n:'장거리 계약',type:'longrange',count:3,par:150,desc:'120m 이상 저격 3회'},
-  {n:'마지막 탄창',type:'ammo',count:6,par:100,desc:'적 6명 · 탄약 7발'},
-  {n:'연쇄 철거',type:'chain',par:150,desc:'구조물 3개를 각 3발 이내로 붕괴'}]},
- {name:'4장 · 야간 작전',gate:18,missions:[
-  {n:'침묵의 밤',type:'silent',count:5,par:180,desc:'시체가 발견되면 실패\n(처치 순서를 계획하라)'},
-  {n:'인질 구출',type:'hostage',count:4,par:100,desc:'납치범 4명 제거\n인질을 맞추면 즉시 실패'},
-  {n:'카운터 스나이퍼',type:'counter',par:150,desc:'적 저격수 제거\n렌즈 반사광이 유일한 힌트'},
-  {n:'호송 저지',type:'convoy',par:60,desc:'차량 통과 전 저지\n(운전병 또는 엔진)'}]},
- {name:'5장 · 전설',gate:26,missions:[
-  {n:'전설의 시험',type:'elim',count:8,elite:true,par:180,desc:'전 유형 정예 8명 섬멸\n피격 2방이면 죽는다'},
-  {n:'강철거인',type:'boss',par:300,desc:'등의 붉은 코어가 유일한 약점\n3페이즈 · 부하 소환'}]},
+ {name:{en:'RECRUIT',ko:'신병'},gate:0,missions:[
+  {n:{en:'First Steps',ko:'첫 발자국'},type:'elim',count:4,par:75,
+   desc:{en:'Eliminate 4 mercenaries',ko:'용병 4명을 섬멸하라'}},
+  {n:{en:'Headhunter',ko:'헤드샷 계약'},type:'head',count:3,par:90,
+   desc:{en:'Kill 3 with headshots only',ko:'헤드샷으로 3명 처치'}},
+  {n:{en:'Demolition Order',ko:'철거 명령'},type:'demolish',par:60,
+   desc:{en:'Bring down the watchtower\n(shoot the mast)',ko:'감시탑을 붕괴시켜라\n(기둥을 노려라)'}}]},
+ {name:{en:'CONTRACT',ko:'계약'},gate:5,missions:[
+  {n:{en:'Time Attack',ko:'타임어택'},type:'timed',count:5,limit:60,par:50,
+   desc:{en:'5 kills in 60 seconds',ko:'60초 내 5명 처치'}},
+  {n:{en:'One Shot One Kill',ko:'원샷 원킬'},type:'oneshot',count:5,par:150,
+   desc:{en:'5 lethal shots in a row\n(a miss resets the streak)',ko:'연속 5발 킬\n(빗나가면 리셋)'}},
+  {n:{en:'VIP Assassination',ko:'VIP 암살'},type:'vip',par:90,
+   desc:{en:'Eliminate the gold officer\n(kill a guard and he runs — 30s)',ko:'금장 장교를 암살하라\n(호위 사살 시 30초 내 도주)'}}]},
+ {name:{en:'WINDY VALLEY',ko:'바람의 계곡'},gate:11,missions:[
+  {n:{en:'Long Range',ko:'장거리 계약'},type:'longrange',count:3,par:150,
+   desc:{en:'3 kills beyond 120m',ko:'120m 이상 저격 3회'}},
+  {n:{en:'Last Magazine',ko:'마지막 탄창'},type:'ammo',count:6,par:100,
+   desc:{en:'6 hostiles · 7 rounds',ko:'적 6명 · 탄약 7발'}},
+  {n:{en:'Chain Demolition',ko:'연쇄 철거'},type:'chain',par:150,
+   desc:{en:'Drop 3 structures, 3 shots each max',ko:'구조물 3개를 각 3발 이내로 붕괴'}}]},
+ {name:{en:'NIGHT OPS',ko:'야간 작전'},gate:18,missions:[
+  {n:{en:'Silent Night',ko:'침묵의 밤'},type:'silent',count:5,par:180,
+   desc:{en:'Fail if a body is found\n(plan your kill order)',ko:'시체가 발견되면 실패\n(처치 순서를 계획하라)'}},
+  {n:{en:'Hostage Rescue',ko:'인질 구출'},type:'hostage',count:4,par:100,
+   desc:{en:'Kill 4 captors\nHit the hostage = instant fail',ko:'납치범 4명 제거\n인질을 맞추면 즉시 실패'}},
+  {n:{en:'Counter Sniper',ko:'카운터 스나이퍼'},type:'counter',par:150,
+   desc:{en:'Kill the enemy sniper\nThe lens glint is your only clue',ko:'적 저격수 제거\n렌즈 반사광이 유일한 힌트'}},
+  {n:{en:'Convoy Interdiction',ko:'호송 저지'},type:'convoy',par:60,
+   desc:{en:'Stop the truck before it crosses\n(driver or engine)',ko:'차량 통과 전 저지\n(운전병 또는 엔진)'}}]},
+ {name:{en:'LEGEND',ko:'전설'},gate:26,missions:[
+  {n:{en:'Trial of Legends',ko:'전설의 시험'},type:'elim',count:8,elite:true,par:180,
+   desc:{en:'Eliminate 8 elites\nTwo hits will kill you',ko:'전 유형 정예 8명 섬멸\n피격 2방이면 죽는다'}},
+  {n:{en:'Steel Colossus',ko:'강철거인'},type:'boss',par:300,
+   desc:{en:'The red core on its back is the only weak spot\n3 phases · summons minions',ko:'등의 붉은 코어가 유일한 약점\n3페이즈 · 부하 소환'}}]},
 ];
 const SHOP=[
- {k:'zoom',n:'줌 강화',p:100,d:'최대 배율 8x → 12x'},
- {k:'breath',n:'숨참기 +2초',p:150,d:'게이지 4초 → 6초'},
- {k:'speed',n:'탄속 업',p:200,d:'250 → 330m/s (낙차·바람 감소)'},
- {k:'mag',n:'탄창 +2',p:250,d:'5발 → 7발'},
- {k:'reload',n:'재장전 단축',p:200,d:'2.5초 → 1.6초'},
- {k:'vest',n:'방탄 조끼',p:300,d:'받는 피해 30% 감소'},
- {k:'wind',n:'방풍 배럴',p:350,d:'바람 영향 60% 감소'},
- {k:'pierce',n:'관통탄',p:400,d:'블록·적 1회 관통'},
+ {k:'zoom',  p:100,n:{en:'Zoom Upgrade',ko:'줌 강화'},        d:{en:'Max magnification 8x → 12x',ko:'최대 배율 8x → 12x'}},
+ {k:'breath',p:150,n:{en:'Lung Capacity',ko:'숨참기 +2초'},   d:{en:'Breath gauge 4s → 6s',ko:'게이지 4초 → 6초'}},
+ {k:'speed', p:200,n:{en:'Velocity Up',ko:'탄속 업'},          d:{en:'250 → 330m/s (less drop & drift)',ko:'250 → 330m/s (낙차·바람 감소)'}},
+ {k:'mag',   p:250,n:{en:'Extended Mag',ko:'탄창 +2'},         d:{en:'5 → 7 rounds',ko:'5발 → 7발'}},
+ {k:'reload',p:200,n:{en:'Fast Reload',ko:'재장전 단축'},      d:{en:'2.5s → 1.6s',ko:'2.5초 → 1.6초'}},
+ {k:'vest',  p:300,n:{en:'Ballistic Vest',ko:'방탄 조끼'},     d:{en:'Damage taken -30%',ko:'받는 피해 30% 감소'}},
+ {k:'wind',  p:350,n:{en:'Stabilized Barrel',ko:'방풍 배럴'},  d:{en:'Wind effect -60%',ko:'바람 영향 60% 감소'}},
+ {k:'pierce',p:400,n:{en:'AP Rounds',ko:'관통탄'},             d:{en:'Penetrates one block / enemy',ko:'블록·적 1회 관통'}},
 ];
 /* =====================================================================
    QuestManager
@@ -2407,6 +2563,20 @@ const QM={
   ms:null,windVec:V3(),windOn:false,night:false,earR:55,
   tutStep:0,wave:0,waveT:0,vipTimer:-1,oneStreak:0,
   key(){return this.ci+'-'+this.mi},
+  qTitle(){
+    if(this.mode==='tutorial')return T('tut_t');
+    if(this.mode==='endless')return T('endless_t',this.wave);
+    return (LANG==='en'?'CH.'+(this.ci+1):(this.ci+1)+'장')+' · '+tx(this.m.n);
+  },
+  refreshObjective(){
+    if(this.state!=='playing'||!this.m)return;
+    const ty=this.m.type,alive=EnemyMgr.alive().length;
+    let extra='';
+    if(['elim','silent','hostage','ammo','timed','counter'].includes(ty))extra=T('obj_left',alive);
+    else if(ty==='head')extra=T('obj_hs',this.ms.heads,this.m.count);
+    else if(ty==='oneshot')extra=T('obj_streak',this.oneStreak);
+    HUD.quest(this.qTitle(),tx(this.m.desc).split('\n')[0]+(extra?'\n'+extra:''));
+  },
   /* ---------- 시작 ---------- */
   begin(ci,mi){
     this.mode='mission';this.ci=ci;this.mi=mi;
@@ -2414,24 +2584,28 @@ const QM={
     DD.apply(ci+1);
     this._common(ci*100+mi*10+7,CH_ENV[ci]);
     this.setup[this.m.type](this,this.m);
-    HUD.quest(CHAPTERS[ci].name+' — '+this.m.n,this.m.desc);
+    HUD.quest(this.qTitle(),tx(this.m.desc));
+    HUD.briefing('OP '+(ci+1)+'-'+(mi+1),tx(this.m.n),tx(this.m.desc));
     this.state='playing';
+    this.refreshObjective();
   },
   beginTutorial(){
-    this.mode='tutorial';this.ci=0;this.mi=-1;this.m={type:'tutorial',n:'미션 0 · 훈련',par:9999};
+    this.mode='tutorial';this.ci=0;this.mi=-1;this.m={type:'tutorial',n:{en:'Training',ko:'훈련'},par:9999};
     DD.apply(1);
     this._common(4242,CH_ENV[0]);
     this.tutStep=0;this.tutKills=0;
     this.spawnTutStep();
-    HUD.quest('미션 0 · 훈련','교관의 지시를 따르라');
+    HUD.quest(T('tut_t'),T('tut_o'));
+    HUD.briefing('OP 0',tx(this.m.n),T('tut_o'));
     this.state='playing';
   },
   beginEndless(){
-    this.mode='endless';this.wave=1;this.m={type:'endless',n:'무한 모드',par:9999};
+    this.mode='endless';this.wave=1;this.m={type:'endless',n:{en:'Endless',ko:'무한 모드'},par:9999};
     DD.apply(2,this.wave);
     this._common(randi(1,9999),CH_ENV[1]);
     this.spawnWave();
-    HUD.quest('무한 모드 — WAVE 1','생존하며 웨이브를 넘겨라');
+    HUD.quest(T('endless_t',1),T('endless_o'));
+    HUD.briefing('WAVE 1',tx(this.m.n),T('endless_o'));
     this.state='playing';
   },
   _common(seed,env){
@@ -2440,7 +2614,6 @@ const QM={
     this.ms={shots:0,hits:0,kills:0,heads:0,dmg:0,t:0,count:0};
     this.mkTimer=0;this.mkCount=0;this.vipTimer=-1;this.oneStreak=0;this.earR=55;
     this.night=env.night;
-    // 바람: 3장+
     const chN=this.ci+1;
     if(this.mode==='mission'&&chN>=3){const sp=rand(0,3)*(Math.random()<.5?-1:1);this.windVec.set(sp,0,0);this.windOn=Math.abs(sp)>.15;}
     else{this.windVec.set(0,0,0);this.windOn=false;}
@@ -2457,7 +2630,6 @@ const QM={
     $('dropArrow').classList.add('hide');AE.heartbeat(false);
     AE.startAmb(env.night,Math.abs(this.windVec.x));
     Music.start();Music.setState('CALM');
-    if(DD.ch>=5)DD.playerDmgMul=1; // dmg 50 → 2방 사망은 dmg 수치로 처리
   },
   /* ---------- 미션별 셋업 ---------- */
   spawnField(n,types){
@@ -2527,9 +2699,7 @@ const QM={
     boss(q,m){EnemyMgr.boss=new Boss();},
   },
   spawnTutStep(){
-    HUD.hint(['[1/3] 조준 버튼으로 스코프를 열고, 30m 표적 3개를 맞혀라',
-      '[2/3] 150m 표적: 탄환은 떨어진다.\n스코프의 밀 도트 1~2칸 위(▲)를 노려라',
-      '[3/3] 나무 블록은 2발이면 뚫린다.\n엄폐물 뒤 표적을 관통 사격하라'][this.tutStep]);
+    HUD.hint([T('tut_h1'),T('tut_h2'),T('tut_h3')][this.tutStep]);
     this.tutCount=0;
     if(this.tutStep===0){
       new TargetBoard(-6,world.surfaceY(-6,42),42);
@@ -2550,16 +2720,16 @@ const QM={
   },
   /* ---------- 이벤트 ---------- */
   onShot(){this.ms.shots++;},
-  onHit(){/* 명중률 집계는 ms.hits에서 */this.ms.hits++;},
+  onHit(){this.ms.hits++;},
   onBulletMiss(){
     if(this.m&&this.m.type==='oneshot'&&this.state==='playing'&&this.oneStreak>0){
-      this.oneStreak=0;HUD.toast('스트릭 리셋!');HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'연속 킬 0 / 5');
+      this.oneStreak=0;HUD.toast(T('streak_reset'));this.refreshObjective();
     }
   },
   onTargetHit(t){
     if(this.mode!=='tutorial')return;
     this.tutCount++;
-    HUD.popup(t.pos.clone().add(V3(0,2,0)),'명중!','gold');
+    HUD.popup(t.pos.clone().add(V3(0,2,0)),T('pop_hit'),'gold');
     if(this.tutCount>=this.tutNeed){
       this.tutStep++;
       if(this.tutStep>=3){G.tutorialDone=true;this.win();}
@@ -2577,7 +2747,7 @@ const QM={
     G.gold+=gold;
     HUD.popup(e.pos.clone().add(V3(0,2.2,0)),'+'+gold+'G','coin');
     AE.coin();
-    HUD.killfeed((head?'헤드샷':cause==='붕괴'?'붕괴 처치':'처치')+' · '+(dist|0)+'m',head);
+    HUD.killfeed((head?T('kf_hs'):cause==='crush'?T('kf_crush'):T('kf_kill'))+' · '+(dist|0)+'m',head);
     // 멀티킬
     this.mkCount=(this.mkTimer>0)?this.mkCount+1:1;
     this.mkTimer=1.2;
@@ -2587,22 +2757,20 @@ const QM={
     if(head&&dist>=100&&G.stats.kills%5===0)player.slowmo(.8);
     vib(head?'head':'hit');
     // 미션별
-    const T=this.m?this.m.type:'';
-    if(T==='oneshot'){this.oneStreak++;HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'연속 킬 '+this.oneStreak+' / 5');
-      if(this.oneStreak>=5)this.win();}
-    if(T==='longrange'&&dist>=120){this.lrKills++;HUD.toast('장거리 킬 '+this.lrKills+'/3 ('+(dist|0)+'m)');
-      if(this.lrKills>=3)this.win();}
-    if(T==='vip'){
-      if(e===this.vip)this.win();
+    const ty=this.m?this.m.type:'';
+    if(ty==='oneshot'){this.oneStreak++;
+      if(this.oneStreak>=5){this.win();return;}}
+    if(ty==='longrange'&&dist>=120){this.lrKills++;HUD.toast(T('obj_lr',this.lrKills,dist|0));
+      if(this.lrKills>=3){this.win();return;}}
+    if(ty==='vip'){
+      if(e===this.vip){this.win();return;}
       else if(this.guards&&this.guards.includes(e)&&this.vip&&!this.vip.dead&&this.vipTimer<0){
         this.vip.flee=true;this.vipTimer=30;
-        HUD.banner('VIP 도주!','30초 내 사살하라');
+        HUD.banner(T('vip_flee'),T('vip_flee_s'));
       }
     }
-    if(T==='head'){
-      HUD.quest(CHAPTERS[this.ci].name+' — '+this.m.n,'헤드샷 '+this.ms.heads+' / '+this.m.count);
-      if(this.ms.heads>=this.m.count)this.win();
-    }
+    if(ty==='head'&&this.ms.heads>=this.m.count){this.win();return;}
+    this.refreshObjective();
   },
   onBlockDestroyed(b){},
   onStructHit(sid){
@@ -2610,22 +2778,22 @@ const QM={
       const s=world.structs[sid];
       if(s.collapsed)return;
       s.shots++;
-      HUD.toast(sid.replace('tower','감시탑 ')+': '+s.shots+' / 3발');
-      if(s.shots>3)this.fail('사격 횟수 초과 (구조물당 3발)');
+      HUD.toast(T('tower_shots',+sid.replace('tower','')+1,s.shots));
+      if(s.shots>3)this.fail(T('f_shots'));
     }
   },
   onStructCollapse(sid){
     if(this.state!=='playing')return;
-    if(sid.startsWith('tower')){HUD.banner('구조물 붕괴!');vib('collapse');player.trauma(.5);}
-    const T=this.m?this.m.type:'';
-    if(T==='demolish'&&sid===this.targetSid)setTimeout(()=>this.win(),800);
-    if(T==='chain'&&world.towerTops.every(t=>world.structs[t.sid].collapsed))setTimeout(()=>this.win(),800);
+    if(sid.startsWith('tower')){HUD.banner(T('collapse'));vib('collapse');player.trauma(.5);}
+    const ty=this.m?this.m.type:'';
+    if(ty==='demolish'&&sid===this.targetSid)setTimeout(()=>this.win(),800);
+    if(ty==='chain'&&world.towerTops.every(t=>world.structs[t.sid].collapsed))setTimeout(()=>this.win(),800);
   },
-  onHostageHit(){this.fail('인질이 피격되었습니다');},
-  onTruckStopped(driver){HUD.banner(driver?'운전병 사살':'차량 파괴');setTimeout(()=>this.win(),600);},
-  onBossDown(){HUD.banner('강철거인 격파!');setTimeout(()=>this.win(),1400);},
+  onHostageHit(){this.fail(T('f_hostage'));},
+  onTruckStopped(driver){HUD.banner(driver?T('driver_kill'):T('truck_kill'));setTimeout(()=>this.win(),600);},
+  onBossDown(){HUD.banner(T('boss_kill'));setTimeout(()=>this.win(),1400);},
   onCorpseSeen(){
-    if(this.m&&this.m.type==='silent')this.fail('시체가 발견되었습니다');
+    if(this.m&&this.m.type==='silent')this.fail(T('f_seen'));
   },
   onPlayerDamage(){this.ms.dmg++;},
   /* ---------- 진행 체크 ---------- */
@@ -2633,39 +2801,39 @@ const QM={
     if(this.state!=='playing')return;
     this.ms.t+=dt;
     if(this.mkTimer>0)this.mkTimer-=dt;
-    const T=this.m?this.m.type:'';
+    const ty=this.m?this.m.type:'';
     const alive=EnemyMgr.alive().length;
     if(this.mode==='tutorial')return;
     if(this.mode==='endless'){
-      if(alive===0&&this.waveT<=0){this.waveT=4;HUD.banner('WAVE '+this.wave+' 클리어');player.hp=player.maxHp;HUD.hp();}
+      if(alive===0&&this.waveT<=0){this.waveT=4;HUD.banner(T('wave_clear',this.wave));player.hp=player.maxHp;HUD.hp();}
       if(this.waveT>0){this.waveT-=dt;
         if(this.waveT<=0){this.wave++;G.stats.bestWave=Math.max(G.stats.bestWave,this.wave);
           DD.apply(2,this.wave);this.spawnWave();
-          HUD.quest('무한 모드 — WAVE '+this.wave,'적 '+EnemyMgr.alive().length+'명');}}
+          HUD.quest(T('endless_t',this.wave),T('obj_left',EnemyMgr.alive().length));}}
       return;
     }
-    switch(T){
+    switch(ty){
       case 'elim':case 'silent':case 'hostage':case 'ammo':
         if(alive===0)this.win();
-        if(T==='ammo'&&player.reserve+player.ammo<=0&&bullets.length===0&&alive>0)this.fail('탄약 소진');
+        if(ty==='ammo'&&player.reserve+player.ammo<=0&&bullets.length===0&&alive>0)this.fail(T('f_ammo'));
         break;
       case 'head':
-        if(alive===0&&this.ms.heads<this.m.count)this.fail('헤드샷이 부족합니다');
+        if(alive===0&&this.ms.heads<this.m.count)this.fail(T('f_hs'));
         break;
       case 'timed':
         this.timeLeft-=dt;HUD.timer(this.timeLeft);
         if(this.ms.kills>=this.m.count)this.win();
-        else if(this.timeLeft<=0)this.fail('시간 초과');
+        else if(this.timeLeft<=0)this.fail(T('f_time'));
         break;
       case 'oneshot':
-        if(alive===0&&this.oneStreak<5)this.fail('연속 킬 실패 — 적이 남지 않았다');
+        if(alive===0&&this.oneStreak<5)this.fail(T('f_streak'));
         break;
       case 'longrange':
-        if(alive===0&&this.lrKills<3)this.fail('120m+ 저격이 부족합니다');
+        if(alive===0&&this.lrKills<3)this.fail(T('f_lr'));
         break;
       case 'vip':
         if(this.vipTimer>0){this.vipTimer-=dt;HUD.timer(this.vipTimer);
-          if(this.vipTimer<=0||(this.vip&&Math.abs(this.vip.pos.x)>31))this.fail('VIP가 도주했습니다');}
+          if(this.vipTimer<=0||(this.vip&&Math.abs(this.vip.pos.x)>31))this.fail(T('f_vip'));}
         break;
       case 'counter':
         if(alive===0)this.win();
@@ -2692,10 +2860,10 @@ const QM={
     if(this.state!=='playing')return;
     this.state='won';
     Music.setState('CALM');AE.fanfare();AE.heartbeat(false);
-    HUD.timer(null);HUD.hint(null);
+    HUD.timer(null);HUD.hint(null);HUD.reloadHint();
     $('btnPause').classList.add('hide');
     if(this.mode==='tutorial'){
-      setTimeout(()=>{showEnd(true,3,'훈련 완료! 이제 실전이다.');},900);
+      setTimeout(()=>{showEnd(true,3,T('tut_done'));},900);
       return;
     }
     const stars=this.starsEarned(),key=this.key();
@@ -2706,10 +2874,9 @@ const QM={
     gold+=newStars*20;                              // 신규 별 1개당 +20
     G.cleared[key]=true;
     G.gold+=gold;
-    // 전체 클리어 → 무한 모드
     if(!G.allClear&&CHAPTERS.every((c,ci)=>c.missions.every((m,mi)=>G.cleared[ci+'-'+mi]))){
       G.allClear=true;
-      setTimeout(()=>HUD.toast('무한 모드 해금!'),2500);
+      setTimeout(()=>HUD.toast(T('endless_unlock')),2500);
     }
     setTimeout(()=>showEnd(true,stars,null,gold),1100);
   },
@@ -2717,11 +2884,11 @@ const QM={
     if(this.state!=='playing')return;
     this.state='failed';
     Music.setState('CALM');AE.failSnd();AE.heartbeat(false);
-    HUD.timer(null);HUD.hint(null);
+    HUD.timer(null);HUD.hint(null);HUD.reloadHint();
     $('btnPause').classList.add('hide');
     if(this.mode==='endless'){
       G.stats.bestWave=Math.max(G.stats.bestWave,this.wave);
-      setTimeout(()=>showEnd(false,0,'WAVE '+this.wave+'에서 전사 (최고 기록 '+G.stats.bestWave+')'),1000);
+      setTimeout(()=>showEnd(false,0,T('f_wave',this.wave,G.stats.bestWave)),1000);
       return;
     }
     setTimeout(()=>showEnd(false,0,reason),1000);
@@ -2731,8 +2898,7 @@ const QM={
     else if(this.mode==='endless')this.beginEndless();
     else this.begin(this.ci,this.mi);
   },
-};
-/* =====================================================================
+};/* =====================================================================
    씬 / 렌더러 / 하늘 / 조명
    ===================================================================== */
 let renderer,scene,camera,sunLight,hemi,skyMat,groundMat,world;
@@ -2851,15 +3017,21 @@ function showScreen(id){
   document.body.classList.toggle('inMenu',!!id);
 }
 let selCh=0,setBack='scrMenu';
+function rankLetter(){
+  const st=G.stats,acc=st.shots?st.hits/st.shots:0,hs=st.kills?st.heads/st.kills:0;
+  const score=acc*50+hs*50;
+  return score>=70?'S':score>=55?'A':score>=40?'B':'C';
+}
 function renderMenu(){
   $('goldTxt').textContent=G.gold+' G';
+  $('rankChip').textContent=T('rank')+' '+rankLetter();
   const tabs=$('chapTabs');tabs.innerHTML='';
   CHAPTERS.forEach((c,i)=>{
     const locked=totalStars()<c.gate;
     const b=document.createElement('button');
     b.className='chapTab'+(i===selCh?' sel':'')+(locked?' lock':'');
-    b.innerHTML=(i+1)+'장'+(locked?'<i>★'+c.gate+'</i>':'');
-    b.onclick=()=>{AE.click();if(locked){HUD.toast('별 '+c.gate+'개 필요 · 현재 '+totalStars()+'개');return;}selCh=i;renderMenu();};
+    b.innerHTML=(LANG==='en'?'CH.'+(i+1):(i+1)+'장')+(locked?'<i>★'+c.gate+'</i>':'');
+    b.onclick=()=>{AE.click();if(locked){HUD.toast(T('locked_toast',c.gate,totalStars()));return;}selCh=i;renderMenu();};
     tabs.appendChild(b);
   });
   const list=$('missionList');list.innerHTML='';
@@ -2870,7 +3042,7 @@ function renderMenu(){
     const card=document.createElement('button');
     card.className='miCard';
     card.innerHTML='<span class="miIdx">'+String(mi+1).padStart(2,'0')+'</span>'
-      +'<span class="miBody"><span class="miName">'+m.n+'</span><small>'+m.desc.split('\n')[0]+' · 별 조건 '+m.par+'초</small></span>'
+      +'<span class="miBody"><span class="miName">'+tx(m.n)+'</span><small>'+tx(m.desc).split('\n')[0]+' · '+T('star_req',m.par)+'</small></span>'
       +'<span class="stars">'+'★'.repeat(st)+'<span style="color:#333c44">'+'★'.repeat(3-st)+'</span></span>';
     card.onclick=()=>{if(chLocked)return;AE.click();QM.begin(selCh,mi);};
     list.appendChild(card);
@@ -2883,37 +3055,36 @@ function renderShop(){
   SHOP.forEach(it=>{
     const owned=!!G.up[it.k];
     const row=document.createElement('div');row.className='shopItem';
-    row.innerHTML='<span><span class="siName">'+it.n+'</span><small>'+it.d+'</small></span>';
+    row.innerHTML='<span><span class="siName">'+tx(it.n)+'</span><small>'+tx(it.d)+'</small></span>';
     const btn=document.createElement('button');
     btn.className='buyBtn'+(owned?' owned':'');
-    btn.textContent=owned?'보유':it.p+' G';
+    btn.textContent=owned?T('owned'):it.p+' G';
     btn.disabled=owned||G.gold<it.p;
     btn.onclick=()=>{
       if(owned||G.gold<it.p)return;
       G.gold-=it.p;G.up[it.k]=1;AE.coin();AE.star(1);
-      HUD.toast(it.n+' 구매 완료');renderShop();
+      HUD.toast(T('bought',tx(it.n)));renderShop();
     };
     row.appendChild(btn);list.appendChild(row);
   });
 }
 function renderStats(){
   const st=G.stats,acc=st.shots?st.hits/st.shots:0,hs=st.kills?st.heads/st.kills:0;
-  const score=acc*50+hs*50;
-  $('rankBig').textContent=score>=70?'S':score>=55?'A':score>=40?'B':'C';
+  $('rankBig').textContent=rankLetter();
   $('statGrid').innerHTML=
-    '<span>총 킬</span><b>'+st.kills+'</b><span>헤드샷률</span><b>'+(hs*100|0)+'%</b>'
-    +'<span>명중률</span><b>'+(acc*100|0)+'%</b><span>최장 거리</span><b>'+st.longest+'m</b>'
-    +'<span>파괴한 블록</span><b>'+st.blocks+'</b><span>최고 웨이브</span><b>'+st.bestWave+'</b>'
-    +'<span>누적 별</span><b>'+totalStars()+' / '+CHAPTERS.reduce((a,c)=>a+c.missions.length*3,0)+'</b>'
-    +'<span>골드</span><b>'+G.gold+' G</b>';
+    '<span>'+T('st_kills')+'</span><b>'+st.kills+'</b><span>'+T('st_hsr')+'</span><b>'+(hs*100|0)+'%</b>'
+    +'<span>'+T('st_acc')+'</span><b>'+(acc*100|0)+'%</b><span>'+T('st_long')+'</span><b>'+st.longest+'m</b>'
+    +'<span>'+T('st_blocks')+'</span><b>'+st.blocks+'</b><span>'+T('st_wave')+'</span><b>'+st.bestWave+'</b>'
+    +'<span>'+T('st_stars')+'</span><b>'+totalStars()+' / '+CHAPTERS.reduce((a,c)=>a+c.missions.length*3,0)+'</b>'
+    +'<span>'+T('st_gold')+'</span><b>'+G.gold+' G</b>';
 }
 function showEnd(won,stars,msg,gold){
   showScreen('scrEnd');
-  $('endTitle').textContent=won?'임무 완수':'임무 실패';
+  $('endTitle').textContent=won?T('win'):T('fail');
   $('endTitle').style.color=won?'#eef1f4':'#ff7364';
   const fr=$('failReason');
-  if(!won&&msg){fr.classList.remove('hide');fr.textContent='실패 원인: '+msg;}
-  else if(msg){fr.classList.remove('hide');fr.style.color='#7dda58';fr.textContent=msg;}
+  if(!won&&msg){fr.classList.remove('hide');fr.style.color='#ff7364';fr.textContent=T('cause',msg);}
+  else if(msg){fr.classList.remove('hide');fr.style.color='#9fce4e';fr.textContent=msg;}
   else fr.classList.add('hide');
   const es=$('endStars');es.innerHTML='';
   if(won&&QM.mode==='mission'){
@@ -2924,10 +3095,11 @@ function showEnd(won,stars,msg,gold){
   }
   const ms=QM.ms,acc=ms.shots?(ms.hits/ms.shots*100|0):0;
   $('endStats').innerHTML=(QM.mode==='mission'?
-    '시간 '+ms.t.toFixed(1)+'초 (별 조건 '+QM.m.par+'초) · 명중률 '+acc+'% · 피격 '+ms.dmg+'회<br>':'')
-    +'킬 '+ms.kills+' · 헤드샷 '+ms.heads+(gold?'<br><span style="color:#ffc668">+'+gold+' G 획득</span>':'');
+    T('end_line1',ms.t.toFixed(1),QM.m.par,acc,ms.dmg)+'<br>':'')
+    +T('end_line2',ms.kills,ms.heads)
+    +(gold?'<br><span style="color:#ffc668">'+T('end_gold',gold)+'</span>':'');
   // 다음 임무 버튼
-  const nx=$('btnNext');nx.classList.add('hide');
+  const nx=$('btnNext');nx.classList.add('hide');nx.textContent=T('next');
   if(won&&QM.mode==='mission'){
     let nc=QM.ci,nm=QM.mi+1;
     if(nm>=CHAPTERS[nc].missions.length){nc++;nm=0;}
@@ -2937,21 +3109,37 @@ function showEnd(won,stars,msg,gold){
     }
   }
   if(won&&QM.mode==='tutorial'){
-    nx.classList.remove('hide');nx.textContent='작전 개시 ▶';
+    nx.classList.remove('hide');nx.textContent=T('deploy_btn');
     nx.onclick=()=>{AE.click();renderMenu();showScreen('scrMenu');};
   }
 }
+/* ---------- 언어 적용 ---------- */
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=T(el.dataset.i18n);});
+  $('btnLang').textContent=LANG==='en'?'한국어':'ENGLISH';
+  $('setLang').querySelectorAll('button').forEach(b=>b.classList.toggle('sel',b.dataset.v===LANG));
+  // 열려 있는 동적 화면 갱신
+  if(!$('scrMenu').classList.contains('hide'))renderMenu();
+  if(!$('scrShop').classList.contains('hide'))renderShop();
+  if(!$('scrStats').classList.contains('hide'))renderStats();
+  if(QM.state==='playing'){QM.refreshObjective();HUD.reloadHint();}
+}
+function setLanguage(l){if(LANG===l)return;LANG=l;applyLang();}
 function pauseGame(){
   if(paused||QM.state!=='playing')return;
   paused=true;AE.suspend();showScreen('scrPause');
 }
 function resumeGame(){paused=false;AE.resume();showScreen(null);}
 function wireUI(){
-  $('scrTitle').addEventListener('pointerdown',()=>{
+  $('scrTitle').addEventListener('pointerdown',e=>{
+    if(e.target.closest&&e.target.closest('#btnLang'))return; // 언어 버튼은 제외
     AE.init();AE.resume();Music.start();AE.click();
     if(!G.tutorialDone)QM.beginTutorial();
     else{renderMenu();showScreen('scrMenu');}
   },{once:false});
+  $('btnLang').addEventListener('pointerdown',e=>e.stopPropagation());
+  $('btnLang').onclick=e=>{e.stopPropagation();AE.init();AE.click();setLanguage(LANG==='en'?'ko':'en');};
+  $('setLang').querySelectorAll('button').forEach(b=>b.onclick=()=>{AE.click();setLanguage(b.dataset.v);});
   $('btnShop').onclick=()=>{AE.click();renderShop();showScreen('scrShop');};
   $('btnShopBack').onclick=()=>{AE.click();renderMenu();showScreen('scrMenu');};
   $('btnStats').onclick=()=>{AE.click();renderStats();showScreen('scrStats');};

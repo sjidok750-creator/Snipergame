@@ -1,45 +1,51 @@
-# BLOCKSHOT — 복셀 모바일 1인칭 스나이퍼
+# BLOCKSHOT — Tactical Voxel Sniper
 
-Three.js 기반 복셀 스타일 터치 전용 스나이퍼 게임. **단일 HTML 파일**, 외부 에셋 0개(모든 텍스처·사운드·음악을 코드에서 절차 생성), 100% 독자 제작 에셋.
+A touch-first voxel sniper game built on Three.js. **Single HTML file**, zero external assets — every texture, sound effect and music track is procedurally generated in code. 100% original assets.
 
-## 실행
+**English by default · 한국어 지원** (language toggle on the title screen and in Settings).
 
-`index.html`을 브라우저로 열면 끝. (Three.js만 CDN에서 로드하므로 인터넷 연결 필요)
+## Run
 
-- 모바일 권장(터치 전용 설계), 데스크톱에서는 마우스로도 조작 가능
-- GitHub Pages를 켜면 바로 배포 가능: Settings → Pages → 브랜치 선택
+Open `index.html` in a browser. (Internet required once, for the Three.js CDN and fonts.)
 
-## 조작
+- Designed for mobile (touch-only controls); works with a mouse on desktop too
+- Deploy instantly with GitHub Pages: Settings → Pages → select the branch
 
-| 입력 | 동작 |
+## Controls
+
+| Input | Action |
 |---|---|
-| 화면 좌측 드래그 | 시점 회전 |
-| 발사 버튼 (우하단) | 사격 → 볼트액션 |
-| 조준 버튼 (우중단) | 스코프 토글, 조준 중 두 손가락 핀치 = 줌 2x~8x |
-| 숨참기 홀드 (좌하단) | 흔들림 90% 감소 (게이지 4초, 소진 시 페널티) |
+| Drag left half | Aim view |
+| FIRE (bottom right) | Shoot → bolt action |
+| AIM (mid right) | Scope toggle · two-finger pinch = 2x–8x zoom |
+| HOLD BREATH (bottom left) | −90% sway (4s gauge, penalty when drained) |
 
-## 구성
+## Content
 
-- **미션 0 튜토리얼** (첫 실행 강제) → **챕터 5개 · 미션 14종** → **무한 모드**
-- 탄도(250m/s + 중력), 3장+ 바람, 4장 야간, 5장 보스 강철거인
-- 블록 전부 파괴 가능 + 지지 상실 연쇄 붕괴 (감시탑 기둥 저격 시 전체 붕괴)
-- 적 AI 5종: 보병 / 저격수 / 장교 / 중장갑병(헬멧 튕김) / 러너(지그재그)
-  — 전원 **마인크래프트 인체비율 캐릭터**(픽셀 얼굴·헤어·진영 유니폼 × 인물 변형 조합)
-- 야생 동물: 멧돼지 / 들닭 / 사슴 — 배회·풀뜯기, 총성에 도주
-- 골드 경제 + 상점 업그레이드 8종, 별 1~3개, 전적/랭크
-- 설정: 감도 · 에임 어시스트 · 진동 · 음량 · 왼손 모드 · 30fps 절전
+- **Mission 0 tutorial** (forced on first run) → **5 chapters · 14 mission types** → **Endless mode**
+- Projectile ballistics (250 m/s + gravity), wind from chapter 3, night ops in chapter 4, Steel Colossus boss in chapter 5
+- Fully destructible blocks with support-loss chain collapse (cut the watchtower mast to drop the whole structure)
+- 5 enemy AI types: grunt / sniper / officer / heavy (helmet deflect) / runner (zigzag) — all rendered as **Minecraft-proportioned characters** (pixel faces, hair, faction uniforms, per-soldier variation)
+- Wildlife: boar / hen / deer — wander, graze, flee from gunfire
+- Gold economy + 8 armory upgrades, 1–3 stars per mission, service record & rank
+- Mission briefing overlay with radio chatter, damage direction indicator, kill cam slow-mo
+- Settings: sensitivity · aim assist · vibration · volumes · left-handed mode · 30fps battery saver · language (EN/KO)
 
-## UI 디자인
+## UI design
 
-밀리터리 슈터 감성의 전술 UI — 건메탈+앰버 팔레트, 모따기(chamfer) 패널,
-Black Han Sans / Noto Sans KR / Rajdhani 타이포그래피, 메뉴 뒤로 실시간
-전장 씬이 흐르는 드리프트 카메라. 메뉴·HUD·결과 화면 전부 동일한 디자인 언어.
+Military-shooter tactical look: gunmetal + amber palette, chamfered panels, Black Han Sans / Noto Sans KR / Rajdhani typography, and a live battlefield drifting behind every menu. One design language across menus, HUD and results.
 
-## 기술 메모
+## Tech notes
 
-- Canvas 16×16 픽셀아트 텍스처 전부 `NearestFilter` + mipmap 없음
-- 맵 8×8 청크 `InstancedMesh`, 파괴 시 인스턴스 scale 0 + 더티 플래그 일괄 갱신
-- 사운드 100% Web Audio 합성 (3레이어 총성, 재질별 타격음, 거리 감쇠/패닝, 동적 음악)
-- 멀티터치 pointerId 분리 추적 — 조준 드래그 중 발사해도 시점 안 튐
-- iOS 진동 미지원 감지 시 시각 피드백 대체, safe-area 노치 대응
-- `localStorage` 미사용 (진행 상황은 세션 내 유지)
+- All 16×16 canvas pixel-art textures use `NearestFilter` with mipmaps off
+- 8×8 chunk `InstancedMesh` terrain; destruction sets instance scale 0 + dirty-flag batch update
+- 100% Web Audio synthesized sound (3-layer gunshot, per-material impacts, distance attenuation/panning, dynamic music with 4s crossfades)
+- Multi-touch tracked per `pointerId` — firing never disturbs the aim drag
+- iOS vibration fallback (visual feedback), safe-area/notch aware, auto-pause on `visibilitychange`
+- No `localStorage` — progress lives in session variables
+
+---
+
+### 한국어 요약
+
+Three.js 기반 복셀 스나이퍼 게임. 단일 HTML 파일, 외부 에셋 0개(텍스처·사운드·음악 전부 절차 생성). 기본 영어 UI이며 타이틀 화면 우상단 버튼 또는 설정에서 한국어로 전환할 수 있습니다. 튜토리얼 → 5개 챕터 · 미션 14종 → 무한 모드, 블록 파괴/연쇄 붕괴, 적 AI 5종(마인크래프트 비율 캐릭터), 야생 동물, 상점 업그레이드 8종을 포함합니다.
