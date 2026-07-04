@@ -5,128 +5,191 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>BLOCKSHOT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#0a0d10;
+  --panel:rgba(13,17,21,.86);
+  --panel2:rgba(22,28,34,.92);
+  --line:#3a434c;
+  --line2:#232b32;
+  --txt:#cdd4da;
+  --dim:#79848d;
+  --amber:#ff9e1b;
+  --amber2:#ffc668;
+  --red:#e2402e;
+  --green:#9fce4e;
+  --fd:'Black Han Sans','Noto Sans KR',sans-serif;
+  --fb:'Noto Sans KR',-apple-system,sans-serif;
+  --fn:'Rajdhani','Noto Sans KR',sans-serif;
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Courier New',ui-monospace,monospace;color:#fff;touch-action:none}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--fb);color:var(--txt);touch-action:none;font-size:13px}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
 .hide{display:none!important}
-/* ---------- HUD ---------- */
+.chamfer{clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)}
+/* ================= HUD ================= */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10}
 .hudPad{position:fixed;pointer-events:none}
-#quest{left:calc(10px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));max-width:44vw;background:rgba(0,0,0,.38);border-left:3px solid #ffb830;padding:6px 9px;font-size:12px;line-height:1.45;border-radius:0 4px 4px 0}
-#qTitle{color:#ffb830;font-weight:bold;font-size:12px}
-#qObj{color:#eee;white-space:pre-line}
-#timerHud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:22px;font-weight:bold;color:#ff5544;text-shadow:0 0 6px #000;letter-spacing:2px}
-#killfeed{right:calc(52px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));text-align:right;font-size:11px;max-width:46vw}
-#killfeed div{background:rgba(0,0,0,.4);margin:3px 0 0 auto;padding:3px 8px;border-radius:3px;border-right:3px solid #ffb830;transition:opacity .6s;width:fit-content}
-#killfeed div.hs{border-right-color:#ff3333;color:#ffd0c0}
-#bottomBar{left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);text-align:center}
-#ammoIcons span{display:inline-block;width:7px;height:18px;background:#ffcf6e;margin:0 2px;border:1px solid #7a5a1e;border-radius:2px 2px 0 0}
-#ammoIcons span.empty{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
-#ammoText{font-size:12px;color:#ddd;margin-top:2px;text-shadow:0 1px 2px #000}
-#hpWrap{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(170px + env(safe-area-inset-bottom));width:110px;height:9px;background:rgba(0,0,0,.5);border:1px solid #555;border-radius:3px}
-#hpFill{height:100%;width:100%;background:linear-gradient(#7dda58,#4a9b30);border-radius:2px;transition:width .18s}
-#breathWrap{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(154px + env(safe-area-inset-bottom));width:110px;height:6px;background:rgba(0,0,0,.5);border:1px solid #555;border-radius:3px}
-#breathFill{height:100%;width:100%;background:#5ec8ff;border-radius:2px}
-#breathWrap.pen #breathFill{background:#ff5544}
-#windFlag{right:calc(12px + env(safe-area-inset-right));top:calc(64px + env(safe-area-inset-top));text-align:right;font-size:11px;color:#cfe;text-shadow:0 1px 2px #000}
+#quest{left:calc(12px + env(safe-area-inset-left));top:calc(10px + env(safe-area-inset-top));max-width:46vw;background:linear-gradient(90deg,rgba(8,10,13,.72),rgba(8,10,13,.25));border-left:2px solid var(--amber);padding:7px 12px 8px}
+#qTitle{font-family:var(--fn);font-weight:700;font-size:11px;letter-spacing:2.5px;color:var(--amber);text-transform:uppercase}
+#qObj{color:var(--txt);white-space:pre-line;font-size:12px;line-height:1.55;margin-top:3px}
+#timerHud{position:fixed;top:calc(8px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-family:var(--fn);font-size:26px;font-weight:700;color:var(--amber);text-shadow:0 0 12px rgba(0,0,0,.8);letter-spacing:2px}
+#killfeed{right:calc(56px + env(safe-area-inset-right));top:calc(10px + env(safe-area-inset-top));text-align:right;font-size:11px;max-width:46vw}
+#killfeed div{background:rgba(8,10,13,.6);margin:3px 0 0 auto;padding:4px 10px;border-right:2px solid var(--dim);transition:opacity .6s;width:fit-content;letter-spacing:.5px;color:#b9c2c9}
+#killfeed div.hs{border-right-color:var(--red);color:#ffb0a4}
+#bottomBar{left:50%;bottom:calc(12px + env(safe-area-inset-bottom));transform:translateX(-50%);text-align:center}
+#ammoIcons{margin-bottom:2px}
+#ammoIcons span{display:inline-block;width:5px;height:15px;background:var(--amber2);margin:0 1.5px;clip-path:polygon(0 3px,50% 0,100% 3px,100% 100%,0 100%)}
+#ammoIcons span.empty{background:rgba(200,210,220,.16)}
+#ammoText{font-family:var(--fn);font-weight:700;font-size:22px;color:#e8edf1;letter-spacing:1px;text-shadow:0 1px 3px rgba(0,0,0,.8);line-height:1}
+#hpWrap{position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(178px + env(safe-area-inset-bottom));width:120px;height:5px;background:rgba(8,10,13,.65);border:1px solid var(--line2)}
+#hpFill{height:100%;width:100%;background:linear-gradient(90deg,#7fae3e,#9fce4e);transition:width .18s}
+#hpWrap::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 11px,rgba(0,0,0,.45) 11px 12px)}
+#breathWrap{position:fixed;left:calc(16px + env(safe-area-inset-left));bottom:calc(166px + env(safe-area-inset-bottom));width:120px;height:4px;background:rgba(8,10,13,.65);border:1px solid var(--line2)}
+#breathFill{height:100%;width:100%;background:#54b8dc}
+#breathWrap.pen #breathFill{background:var(--red)}
+#windFlag{right:calc(14px + env(safe-area-inset-right));top:calc(58px + env(safe-area-inset-top));text-align:right;font-family:var(--fn);font-weight:600;font-size:12px;color:#aeb9c2;letter-spacing:1px}
 #flagPole{display:inline-block;width:44px;height:30px;position:relative}
-#flagCloth{position:absolute;top:2px;left:3px;width:30px;height:14px;background:#ffb830;transform-origin:left center;border:1px solid #7a5a1e}
-#flagStick{position:absolute;top:0;left:0;width:3px;height:30px;background:#caa}
-/* ---------- Buttons ---------- */
-.btn{position:fixed;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.38);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;z-index:20;pointer-events:auto;font-family:inherit;text-shadow:0 1px 2px #000;transition:background .1s}
-.btn.on{background:rgba(255,190,60,.35);border-color:#ffb830}
-#btnFire{right:calc(20px + env(safe-area-inset-right));bottom:calc(66px + env(safe-area-inset-bottom));width:96px;height:96px;font-size:16px;background:rgba(255,80,60,.16);border-color:rgba(255,120,90,.55)}
-#btnAim{right:calc(30px + env(safe-area-inset-right));bottom:calc(184px + env(safe-area-inset-bottom));width:72px;height:72px;font-size:14px}
-#btnBreath{left:calc(20px + env(safe-area-inset-left));bottom:calc(56px + env(safe-area-inset-bottom));width:84px;height:84px;font-size:13px}
-#btnPause{right:calc(8px + env(safe-area-inset-right));top:calc(6px + env(safe-area-inset-top));width:38px;height:38px;border-radius:8px;font-size:15px}
+#flagCloth{position:absolute;top:2px;left:3px;width:30px;height:13px;background:var(--amber);transform-origin:left center}
+#flagStick{position:absolute;top:0;left:0;width:2px;height:30px;background:#8d99a2}
+/* ================= 조작 버튼 ================= */
+.btn{position:fixed;border-radius:50%;background:rgba(10,13,16,.38);border:1.5px solid rgba(205,215,225,.35);color:#dde4ea;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;z-index:20;pointer-events:auto;font-family:var(--fb);letter-spacing:1px;transition:background .12s,border-color .12s;gap:2px}
+.btn.on{background:rgba(255,158,27,.22);border-color:var(--amber)}
+.btn b{font-size:12px;font-weight:700}
+.btn small{font-family:var(--fn);font-size:9px;font-weight:600;letter-spacing:2px;color:var(--dim)}
+#btnFire{right:calc(20px + env(safe-area-inset-right));bottom:calc(64px + env(safe-area-inset-bottom));width:98px;height:98px;border-color:rgba(255,158,27,.55);background:rgba(20,14,8,.42)}
+#btnFire b{font-size:14px;color:var(--amber2)}
+.ci{width:26px;height:26px;position:relative;opacity:.9}
+.ci::before{content:'';position:absolute;inset:0;border:2px solid var(--amber);border-radius:50%}
+.ci::after{content:'';position:absolute;inset:0;background:
+  linear-gradient(var(--amber),var(--amber)) 50% 0/2px 7px no-repeat,
+  linear-gradient(var(--amber),var(--amber)) 50% 100%/2px 7px no-repeat,
+  linear-gradient(var(--amber),var(--amber)) 0 50%/7px 2px no-repeat,
+  linear-gradient(var(--amber),var(--amber)) 100% 50%/7px 2px no-repeat}
+#btnAim{right:calc(32px + env(safe-area-inset-right));bottom:calc(186px + env(safe-area-inset-bottom));width:74px;height:74px}
+#btnBreath{left:calc(20px + env(safe-area-inset-left));bottom:calc(56px + env(safe-area-inset-bottom));width:84px;height:84px}
+#btnPause{right:calc(10px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));width:40px;height:36px;border-radius:0;font-family:var(--fn);font-size:14px;font-weight:700;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+body.inMenu .btn{display:none} /* 메뉴 화면에서 조작 버튼 숨김 */
 body.lefty #btnFire{left:calc(20px + env(safe-area-inset-left));right:auto}
-body.lefty #btnAim{left:calc(30px + env(safe-area-inset-left));right:auto}
+body.lefty #btnAim{left:calc(32px + env(safe-area-inset-left));right:auto}
 body.lefty #btnBreath{right:calc(20px + env(safe-area-inset-right));left:auto}
-body.lefty #hpWrap,body.lefty #breathWrap{left:auto;right:calc(14px + env(safe-area-inset-right))}
-body.lefty #quest{left:auto;right:calc(10px + env(safe-area-inset-right));border-left:none;border-right:3px solid #ffb830;border-radius:4px 0 0 4px}
-body.lefty #killfeed{right:auto;left:calc(52px + env(safe-area-inset-left));text-align:left}
-body.lefty #killfeed div{margin:3px auto 0 0;border-right:none;border-left:3px solid #ffb830}
-body.lefty #btnPause{left:calc(8px + env(safe-area-inset-left));right:auto}
-body.lefty #windFlag{right:auto;left:calc(12px + env(safe-area-inset-left));text-align:left}
-/* ---------- Scope ---------- */
+body.lefty #hpWrap,body.lefty #breathWrap{left:auto;right:calc(16px + env(safe-area-inset-right))}
+body.lefty #quest{left:auto;right:calc(12px + env(safe-area-inset-right));border-left:none;border-right:2px solid var(--amber);background:linear-gradient(-90deg,rgba(8,10,13,.72),rgba(8,10,13,.25))}
+body.lefty #killfeed{right:auto;left:calc(56px + env(safe-area-inset-left));text-align:left}
+body.lefty #killfeed div{margin:3px auto 0 0;border-right:none;border-left:2px solid var(--dim)}
+body.lefty #killfeed div.hs{border-left-color:var(--red)}
+body.lefty #btnPause{left:calc(10px + env(safe-area-inset-left));right:auto}
+body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text-align:left}
+/* ================= 스코프 ================= */
 #scope{position:fixed;inset:0;z-index:15;pointer-events:none;opacity:0;transition:opacity .1s}
-#scopeMask{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 33vmin, rgba(4,4,6,.85) 35vmin, #020204 38vmin)}
-#scopeRing{position:absolute;left:50%;top:50%;width:68vmin;height:68vmin;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #111;box-shadow:inset 0 0 40px rgba(0,0,0,.9), inset 0 6vmin 9vmin rgba(80,120,200,.06)}
-#lensGlint{position:absolute;left:calc(50% + 16vmin);top:calc(50% - 20vmin);width:5vmin;height:5vmin;border-radius:50%;border:2px solid rgba(255,255,240,.35);box-shadow:0 0 8px rgba(255,255,220,.25)}
-.cross{position:absolute;background:#0a0a0a}
-#crossV{left:calc(50% - 1px);top:calc(50% - 33vmin);width:2px;height:66vmin}
-#crossH{top:calc(50% - 1px);left:calc(50% - 33vmin);height:2px;width:66vmin}
-.milDot{position:absolute;width:4px;height:4px;background:#0a0a0a;border-radius:50%;left:calc(50% - 2px)}
-.milDotH{position:absolute;width:4px;height:4px;background:#0a0a0a;border-radius:50%;top:calc(50% - 2px)}
+#scopeMask{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0, rgba(0,0,0,0) 33vmin, rgba(3,4,5,.88) 35vmin, #020304 38vmin)}
+#scopeRing{position:absolute;left:50%;top:50%;width:68vmin;height:68vmin;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #0c0e10;box-shadow:inset 0 0 42px rgba(0,0,0,.92), inset 0 6vmin 9vmin rgba(90,130,200,.05)}
+#lensGlint{position:absolute;left:calc(50% + 16vmin);top:calc(50% - 20vmin);width:5vmin;height:5vmin;border-radius:50%;border:2px solid rgba(255,255,240,.3);box-shadow:0 0 8px rgba(255,255,220,.22)}
+.cross{position:absolute;background:#07090b}
+#crossV{left:calc(50% - .8px);top:calc(50% - 33vmin);width:1.6px;height:66vmin}
+#crossH{top:calc(50% - .8px);left:calc(50% - 33vmin);height:1.6px;width:66vmin}
+.milDot{position:absolute;width:4px;height:4px;background:#07090b;border-radius:50%;left:calc(50% - 2px)}
+.milDotH{position:absolute;width:4px;height:4px;background:#07090b;border-radius:50%;top:calc(50% - 2px)}
 #scopeGrass{position:absolute;left:calc(50% - 14px);top:calc(50% + 24vmin);width:28px;height:22px;transform-origin:bottom center}
-#scopeGrass i{position:absolute;bottom:0;width:3px;background:#3f7a2e;transform-origin:bottom center;border-radius:2px 2px 0 0}
-#dropArrow{position:absolute;left:calc(50% - 10px);top:calc(50% + 40px);color:#ffe14d;font-size:20px;font-weight:bold;text-shadow:0 0 6px #000;animation:bnc 1s infinite}
+#scopeGrass i{position:absolute;bottom:0;width:3px;background:#3f7a2e;transform-origin:bottom center}
+#dropArrow{position:absolute;left:calc(50% - 10px);top:calc(50% + 40px);color:var(--amber2);font-size:20px;font-weight:bold;text-shadow:0 0 6px #000;animation:bnc 1s infinite}
 @keyframes bnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-#zoomTxt{position:absolute;left:50%;top:calc(50% - 30vmin);transform:translateX(-50%);color:#cde;font-size:12px;text-shadow:0 1px 2px #000}
-/* ---------- crosshair (hip) ---------- */
+#zoomTxt{position:absolute;left:50%;top:calc(50% - 30vmin);transform:translateX(-50%);color:#c3cdd6;font-family:var(--fn);font-weight:600;font-size:13px;letter-spacing:2px}
+/* ================= 힙 십자선 & 피드백 ================= */
 #hip{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:12;pointer-events:none}
-#hip i{position:absolute;background:rgba(255,255,255,.85);box-shadow:0 0 2px #000}
-/* ---------- feedback ---------- */
+#hip i{position:absolute;background:rgba(235,240,245,.88);box-shadow:0 0 2px rgba(0,0,0,.9)}
 #hitmarker{position:fixed;left:50%;top:50%;width:40px;height:40px;transform:translate(-50%,-50%);z-index:16;pointer-events:none;opacity:0}
 #hitmarker i{position:absolute;width:14px;height:2.5px;background:#fff;box-shadow:0 0 3px #000}
-#hitmarker.hs i{background:#ff3020;height:3.5px}
-#vig{position:fixed;inset:0;pointer-events:none;z-index:9;background:radial-gradient(circle,transparent 55%,rgba(0,0,0,.42) 100%)}
-#dmgVig{position:fixed;inset:0;pointer-events:none;z-index:17;box-shadow:inset 0 0 24vmin rgba(255,20,10,.85);opacity:0;transition:opacity .5s}
-#flashEdge{position:fixed;inset:0;pointer-events:none;z-index:18;border:5px solid rgba(255,255,255,.9);opacity:0}
-#banner{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(1);z-index:19;font-size:30px;font-weight:900;letter-spacing:3px;color:#ffb830;text-shadow:2px 2px 0 #6b3, -1px -1px 0 #310, 0 0 14px rgba(255,160,40,.6);opacity:0;pointer-events:none;text-align:center}
-#subBanner{position:fixed;left:50%;top:34%;transform:translateX(-50%);z-index:19;font-size:14px;color:#ffe;opacity:0;pointer-events:none;text-shadow:0 1px 3px #000}
+#hitmarker.hs i{background:#ff3826;height:3.5px}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:9;background:radial-gradient(circle,transparent 52%,rgba(0,0,0,.46) 100%)}
+#dmgVig{position:fixed;inset:0;pointer-events:none;z-index:17;box-shadow:inset 0 0 24vmin rgba(226,64,46,.85);opacity:0;transition:opacity .5s}
+#flashEdge{position:fixed;inset:0;pointer-events:none;z-index:18;border:4px solid rgba(255,255,255,.85);opacity:0}
+#banner{position:fixed;left:50%;top:24%;transform:translate(-50%,-50%) scale(1);z-index:19;font-family:var(--fd);font-size:34px;font-weight:400;letter-spacing:6px;color:#f2f5f7;text-shadow:0 2px 14px rgba(0,0,0,.85);opacity:0;pointer-events:none;text-align:center;text-transform:uppercase}
+#banner::after{content:'';display:block;width:64%;height:2px;margin:4px auto 0;background:var(--amber)}
+#subBanner{position:fixed;left:50%;top:33%;transform:translateX(-50%);z-index:19;font-size:13px;letter-spacing:2px;color:#dfe5ea;opacity:0;pointer-events:none;text-shadow:0 1px 4px #000}
 #popups{position:fixed;inset:0;z-index:13;pointer-events:none;overflow:hidden}
-.pop{position:absolute;font-weight:bold;font-size:15px;color:#fff;text-shadow:0 1px 2px #000,0 0 5px rgba(0,0,0,.6);transition:transform .8s ease-out,opacity .8s;will-change:transform,opacity}
-.pop.gold{color:#ffd94d;font-size:18px}
-.pop.coin{color:#ffe98a;font-size:12px}
+.pop{position:absolute;font-family:var(--fn);font-weight:700;font-size:16px;color:#eef2f5;text-shadow:0 1px 3px rgba(0,0,0,.9);transition:transform .8s ease-out,opacity .8s;will-change:transform,opacity;letter-spacing:1px}
+.pop.gold{color:var(--amber2);font-size:19px}
+.pop.coin{color:#ffe9b0;font-size:12px}
 #kcT,#kcB{position:fixed;left:0;width:100%;height:0;background:#000;z-index:21;transition:height .25s;pointer-events:none}
 #kcT{top:0}#kcB{bottom:0}
-#kcTxt{position:fixed;right:16px;top:14%;z-index:22;color:#ffb830;font-size:13px;letter-spacing:4px;opacity:0;pointer-events:none}
-#tutHint{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:19;background:rgba(0,0,0,.55);border:1px solid #ffb830;color:#ffe;padding:8px 14px;border-radius:6px;font-size:13px;max-width:80vw;text-align:center;pointer-events:none;line-height:1.5}
-#toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:40;background:rgba(0,0,0,.7);color:#ffe;padding:7px 16px;border-radius:16px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid #666}
-/* ---------- screens ---------- */
-.screen{position:fixed;inset:0;z-index:50;background:linear-gradient(#1a1626,#241b2e 60%,#3a2033);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:pan-y;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left))}
-.screen h2{color:#ffb830;letter-spacing:3px;margin-bottom:14px;font-size:20px;text-shadow:2px 2px 0 #000}
-.mbtn{pointer-events:auto;background:linear-gradient(#4a3b63,#37294a);border:2px solid #7a6a9a;color:#ffe;font-family:inherit;font-weight:bold;font-size:15px;padding:12px 26px;border-radius:8px;margin:6px;min-width:190px;min-height:52px;text-shadow:0 1px 2px #000;box-shadow:0 3px 0 #241b30}
-.mbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #241b30}
-.mbtn.gold{background:linear-gradient(#a8742c,#7d5314);border-color:#ffcf6e}
-.mbtn.small{min-width:0;padding:8px 14px;font-size:13px;min-height:44px}
-.mbtn:disabled{opacity:.4}
-#logoCv{image-rendering:pixelated;margin-bottom:6px}
-#titleTap{color:#ffe;font-size:15px;animation:pulse 1.4s infinite;margin:16px 0 8px}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-.ctrlRow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:10px}
-.ctrlCard{background:rgba(0,0,0,.3);border:1px solid #555;border-radius:6px;padding:7px 10px;font-size:11px;color:#ccc;text-align:center;line-height:1.5}
-.ctrlCard b{color:#ffb830}
-#chapTabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;justify-content:center}
-.chapTab{pointer-events:auto;background:#2c2440;border:2px solid #554a77;color:#cbc;padding:8px 12px;border-radius:6px;font-family:inherit;font-size:12px;font-weight:bold;min-height:44px}
-.chapTab.sel{background:#5a4380;border-color:#ffb830;color:#ffe}
-.chapTab.lock{opacity:.45}
-#missionList{display:flex;flex-direction:column;gap:8px;width:min(92vw,460px)}
-.miCard{pointer-events:auto;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.06);border:2px solid #665a88;border-radius:8px;padding:10px 14px;color:#ffe;font-family:inherit;font-size:13px;text-align:left;min-height:56px}
-.miCard:active{background:rgba(255,255,255,.14)}
-.miCard .stars{color:#ffd94d;font-size:15px;letter-spacing:2px}
-.miCard small{color:#aa9;display:block;font-size:10px;margin-top:2px}
-.topRow{display:flex;justify-content:space-between;align-items:center;width:min(92vw,460px);margin-bottom:10px}
-#goldTxt,#goldTxt2{color:#ffd94d;font-weight:bold;font-size:15px;text-shadow:0 1px 2px #000}
-.shopItem{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.06);border:1px solid #665a88;border-radius:8px;padding:10px 12px;width:min(92vw,440px);margin:4px 0;font-size:13px}
-.shopItem small{color:#a9a;display:block;font-size:10px;margin-top:2px}
-.buyBtn{pointer-events:auto;background:#7d5314;border:2px solid #ffcf6e;color:#ffe;font-family:inherit;font-weight:bold;padding:8px 12px;border-radius:6px;min-width:76px;min-height:44px;font-size:12px}
-.buyBtn:disabled{opacity:.4}
-.buyBtn.owned{background:#2e5a2e;border-color:#7dda58}
-.setRow{display:flex;justify-content:space-between;align-items:center;width:min(88vw,420px);margin:7px 0;font-size:13px;color:#dde}
-.setRow input[type=range]{pointer-events:auto;width:150px;height:30px}
-.segBtns{display:flex;gap:4px}
-.segBtns button{pointer-events:auto;background:#2c2440;border:1px solid #665a88;color:#cbc;font-family:inherit;padding:8px 10px;border-radius:5px;font-size:12px;min-height:40px}
-.segBtns button.sel{background:#5a4380;border-color:#ffb830;color:#ffe}
-#endStars{font-size:38px;letter-spacing:8px;color:#555;margin:8px 0}
-#endStars .got{color:#ffd94d;text-shadow:0 0 12px rgba(255,200,60,.7)}
-#endStats{font-size:13px;color:#ccc;line-height:1.8;text-align:center}
-#failReason{color:#ff6655;font-size:15px;font-weight:bold;margin:6px 0 2px}
-.statGrid{display:grid;grid-template-columns:auto auto;gap:5px 22px;font-size:13px;color:#dde;margin:8px 0}
-.statGrid b{color:#ffd94d}
-#rankBig{font-size:56px;font-weight:900;color:#ffb830;text-shadow:3px 3px 0 #000}
+#kcTxt{position:fixed;right:20px;top:13.5%;z-index:22;color:var(--amber);font-family:var(--fn);font-weight:700;font-size:13px;letter-spacing:6px;opacity:0;pointer-events:none}
+#tutHint{position:fixed;left:50%;bottom:calc(152px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:19;background:var(--panel);border:1px solid var(--line2);border-top:2px solid var(--amber);color:#e4e9ee;padding:9px 16px;font-size:12.5px;max-width:82vw;text-align:center;pointer-events:none;line-height:1.6;letter-spacing:.3px}
+#toast{position:fixed;left:50%;top:13%;transform:translateX(-50%);z-index:40;background:var(--panel);color:#e8edf1;padding:7px 18px;font-size:12px;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;border:1px solid var(--line2);border-left:2px solid var(--amber)}
+/* ================= 스크린 공통 ================= */
+.screen{position:fixed;inset:0;z-index:50;background:linear-gradient(90deg,rgba(6,8,10,.88) 0%,rgba(6,8,10,.72) 55%,rgba(6,8,10,.55) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:pan-y;overflow-y:auto;padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));animation:scrIn .22s ease-out}
+@keyframes scrIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.screen::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(255,255,255,.013) 2px 4px);pointer-events:none}
+.screen.left{align-items:flex-start;justify-content:flex-start;padding-left:max(7vw,calc(18px + env(safe-area-inset-left)));padding-top:calc(20px + env(safe-area-inset-top))}
+.scrHead{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;width:min(92vw,500px)}
+.scrHead h2{font-family:var(--fd);font-weight:400;color:#eef1f4;letter-spacing:4px;font-size:24px;line-height:1}
+.scrHead .sub{font-family:var(--fn);font-weight:600;font-size:10px;letter-spacing:3px;color:var(--amber);text-transform:uppercase}
+.scrHead::after{content:'';flex:1;height:1px;background:var(--line2);align-self:center}
+.goldChip{font-family:var(--fn);font-weight:700;font-size:15px;color:var(--amber2);letter-spacing:1px;background:rgba(255,158,27,.08);border:1px solid rgba(255,158,27,.3);padding:3px 12px;align-self:center}
+/* 버튼 */
+.mbtn{pointer-events:auto;background:var(--panel2);border:1px solid var(--line);color:#dde4ea;font-family:var(--fb);font-weight:700;font-size:13.5px;letter-spacing:2px;padding:0 26px;margin:5px;min-width:180px;min-height:50px;clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px);transition:background .12s,border-color .12s,color .12s;position:relative}
+.mbtn:active{background:#2c353d;border-color:var(--dim)}
+.mbtn.gold{background:linear-gradient(180deg,#e08c14,#c47408);border-color:var(--amber2);color:#14100a;text-shadow:none}
+.mbtn.gold:active{background:#a86408}
+.mbtn.small{min-width:0;padding:0 18px;font-size:12px;min-height:46px;letter-spacing:1.5px}
+.mbtn:disabled{opacity:.35}
+/* 타이틀 */
+#scrTitle{background:linear-gradient(180deg,rgba(5,7,9,.55) 0%,rgba(5,7,9,.3) 45%,rgba(5,7,9,.82) 100%)}
+#logoCv{image-rendering:pixelated;margin-bottom:10px;filter:drop-shadow(0 4px 18px rgba(0,0,0,.7))}
+#titleSub{font-family:var(--fn);font-weight:600;color:#93a0aa;font-size:11px;letter-spacing:8px;margin-bottom:6px;text-transform:uppercase}
+#titleSub b{color:var(--amber)}
+#titleRule{width:min(60vw,320px);height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:8px 0 18px}
+#titleTap{font-family:var(--fn);font-weight:600;color:#e8edf1;font-size:14px;letter-spacing:4px;animation:pulse 1.6s infinite;margin:6px 0 16px}
+#titleTap i{color:var(--amber);font-style:normal}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ctrlRow{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:6px}
+.ctrlCard{background:rgba(10,13,16,.55);border:1px solid var(--line2);border-top:2px solid var(--line);padding:7px 12px;font-size:10.5px;color:#9aa5ae;text-align:center;line-height:1.6;min-width:88px}
+.ctrlCard b{color:#dde4ea;font-size:11px;display:block;letter-spacing:.5px}
+#titleVer{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(10px + env(safe-area-inset-bottom));font-family:var(--fn);font-size:9px;letter-spacing:2px;color:#525c64}
+#titleVer b{color:#79848d}
+/* 작전 선택 */
+#chapTabs{display:flex;gap:0;margin-bottom:12px;flex-wrap:wrap;border-bottom:1px solid var(--line2);width:min(92vw,500px)}
+.chapTab{pointer-events:auto;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);padding:10px 16px 9px;font-family:var(--fb);font-size:13px;font-weight:700;letter-spacing:1.5px;min-height:44px;transition:color .12s,border-color .12s}
+.chapTab.sel{color:#f0f3f6;border-bottom-color:var(--amber)}
+.chapTab.lock{opacity:.4}
+.chapTab i{font-style:normal;font-family:var(--fn);font-size:10px;color:var(--amber);margin-left:4px;letter-spacing:0}
+#missionList{display:flex;flex-direction:column;gap:6px;width:min(92vw,500px)}
+.miCard{pointer-events:auto;display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line2);border-left:3px solid transparent;padding:9px 16px 9px 12px;color:#e4e9ee;font-family:var(--fb);text-align:left;min-height:58px;transition:background .12s,border-color .12s;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+.miCard:active{background:var(--panel2);border-left-color:var(--amber)}
+.miIdx{font-family:var(--fn);font-weight:700;font-size:20px;color:#4b565f;letter-spacing:1px;min-width:30px}
+.miBody{flex:1}
+.miName{font-size:14px;font-weight:700;letter-spacing:1px}
+.miCard small{color:#7d8891;display:block;font-size:10.5px;margin-top:2px;letter-spacing:.3px}
+.miCard .stars{color:var(--amber2);font-size:14px;letter-spacing:2px}
+.menuBtnRow{display:flex;flex-wrap:wrap;gap:0 4px;margin-top:16px}
+/* 상점 */
+.shopItem{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line2);padding:9px 12px;width:min(92vw,480px);margin:3px 0;font-size:13px;clip-path:polygon(0 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%)}
+.shopItem .siName{font-weight:700;letter-spacing:.5px}
+.shopItem small{color:#7d8891;display:block;font-size:10.5px;margin-top:2px}
+.buyBtn{pointer-events:auto;background:rgba(255,158,27,.1);border:1px solid rgba(255,158,27,.45);color:var(--amber2);font-family:var(--fn);font-weight:700;font-size:13px;letter-spacing:1px;padding:0 14px;min-width:82px;min-height:44px;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.buyBtn:disabled{opacity:.3}
+.buyBtn.owned{background:rgba(159,206,78,.08);border-color:rgba(159,206,78,.4);color:var(--green)}
+/* 설정 */
+.setRow{display:flex;justify-content:space-between;align-items:center;width:min(90vw,460px);margin:0;padding:9px 2px;font-size:13px;color:#dde4ea;border-bottom:1px solid var(--line2);letter-spacing:.5px}
+.setRow input[type=range]{pointer-events:auto;width:150px;height:30px;accent-color:var(--amber)}
+.segBtns{display:flex;gap:3px}
+.segBtns button{pointer-events:auto;background:rgba(10,13,16,.5);border:1px solid var(--line2);color:var(--dim);font-family:var(--fb);font-weight:700;padding:0 13px;font-size:12px;min-height:40px;letter-spacing:.5px;transition:all .12s}
+.segBtns button.sel{background:var(--amber);border-color:var(--amber);color:#14100a}
+/* 결과 / 전적 */
+#endStars{font-size:40px;letter-spacing:10px;color:#333c44;margin:6px 0}
+#endStars .got{color:var(--amber2);text-shadow:0 0 16px rgba(255,166,40,.55)}
+#endStats{font-size:12.5px;color:#a8b2ba;line-height:1.9;text-align:center;letter-spacing:.5px}
+#endStats b,#endStats span{font-family:var(--fn)}
+#failReason{color:#ff7364;font-size:14px;font-weight:700;margin:4px 0 2px;letter-spacing:1px}
+.statGrid{display:grid;grid-template-columns:auto auto;gap:6px 28px;font-size:13px;color:#aab4bc;margin:10px 0;letter-spacing:.5px}
+.statGrid b{color:#eef2f5;font-family:var(--fn);font-weight:700;font-size:15px;text-align:right}
+#rankBig{font-family:var(--fd);font-size:64px;color:var(--amber);text-shadow:0 0 30px rgba(255,158,27,.35);line-height:1}
+#endTitle{font-family:var(--fd);font-weight:400;letter-spacing:6px;font-size:30px;color:#eef1f4;margin-bottom:6px}
+#endTitle::after{content:'';display:block;width:70%;height:2px;margin:6px auto 0;background:var(--amber)}
+#scrPause h2,#scrEnd h2{margin-bottom:12px}
 #fadeBlack{position:fixed;inset:0;background:#000;z-index:60;opacity:1;transition:opacity .4s;pointer-events:none}
 </style>
 </head>
@@ -158,46 +221,47 @@ body.lefty #windFlag{right:auto;left:calc(12px + env(safe-area-inset-left));text
   <div id="scopeRing"></div>
   <div id="lensGlint"></div>
 </div>
-<button class="btn" id="btnFire" data-btn="fire">발사</button>
-<button class="btn" id="btnAim" data-btn="aim">조준</button>
-<button class="btn" id="btnBreath" data-btn="breath">숨<br>참기</button>
+<button class="btn" id="btnFire" data-btn="fire"><i class="ci"></i><b>발사</b></button>
+<button class="btn" id="btnAim" data-btn="aim"><b>조준</b><small>ADS</small></button>
+<button class="btn" id="btnBreath" data-btn="breath"><b>숨참기</b><small>HOLD</small></button>
 <button class="btn hide" id="btnPause" data-btn="pause">II</button>
 <div id="kcT"></div><div id="kcB"></div><div id="kcTxt">KILL CAM</div>
 <div id="toast"></div>
 
 <div class="screen" id="scrTitle">
   <canvas id="logoCv" width="212" height="18"></canvas>
-  <div style="color:#b9a;font-size:11px;letter-spacing:5px;margin-bottom:4px">VOXEL SNIPER OPERATIONS</div>
-  <div id="titleTap">― 탭하여 시작 ―</div>
+  <div id="titleSub">TACTICAL <b>VOXEL</b> OPERATIONS</div>
+  <div id="titleRule"></div>
+  <div id="titleTap"><i>[</i> 화면을 터치해 작전 개시 <i>]</i></div>
   <div class="ctrlRow">
-    <div class="ctrlCard"><b>◀ 왼쪽 드래그</b><br>시점 조작</div>
-    <div class="ctrlCard"><b>조준 버튼</b><br>스코프 (핀치로 줌)</div>
-    <div class="ctrlCard"><b>발사 버튼</b><br>사격 · 볼트액션</div>
-    <div class="ctrlCard"><b>숨참기 홀드</b><br>흔들림 감소</div>
+    <div class="ctrlCard"><b>좌측 드래그</b>시점 조작</div>
+    <div class="ctrlCard"><b>조준</b>스코프 · 핀치 줌</div>
+    <div class="ctrlCard"><b>발사</b>사격 · 볼트액션</div>
+    <div class="ctrlCard"><b>숨참기</b>홀드 시 안정</div>
   </div>
-  <div style="color:#776;font-size:10px;margin-top:18px">100% 독자 제작 에셋 · 외부 리소스 없음</div>
+  <div id="titleVer"><b>BLOCKSHOT</b> · 100% 독자 제작 에셋 · V 1.1</div>
 </div>
 
-<div class="screen hide" id="scrMenu">
-  <div class="topRow"><h2 style="margin:0">작전 선택</h2><span id="goldTxt"></span></div>
+<div class="screen left hide" id="scrMenu">
+  <div class="scrHead"><h2>작전 선택</h2><span class="sub">Operations</span><span class="goldChip" id="goldTxt"></span></div>
   <div id="chapTabs"></div>
   <div id="missionList"></div>
-  <div class="ctrlRow" style="margin-top:14px">
-    <button class="mbtn small" id="btnShop">🛠 상점</button>
-    <button class="mbtn small" id="btnStats">📊 전적</button>
-    <button class="mbtn small" id="btnSettings">⚙ 설정</button>
-    <button class="mbtn small hide" id="btnEndless">∞ 무한 모드</button>
+  <div class="menuBtnRow">
+    <button class="mbtn small" id="btnShop">상점</button>
+    <button class="mbtn small" id="btnStats">전적</button>
+    <button class="mbtn small" id="btnSettings">설정</button>
+    <button class="mbtn small gold hide" id="btnEndless">무한 모드</button>
   </div>
 </div>
 
-<div class="screen hide" id="scrShop">
-  <div class="topRow"><h2 style="margin:0">상점</h2><span id="goldTxt2"></span></div>
+<div class="screen left hide" id="scrShop">
+  <div class="scrHead"><h2>상점</h2><span class="sub">Armory</span><span class="goldChip" id="goldTxt2"></span></div>
   <div id="shopList"></div>
-  <button class="mbtn" id="btnShopBack">← 돌아가기</button>
+  <button class="mbtn" id="btnShopBack" style="margin-top:12px">돌아가기</button>
 </div>
 
-<div class="screen hide" id="scrSettings">
-  <h2>설정</h2>
+<div class="screen left hide" id="scrSettings">
+  <div class="scrHead"><h2>설정</h2><span class="sub">Settings</span></div>
   <div class="setRow"><span>감도</span><input type="range" id="setSens" min="30" max="200" value="100"></div>
   <div class="setRow"><span>에임 어시스트</span><div class="segBtns" id="setAssist"><button data-v="0">끄기</button><button data-v="1" class="sel">약</button><button data-v="2">강</button></div></div>
   <div class="setRow"><span>진동</span><div class="segBtns" id="setVib"><button data-v="1" class="sel">켜기</button><button data-v="0">끄기</button></div></div>
@@ -205,33 +269,33 @@ body.lefty #windFlag{right:auto;left:calc(12px + env(safe-area-inset-left));text
   <div class="setRow"><span>효과음 음량</span><input type="range" id="setSfx" min="0" max="100" value="90"></div>
   <div class="setRow"><span>왼손잡이 모드</span><div class="segBtns" id="setLefty"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
   <div class="setRow"><span>30fps 절전 모드</span><div class="segBtns" id="setFps"><button data-v="0" class="sel">끄기</button><button data-v="1">켜기</button></div></div>
-  <button class="mbtn" id="btnSetBack" style="margin-top:14px">← 돌아가기</button>
+  <button class="mbtn" id="btnSetBack" style="margin-top:16px">돌아가기</button>
 </div>
 
 <div class="screen hide" id="scrStats">
-  <h2>전적</h2>
+  <div class="scrHead" style="width:auto"><h2>전적</h2><span class="sub">Service Record</span></div>
   <div id="rankBig"></div>
   <div class="statGrid" id="statGrid"></div>
-  <button class="mbtn" id="btnStatsBack">← 돌아가기</button>
+  <button class="mbtn" id="btnStatsBack">돌아가기</button>
 </div>
 
-<div class="screen hide" id="scrEnd" style="background:rgba(8,5,14,.92)">
+<div class="screen hide" id="scrEnd">
   <h2 id="endTitle"></h2>
   <div id="failReason" class="hide"></div>
   <div id="endStars"></div>
   <div id="endStats"></div>
-  <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;justify-content:center">
-    <button class="mbtn gold" id="btnRetry">↻ 즉시 재시도</button>
-    <button class="mbtn hide" id="btnNext">다음 임무 ▶</button>
+  <div style="display:flex;gap:4px;margin-top:16px;flex-wrap:wrap;justify-content:center">
+    <button class="mbtn gold" id="btnRetry">즉시 재시도</button>
+    <button class="mbtn hide" id="btnNext">다음 임무</button>
     <button class="mbtn" id="btnToMenu">작전 목록</button>
   </div>
 </div>
 
-<div class="screen hide" id="scrPause" style="background:rgba(8,5,14,.86)">
-  <h2>일시 정지</h2>
-  <button class="mbtn gold" id="btnResume">▶ 계속하기</button>
-  <button class="mbtn" id="btnPauseRetry">↻ 재시도</button>
-  <button class="mbtn" id="btnPauseSet">⚙ 설정</button>
+<div class="screen hide" id="scrPause">
+  <div class="scrHead" style="width:auto"><h2>일시 정지</h2><span class="sub">Paused</span></div>
+  <button class="mbtn gold" id="btnResume">계속하기</button>
+  <button class="mbtn" id="btnPauseRetry">재시도</button>
+  <button class="mbtn" id="btnPauseSet">설정</button>
   <button class="mbtn" id="btnQuit">작전 포기</button>
 </div>
 <div id="fadeBlack"></div>
@@ -363,41 +427,109 @@ function buildBlockGeo(){
   }
   blockGeo.setAttribute('color',new THREE.BufferAttribute(col,3));
 }
-/* ---------- 적 용병 텍스처 (독자 디자인, 진영 팔레트) ---------- */
-function mercTex(base,dark,accent,face){
+/* =====================================================================
+   캐릭터 스킨 — 마인크래프트 인체비율 캐릭터 (독자 디자인)
+   진영 유니폼 × 캐릭터(피부·헤어·눈) 조합으로 개별 인물처럼 보이게
+   ===================================================================== */
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  const r=clamp((n>>16)+amt,0,255),g=clamp((n>>8&255)+amt,0,255),b=clamp((n&255)+amt,0,255);
+  return `rgb(${r},${g},${b})`;
+}
+function charSkin(ch,f,seed){
+  const N=(g,cols,s)=>{const rng=mulberry(s);for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=cols[Math.floor(rng()*cols.length)];g.fillRect(x,y,1,1);}};
+  const edge=g=>{g.fillStyle='rgba(0,0,0,.16)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);};
+  // 얼굴 (앞면): 앞머리 + 눈 + 입
+  const faceT=px16(g=>{
+    N(g,[ch.skin,ch.skin,shade(ch.skin,-9)],seed+1);
+    g.fillStyle=ch.hair;g.fillRect(0,0,16,4);
+    g.fillStyle=shade(ch.hair,-16);
+    g.fillRect(0,4,3,2);g.fillRect(13,4,3,2);g.fillRect(5,4,1,1);g.fillRect(9,4,2,1); // 삐죽 앞머리
+    if(f.band){g.fillStyle=f.band;g.fillRect(0,4,16,2);}                              // 헤드밴드(러너)
+    g.fillStyle='#ffffff';g.fillRect(3,8,3,2);g.fillRect(10,8,3,2);                   // 눈 흰자
+    g.fillStyle=ch.eye;g.fillRect(4,8,2,2);g.fillRect(11,8,2,2);                      // 눈동자
+    g.fillStyle=shade(ch.skin,-30);g.fillRect(7,12,2,1);                              // 입
+    g.fillStyle=shade(ch.skin,-14);g.fillRect(7,10,2,1);                              // 코
+    edge(g);
+  });
+  const hairT=px16(g=>{N(g,[ch.hair,shade(ch.hair,-12),shade(ch.hair,8)],seed+2);edge(g);});
+  const skinT=px16(g=>{N(g,[ch.skin,shade(ch.skin,-7)],seed+3);edge(g);});
+  // 몸통: 셔츠 + 전술조끼 + 벨트
+  const bodyT=px16(g=>{
+    N(g,[f.shirt,shade(f.shirt,-9)],seed+4);
+    if(f.vest){
+      g.fillStyle=f.vest;g.fillRect(2,1,12,10);
+      g.fillStyle=shade(f.vest,-14);g.fillRect(3,3,4,3);g.fillRect(9,3,4,3);g.fillRect(6,7,4,3); // 파우치
+      g.fillStyle=shade(f.vest,12);g.fillRect(2,1,12,1);
+    }
+    g.fillStyle=f.accent;g.fillRect(0,11,16,2);                                       // 벨트
+    g.fillStyle=f.pants;g.fillRect(0,13,16,3);
+    edge(g);
+  });
+  const armT=px16(g=>{
+    N(g,[f.shirt,shade(f.shirt,-9)],seed+5);
+    g.fillStyle=ch.skin;g.fillRect(0,10,16,4);                                        // 손목 살
+    g.fillStyle=shade(f.accent,-6);g.fillRect(0,14,16,2);                             // 장갑
+    edge(g);
+  });
+  const legT=px16(g=>{
+    N(g,[f.pants,shade(f.pants,-9)],seed+6);
+    g.fillStyle=shade(f.pants,-20);g.fillRect(0,7,16,1);                              // 무릎 패드 라인
+    g.fillStyle=f.shoe;g.fillRect(0,12,16,4);                                         // 부츠
+    edge(g);
+  });
+  const M=t=>new THREE.MeshLambertMaterial({map:t});
+  const mh=M(hairT),ms=M(skinT);
   return {
-    head:px16(g=>{const rng=mulberry(31);
-      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.5?dark:base;g.fillRect(x,y,1,1);}
-      g.fillStyle=face;g.fillRect(2,6,12,4);          // 바이저 밴드
-      g.fillStyle='#e8f4ff';g.fillRect(4,7,3,2);g.fillRect(9,7,3,2); // 눈
-      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
-    }),
-    body:px16(g=>{const rng=mulberry(37);
-      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.4?dark:base;g.fillRect(x,y,1,1);}
-      g.fillStyle=accent;g.fillRect(0,10,16,2);       // 벨트
-      g.fillStyle=dark;g.fillRect(3,2,4,6);g.fillRect(9,2,4,6); // 조끼 파우치
-      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
-    }),
-    limb:px16(g=>{const rng=mulberry(41);
-      for(let y=0;y<16;y++)for(let x=0;x<16;x++){g.fillStyle=rng()<.45?dark:base;g.fillRect(x,y,1,1);}
-      g.fillStyle=accent;g.fillRect(0,13,16,2);       // 부츠/장갑 라인
-      g.fillStyle='rgba(0,0,0,.3)';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);
-    })
+    headMats:[mh,mh,M(hairT),ms,mh,M(faceT)], // +x -x +y -y +z -z(정면=얼굴)
+    body:M(bodyT),arm:M(armT),leg:M(legT),
   };
 }
+/* 캐릭터 변형 5종 (피부/헤어/눈) */
+const CHARS=[
+  {skin:'#f0c8a0',hair:'#3a2a1a',eye:'#3a5fc8'},
+  {skin:'#e8b98a',hair:'#17171c',eye:'#4a3624'},
+  {skin:'#f4d2b0',hair:'#c8903a',eye:'#3c8a4a'},
+  {skin:'#d8a878',hair:'#54341c',eye:'#26262c'},
+  {skin:'#f0c4a4',hair:'#8a3a2a',eye:'#48505a'},
+];
+/* 진영 유니폼 */
+const FACTIONS={
+  tan:   {shirt:'#8a7a52',vest:'#5c5138',pants:'#6e6140',shoe:'#2e2820',accent:'#4a4030'},
+  green: {shirt:'#5a7048',vest:'#41522f',pants:'#485a3a',shoe:'#22281c',accent:'#333f26'},
+  desert:{shirt:'#b09a62',vest:'#8d7a48',pants:'#95804e',shoe:'#40351e',accent:'#6b5a34'},
+  night: {shirt:'#3c4458',vest:'#2b3244',pants:'#323a4c',shoe:'#161b26',accent:'#232a3a'},
+  black: {shirt:'#38323a',vest:'#26222a',pants:'#2c272e',shoe:'#131014',accent:'#8a2020'},
+  gold:  {shirt:'#8a6f22',vest:'#b08a30',pants:'#5f4a18',shoe:'#241a04',accent:'#ffd94d'},
+  heavy: {shirt:'#5e6468',vest:'#464d52',pants:'#4c5156',shoe:'#1a1e22',accent:'#33383c'},
+  runner:{shirt:'#7a8a8f',vest:null,   pants:'#5a666e',shoe:'#c05028',accent:'#c05028',band:'#c03828'},
+  civ:   {shirt:'#c8c0b0',vest:null,   pants:'#6a86b8',shoe:'#3a3630',accent:'#a8a090'},
+};
 let MERC_SKINS={};
 function buildMercSkins(){
-  const mk=t=>{const m={};for(const k in t)m[k]=new THREE.MeshLambertMaterial({map:t[k]});return m;};
-  MERC_SKINS={
-    tan:   mk(mercTex('#8a7a52','#6e6140','#3d3223','#1a1a22')),
-    green: mk(mercTex('#5a7048','#465a38','#2c3a22','#141a20')),
-    desert:mk(mercTex('#b09a62','#94804e','#5c4c2a','#20180e')),
-    night: mk(mercTex('#3c4458','#2e3444','#1c2030','#0c1420')),
-    black: mk(mercTex('#38323a','#2a252c','#8a2020','#1a0808')),
-    gold:  mk(mercTex('#b08a30','#8f6f22','#5f4310','#241a04')),
-    heavy: mk(mercTex('#5e6468','#4c5156','#33383c','#14181c')),
-    runner:mk(mercTex('#7a8a8f','#61707a','#c05028','#101418')),
-    civ:   mk(mercTex('#c8c0b0','#a8a090','#6a86b8','#302a20')),
+  MERC_SKINS={};
+  let s=900;
+  for(const key in FACTIONS){
+    MERC_SKINS[key]=[];
+    for(let v=0;v<3;v++)MERC_SKINS[key].push(charSkin(CHARS[(v*2+s)%CHARS.length],FACTIONS[key],s+=17));
+  }
+}
+function getSkin(key,idx){const arr=MERC_SKINS[key]||MERC_SKINS.tan;return arr[idx%arr.length];}
+/* ---------- 야생 동물 재질 ---------- */
+let ANIMAL_MATS=null;
+function buildAnimalMats(){
+  const M=(sh,seed)=>new THREE.MeshLambertMaterial({map:noiseTex(sh,{seed})});
+  ANIMAL_MATS={
+    boar:  M(['#5e4328','#54391f','#6b4e2e','#4a3520'],51),
+    boarD: M(['#3c2a16','#342410','#443019'],53),
+    snout: new THREE.MeshLambertMaterial({color:0xc99a86}),
+    hen:   M(['#e8e2d4','#dcd4c4','#f0ece0'],55),
+    comb:  new THREE.MeshLambertMaterial({color:0xc23a2a}),
+    beak:  new THREE.MeshLambertMaterial({color:0xd8922a}),
+    henLeg:new THREE.MeshLambertMaterial({color:0xc9a23a}),
+    deer:  M(['#a4805a','#96744e','#b08c64'],57),
+    deerD: M(['#6b5138','#5f472f','#755a3e'],59),
+    antler:new THREE.MeshLambertMaterial({color:0xd8cbb4}),
   };
 }
 /* 표적판 텍스처 */
@@ -418,18 +550,22 @@ function drawLogo(){
     O:'01110,10001,10001,10001,10001,10001,01110',C:'01111,10000,10000,10000,10000,10000,01111',
     K:'10001,10010,10100,11000,10100,10010,10001',S:'01111,10000,10000,01110,00001,00001,11110',
     H:'10001,10001,10001,11111,10001,10001,10001',T:'11111,00100,00100,00100,00100,00100,00100'};
-  const word='BLOCKSHOT',cv=$('logoCv'),g=cv.getContext('2d'),sc=2;
-  cv.width=word.length*6*sc*2-2*sc*2;cv.height=9*sc*2;cv.style.width=(cv.width/1.2|0)+'px';
+  const word='BLOCKSHOT',cv=$('logoCv'),g=cv.getContext('2d'),px=6;
+  cv.width=(word.length*6-1)*px+px;cv.height=10*px;
+  cv.style.width=Math.min(cv.width*.85,window.innerWidth*.8|0)+'px';
   g.imageSmoothingEnabled=false;
   word.split('').forEach((ch,ci)=>{
-    const rows=F[ch].split(',');
+    const rows=F[ch].split(','),amber=ci>=5; // SHOT = 앰버
     rows.forEach((row,y)=>{row.split('').forEach((b,x)=>{ if(b==='1'){
-      const X=(ci*6+x)*sc*2,Y=(y+1)*sc*2;
-      g.fillStyle='#000';g.fillRect(X+sc,Y+sc,sc*2,sc*2);
-      g.fillStyle=y<3?'#ffd94d':(y<5?'#ffb830':'#e07820');
-      g.fillRect(X,Y,sc*2,sc*2);
+      const X=(ci*6+x)*px+px/2,Y=(y+1)*px;
+      g.fillStyle='rgba(0,0,0,.85)';g.fillRect(X+px*.3,Y+px*.3,px,px);           // 그림자
+      g.fillStyle=amber?(y<3?'#ffc668':'#ff9e1b'):(y<3?'#f4f7f9':'#c2ccd4');     // 상단 하이라이트
+      if(y>=5)g.fillStyle=amber?'#d97f0e':'#98a4ad';                             // 하단 셰이드
+      g.fillRect(X,Y,px,px);
     }});});
   });
+  // 하단 앰버 룰
+  g.fillStyle='#ff9e1b';g.fillRect(px/2,9*px+1,cv.width-px,2);
 }
 /* =====================================================================
    AudioEngine — 100% Web Audio 합성 (샘플 0개)
@@ -1183,13 +1319,14 @@ function segBox(p0,d,len,c,s){
   }
   return t0;
 }
+/* 마인크래프트 인체비율: 머리 0.5³ / 몸통 0.5×0.75×0.25 / 팔다리 0.25×0.75 (전고 2.0m) */
 const PARTS_L=[
-  {n:'head', c:{x:0,y:1.51,z:0},s:{x:.42,y:.42,z:.42}},
-  {n:'torso',c:{x:0,y:.95,z:0}, s:{x:.5,y:.72,z:.34}},
-  {n:'armL', c:{x:-.35,y:.95,z:0},s:{x:.18,y:.62,z:.18}},
-  {n:'armR', c:{x:.35,y:.95,z:0}, s:{x:.18,y:.62,z:.18}},
-  {n:'legL', c:{x:-.13,y:.3,z:0}, s:{x:.2,y:.62,z:.2}},
-  {n:'legR', c:{x:.13,y:.3,z:0},  s:{x:.2,y:.62,z:.2}},
+  {n:'head', c:{x:0,y:1.75,z:0},  s:{x:.52,y:.52,z:.52}},
+  {n:'torso',c:{x:0,y:1.125,z:0}, s:{x:.52,y:.76,z:.28}},
+  {n:'armL', c:{x:-.385,y:1.125,z:0},s:{x:.27,y:.76,z:.27}},
+  {n:'armR', c:{x:.385,y:1.125,z:0}, s:{x:.27,y:.76,z:.27}},
+  {n:'legL', c:{x:-.13,y:.375,z:0}, s:{x:.27,y:.76,z:.27}},
+  {n:'legR', c:{x:.13,y:.375,z:0},  s:{x:.27,y:.76,z:.27}},
 ];
 let ENEMY_ID=0;
 class Enemy{
@@ -1203,7 +1340,7 @@ class Enemy{
     this.fallV=0;this.fallFrom=0;this.dead=false;this.flee=false;
     this.zigT=0;this.zigDir=1;this.glint=!!opts.glint;this.glintT=rand(2);
     this.noMove=!!opts.noMove||type==='sniper';
-    this.skin=MERC_SKINS[opts.skin||{grunt:DD.skin,sniper:DD.skin,officer:'gold',heavy:'heavy',runner:'runner'}[type]]||MERC_SKINS.tan;
+    this.skin=getSkin(opts.skin||{grunt:DD.skin,sniper:DD.skin,officer:'gold',heavy:'heavy',runner:'runner'}[type]||'tan',this.id);
     this.pos=V3(x,opts.y!==undefined?opts.y:world.surfaceY(x,z),z);
     this.yaw=rand(6.28);this.crouch=0;this.walkT=0;
     this.home=this.pos.clone();
@@ -1215,24 +1352,36 @@ class Enemy{
   build(){
     const g=new THREE.Group(),sk=this.skin;
     const B=(mat,x,y,z,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;};
-    this.mTorso=B(sk.body,0,.95,0,.5,.72,.34);
-    this.headG=new THREE.Group();this.headG.position.y=1.3;g.add(this.headG);
-    this.mHead=new THREE.Mesh(new THREE.BoxGeometry(.42,.42,.42),sk.head);this.mHead.position.y=.21;this.mHead.castShadow=true;this.headG.add(this.mHead);
-    if(this.helmet){this.mHelm=new THREE.Mesh(new THREE.BoxGeometry(.48,.3,.48),MATS[MI.metal].clone());this.mHelm.material.vertexColors=false;this.mHelm.position.y=.34;this.headG.add(this.mHelm);}
-    const limb=(mat,x,sy)=>{const grp=new THREE.Group();grp.position.set(x,sy,0);
-      const m=new THREE.Mesh(new THREE.BoxGeometry(.18,.6,.18),mat);m.position.y=-.3;m.castShadow=true;grp.add(m);g.add(grp);return grp;};
-    this.armL=limb(sk.limb,-.35,1.26);this.armR=limb(sk.limb,.35,1.26);
-    this.legL=limb(sk.limb,-.13,.62);this.legR=limb(sk.limb,.13,.62);
-    this.mGun=B(new THREE.MeshLambertMaterial({color:0x22242a}),.2,1.02,-.3,.08,.1,.7);
-    if(this.type==='officer'){const cap=B(new THREE.MeshLambertMaterial({color:0xc8a030}),0,1.78,0,.46,.1,.46);this.capMesh=cap;}
+    // 몸통
+    this.mTorso=B(sk.body,0,1.125,0,.5,.75,.25);
+    // 머리 (0.5³, 정면 -z에 얼굴 텍스처)
+    this.headG=new THREE.Group();this.headG.position.y=1.5;g.add(this.headG);
+    this.mHead=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.5),sk.headMats);
+    this.mHead.position.y=.25;this.mHead.castShadow=true;this.headG.add(this.mHead);
+    if(this.helmet){
+      this.mHelm=new THREE.Mesh(new THREE.BoxGeometry(.58,.32,.58),MATS[MI.metal].clone());
+      this.mHelm.material.vertexColors=false;this.mHelm.position.y=.42;this.headG.add(this.mHelm);
+    }
+    // 팔다리 (어깨/골반 피벗)
+    const limb=(mat,x,pivotY)=>{const grp=new THREE.Group();grp.position.set(x,pivotY,0);
+      const m=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),mat);m.position.y=-.375;m.castShadow=true;grp.add(m);g.add(grp);return grp;};
+    this.armL=limb(sk.arm,-.375,1.5);this.armR=limb(sk.arm,.375,1.5);
+    this.legL=limb(sk.leg,-.125,.75);this.legR=limb(sk.leg,.125,.75);
+    this.mGun=B(new THREE.MeshLambertMaterial({color:0x22242a}),.3,1.08,-.34,.09,.11,.78);
+    if(this.type==='officer'){ // 금장 정모
+      const cap=B(new THREE.MeshLambertMaterial({color:0x8a6f22}),0,2.06,0,.54,.13,.54);
+      const brim=B(new THREE.MeshLambertMaterial({color:0x241a04}),0,2.0,-.3,.5,.05,.16);
+      const band=B(new THREE.MeshLambertMaterial({color:0xffd94d}),0,2.01,0,.56,.04,.56);
+      this.capMesh=cap;this.headG.attach(cap);this.headG.attach(brim);this.headG.attach(band);
+    }
     if(this.glint){
       this.glintSp=new THREE.Sprite(new THREE.SpriteMaterial({map:PS.flashMesh.material.map,color:0xcfe8ff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-      this.glintSp.scale.setScalar(1.6);this.glintSp.position.set(0,1.55,-.4);this.glintSp.visible=false;g.add(this.glintSp);
+      this.glintSp.scale.setScalar(1.6);this.glintSp.position.set(0,1.75,-.45);this.glintSp.visible=false;g.add(this.glintSp);
     }
     g.position.copy(this.pos);g.rotation.y=this.yaw;
     this.group=g;EnemyMgr.group.add(g);
   }
-  eyePos(){return this.pos.clone().add(V3(0,1.5-this.crouch*.55,0))}
+  eyePos(){return this.pos.clone().add(V3(0,1.7-this.crouch*.55,0))}
   /* 선분 히트 판정 → {t, part} */
   segHit(p0,dir,len){
     const inv=this.pos.clone().multiplyScalar(-1);
@@ -1343,6 +1492,7 @@ class Enemy{
     this.sync();
   }
   fireAtPlayer(dt,rate){
+    if(QM.state!=='playing')return; // 메뉴/결과 화면에서는 사격 안 함
     this.atkT-=dt*rate;
     if(this.atkT>0)return;
     this.atkT=rand(1.3,2.1);
@@ -1401,7 +1551,7 @@ class Enemy{
     this.group.traverse(o=>{
       if(!o.isMesh||o===this.mHelm)return;
       if(head&&o===this.mHead){ // 헤드샷: 머리 폭발
-        PS.debris(this.pos.clone().add(V3(0,1.5,0)),MI.brick,12,V3(dir.x,2,dir.z));return;
+        PS.debris(this.pos.clone().add(V3(0,1.75,0)),MI.brick,12,V3(dir.x,2,dir.z));return;
       }
       const wp=o.getWorldPosition(V3()),m=new THREE.Mesh(o.geometry,o.material);
       m.position.copy(wp);m.rotation.copy(o.rotation);m.castShadow=false;
@@ -1429,6 +1579,7 @@ const EnemyMgr={
   alert(pos,r){
     for(const e of this.list)if(!e.dead&&e.pos.distanceTo(pos)<r)
       setTimeout(()=>e.onAlert(),(DD.alertDelay+rand(.5))*1000);
+    for(const p of this.props)if(p.scare)p.scare(pos); // 야생동물 도주
     if(this.alive().some(e=>e.state!=='idle'))Music.setState(this.boss&&!this.boss.dead?'BOSS':'ALERT');
   },
   update(dt){
@@ -1502,12 +1653,12 @@ class Hostage{
     this.kind='hostage';
     const y=world.surfaceY(x,z);
     this.pos=V3(x,y,z);
-    const sk=MERC_SKINS.civ;
+    const sk=getSkin('civ',1);
     this.group=new THREE.Group();
     const B=(mat,px,py,pz,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(px,py,pz);m.castShadow=true;this.group.add(m);};
-    B(sk.body,0,.72,0,.5,.66,.34);B(sk.head,0,1.28,0,.42,.42,.42);
-    B(sk.limb,-.33,.95,0,.16,.5,.16);B(sk.limb,.33,.95,0,.16,.5,.16); // 손 든 팔
-    B(sk.limb,-.13,.2,.1,.2,.4,.44);B(sk.limb,.13,.2,.1,.2,.4,.44);   // 무릎 꿇음
+    B(sk.body,0,.85,0,.5,.75,.25);B(sk.headMats,0,1.48,0,.5,.5,.5);
+    B(sk.arm,-.375,1.42,0,.22,.62,.22);B(sk.arm,.375,1.42,0,.22,.62,.22); // 손 든 팔
+    B(sk.leg,-.13,.24,.12,.25,.45,.5);B(sk.leg,.13,.24,.12,.25,.45,.5);   // 무릎 꿇음
     this.group.position.copy(this.pos);
     this.group.rotation.y=Math.atan2(player.pos.x-x,player.pos.z-z);
     EnemyMgr.group.add(this.group);
@@ -1532,7 +1683,7 @@ class Truck{
     this.engine=B(mBody,3.1,.9,0,1,.8,1.8);              // 엔진(약점)
     B(mBody,-.8,1.5,0,3.4,1.8,2.2);                      // 카고
     [[-2,-.9],[-2,.9],[1.2,-.9],[1.2,.9],[2.6,-.9],[2.6,.9]].forEach(w=>B(mDark,w[0],.4,w[1],.7,.7,.3));
-    this.driver=B(MERC_SKINS.tan.head,1.9,2.05,.5,.4,.4,.4); // 운전병 머리
+    this.driver=B(getSkin('tan',0).headMats,1.9,2.05,.5,.4,.4,.4); // 운전병 머리
     EnemyMgr.group.add(this.group);
     EnemyMgr.props.push(this);
   }
@@ -1681,6 +1832,112 @@ class Boss{
     QM.onBossDown();
   }
   dispose(){EnemyMgr.group.remove(this.group);this.rocks.forEach(r=>EnemyMgr.group.remove(r.mesh));}
+}
+/* =====================================================================
+   야생 동물 — 복셀 멧돼지 / 들닭 / 사슴 (배회·풀뜯기·총성 도주)
+   ===================================================================== */
+class Animal{
+  constructor(type,x,z){
+    this.kind='animal';this.type=type;this.dead=false;
+    this.pos=V3(x,world.surfaceY(x,z),z);this.home=this.pos.clone();
+    this.yaw=rand(6.28);this.walkT=0;this.state='idle';this.stateT=rand(1,3);
+    this.fleeT=0;this.fleeDir=V3(1,0,0);this.target=this.pos.clone();
+    this.build();
+    EnemyMgr.group.add(this.group);EnemyMgr.props.push(this);
+  }
+  build(){
+    const A=ANIMAL_MATS,g=new THREE.Group();this.group=g;this.legs=[];
+    const B=(m,x,y,z,sx,sy,sz)=>{const ms=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),m);ms.position.set(x,y,z);ms.castShadow=true;g.add(ms);return ms;};
+    const LEG=(m,x,z,h,w)=>{const gr=new THREE.Group();gr.position.set(x,h,z);
+      const ms=new THREE.Mesh(new THREE.BoxGeometry(w,h,w),m);ms.position.y=-h/2;ms.castShadow=true;gr.add(ms);g.add(gr);this.legs.push(gr);return gr;};
+    if(this.type==='boar'){
+      B(A.boar,0,.62,0,.55,.5,.95);
+      this.headM=B(A.boarD,0,.66,-.62,.4,.38,.35);
+      B(A.snout,0,.56,-.84,.18,.14,.12);
+      B(A.boarD,0,.9,.12,.3,.1,.65);                     // 등갈기
+      LEG(A.boarD,-.18,-.32,.38,.14);LEG(A.boarD,.18,-.32,.38,.14);
+      LEG(A.boarD,-.18,.34,.38,.14);LEG(A.boarD,.18,.34,.38,.14);
+      this.spd=.8;this.fspd=4.6;this.box={c:{x:0,y:.6,z:-.05},s:{x:.65,y:.85,z:1.6}};
+    }else if(this.type==='hen'){
+      B(A.hen,0,.42,0,.34,.3,.46);
+      this.headM=B(A.hen,0,.66,-.2,.18,.2,.18);
+      B(A.beak,0,.64,-.32,.08,.06,.08);
+      B(A.comb,0,.8,-.2,.06,.09,.12);
+      B(A.hen,0,.52,.27,.2,.16,.14);                     // 꼬리
+      LEG(A.henLeg,-.07,.02,.27,.05);LEG(A.henLeg,.07,.02,.27,.05);
+      this.spd=.6;this.fspd=3.6;this.box={c:{x:0,y:.5,z:0},s:{x:.45,y:.65,z:.65}};
+    }else{ // deer
+      B(A.deer,0,.95,0,.42,.45,.95);
+      B(A.deer,0,1.32,-.5,.2,.5,.22);                    // 목
+      this.headM=B(A.deerD,0,1.64,-.58,.26,.26,.4);
+      B(A.antler,-.1,1.9,-.52,.04,.28,.04);B(A.antler,.1,1.9,-.52,.04,.28,.04);
+      B(A.antler,-.15,2.0,-.52,.14,.04,.04);B(A.antler,.15,2.0,-.52,.14,.04,.04);
+      B(A.deerD,0,1.08,.5,.12,.14,.1);                   // 꼬리
+      LEG(A.deerD,-.14,-.32,.72,.11);LEG(A.deerD,.14,-.32,.72,.11);
+      LEG(A.deerD,-.14,.34,.72,.11);LEG(A.deerD,.14,.34,.72,.11);
+      this.spd=1.1;this.fspd=6.5;this.box={c:{x:0,y:1.0,z:-.05},s:{x:.55,y:1.6,z:1.5}};
+    }
+    g.position.copy(this.pos);g.rotation.y=this.yaw;
+  }
+  segHit(p0,dir,len){
+    if(this.dead)return null;
+    const lp=p0.clone().sub(this.pos).applyAxisAngle(V3(0,1,0),-this.yaw);
+    const ld=dir.clone().applyAxisAngle(V3(0,1,0),-this.yaw);
+    const t=segBox(lp,ld,len,this.box.c,this.box.s);
+    return t!==null?{t}:null;
+  }
+  onHit(point,dir){
+    if(this.dead)return;
+    this.dead=true;
+    AE.hit('body',this.pos);
+    this.group.traverse(o=>{
+      if(!o.isMesh)return;
+      const wp=o.getWorldPosition(V3()),m=new THREE.Mesh(o.geometry,o.material);
+      m.position.copy(wp);m.castShadow=false;EnemyMgr.group.add(m);
+      EnemyMgr.ragdolls.push({mesh:m,vel:V3(dir.x*2+rand(-1,1),rand(1.5,3),dir.z*2+rand(-1,1)),
+        ang:V3(rand(-6,6),rand(-6,6),rand(-6,6)),life:6,gy:world.surfaceY(wp.x,wp.z)});
+    });
+    EnemyMgr.group.remove(this.group);
+    const i=EnemyMgr.props.indexOf(this);if(i>=0)EnemyMgr.props.splice(i,1);
+  }
+  scare(pos){
+    if(this.dead||this.pos.distanceTo(pos)>24)return;
+    this.fleeT=rand(2.5,3.5);
+    this.fleeDir=this.pos.clone().sub(pos);this.fleeDir.y=0;
+    if(this.fleeDir.lengthSq()<.01)this.fleeDir.set(rand(-1,1),0,rand(-1,1));
+    this.fleeDir.normalize();
+  }
+  update(dt){
+    if(this.dead)return;
+    let moving=false,spd=this.spd;
+    if(this.fleeT>0){
+      this.fleeT-=dt;spd=this.fspd;moving=true;
+      this.yaw=Math.atan2(this.fleeDir.x,this.fleeDir.z);
+      this.pos.addScaledVector(this.fleeDir,spd*dt);
+      this.pos.x=clamp(this.pos.x,-31,31);this.pos.z=clamp(this.pos.z,-31,31);
+    }else{
+      this.stateT-=dt;
+      if(this.state==='walk'){
+        const d=this.target.clone().sub(this.pos);d.y=0;const l=d.length();
+        if(l<.3||this.stateT<=0){this.state='idle';this.stateT=rand(1.5,4);}
+        else{d.divideScalar(l);this.yaw=Math.atan2(d.x,d.z);this.pos.addScaledVector(d,spd*dt);moving=true;}
+      }else if(this.stateT<=0){
+        this.state='walk';this.stateT=rand(3,6);
+        this.target=this.home.clone().add(V3(rand(-9,9),0,rand(-9,9)));
+        this.target.x=clamp(this.target.x,-30,30);this.target.z=clamp(this.target.z,-30,30);
+      }
+    }
+    this.pos.y=world.surfaceY(this.pos.x,this.pos.z);
+    this.walkT+=dt*(moving?spd*3.2:0);
+    const s=Math.sin(this.walkT);
+    this.legs.forEach((lg,i)=>lg.rotation.x=moving?s*(i%2?-1:1)*.6:0);
+    if(this.headM){ // 머리 까딱 / 풀 뜯기
+      if(this.type==='hen')this.headM.position.y=.66+(moving?Math.abs(Math.sin(this.walkT*1.6))*.07:0);
+      else this.headM.rotation.x=(!moving&&this.state==='idle')?Math.sin(performance.now()/900)*.18+.22:0;
+    }
+    this.group.position.copy(this.pos);this.group.rotation.y=this.yaw;
+  }
+  dispose(){EnemyMgr.group.remove(this.group);}
 }
 /* =====================================================================
    DifficultyDirector — 챕터별 수치
@@ -1980,6 +2237,7 @@ function resolveHit(b,hit,point,dirn){
     return true;
   }
   if(hit.kind==='target'){hit.prop.onHit();b.killed=true;G.stats.hits++;HUD.hitmarker(false);return true;}
+  if(hit.kind==='animal'){hit.prop.onHit(point,dirn);b.killed=true;HUD.hitmarker(false);vib('hit');return true;}
   if(hit.kind==='hostage'){hit.prop.onHit();return true;}
   if(hit.kind==='truck'){hit.prop.onHit(hit.part,point,dirn);G.stats.hits++;QM.onHit();HUD.hitmarker(hit.part==='driver');b.killed=true;return true;}
   // 블록
@@ -2191,6 +2449,9 @@ const QM={
     EnemyMgr.clear();PS.reset();
     applyEnv(env);
     player.reset();
+    // 야생 동물 배치
+    const nAnim=this.m&&this.m.type==='boss'?2:5;
+    for(let i=0;i<nAnim;i++)new Animal(pick(['boar','hen','hen','deer']),rand(-26,26),rand(-26,12));
     if(this.m&&this.m.type==='ammo'){player.reserve=2;} // 5+2=7발
     HUD.ammo();HUD.hp();HUD.hint(null);HUD.timer(null);
     $('dropArrow').classList.add('hide');AE.heartbeat(false);
@@ -2587,17 +2848,18 @@ const SCREENS=['scrTitle','scrMenu','scrShop','scrSettings','scrStats','scrEnd',
 function showScreen(id){
   SCREENS.forEach(s=>$(s).classList.toggle('hide',s!==id));
   $('hud').style.visibility=id&&id!=='scrPause'?'hidden':'visible';
+  document.body.classList.toggle('inMenu',!!id);
 }
 let selCh=0,setBack='scrMenu';
 function renderMenu(){
-  $('goldTxt').textContent='● '+G.gold+' G';
+  $('goldTxt').textContent=G.gold+' G';
   const tabs=$('chapTabs');tabs.innerHTML='';
   CHAPTERS.forEach((c,i)=>{
     const locked=totalStars()<c.gate;
     const b=document.createElement('button');
     b.className='chapTab'+(i===selCh?' sel':'')+(locked?' lock':'');
-    b.textContent=(i+1)+'장'+(locked?' 🔒':'');
-    b.onclick=()=>{AE.click();if(locked){HUD.toast('별 '+c.gate+'개 필요 (현재 '+totalStars()+'개)');return;}selCh=i;renderMenu();};
+    b.innerHTML=(i+1)+'장'+(locked?'<i>★'+c.gate+'</i>':'');
+    b.onclick=()=>{AE.click();if(locked){HUD.toast('별 '+c.gate+'개 필요 · 현재 '+totalStars()+'개');return;}selCh=i;renderMenu();};
     tabs.appendChild(b);
   });
   const list=$('missionList');list.innerHTML='';
@@ -2607,28 +2869,29 @@ function renderMenu(){
     const key=selCh+'-'+mi,st=G.stars[key]||0;
     const card=document.createElement('button');
     card.className='miCard';
-    card.innerHTML='<span>'+m.n+'<small>'+m.desc.split('\n')[0]+' · 별 조건 '+m.par+'초</small></span>'
-      +'<span class="stars">'+'★'.repeat(st)+'<span style="color:#555">'+'★'.repeat(3-st)+'</span></span>';
+    card.innerHTML='<span class="miIdx">'+String(mi+1).padStart(2,'0')+'</span>'
+      +'<span class="miBody"><span class="miName">'+m.n+'</span><small>'+m.desc.split('\n')[0]+' · 별 조건 '+m.par+'초</small></span>'
+      +'<span class="stars">'+'★'.repeat(st)+'<span style="color:#333c44">'+'★'.repeat(3-st)+'</span></span>';
     card.onclick=()=>{if(chLocked)return;AE.click();QM.begin(selCh,mi);};
     list.appendChild(card);
   });
   $('btnEndless').classList.toggle('hide',!G.allClear);
 }
 function renderShop(){
-  $('goldTxt2').textContent='● '+G.gold+' G';
+  $('goldTxt2').textContent=G.gold+' G';
   const list=$('shopList');list.innerHTML='';
   SHOP.forEach(it=>{
     const owned=!!G.up[it.k];
     const row=document.createElement('div');row.className='shopItem';
-    row.innerHTML='<span>'+it.n+'<small>'+it.d+'</small></span>';
+    row.innerHTML='<span><span class="siName">'+it.n+'</span><small>'+it.d+'</small></span>';
     const btn=document.createElement('button');
     btn.className='buyBtn'+(owned?' owned':'');
-    btn.textContent=owned?'보유중':it.p+' G';
+    btn.textContent=owned?'보유':it.p+' G';
     btn.disabled=owned||G.gold<it.p;
     btn.onclick=()=>{
       if(owned||G.gold<it.p)return;
       G.gold-=it.p;G.up[it.k]=1;AE.coin();AE.star(1);
-      HUD.toast(it.n+' 구매!');renderShop();
+      HUD.toast(it.n+' 구매 완료');renderShop();
     };
     row.appendChild(btn);list.appendChild(row);
   });
@@ -2647,7 +2910,7 @@ function renderStats(){
 function showEnd(won,stars,msg,gold){
   showScreen('scrEnd');
   $('endTitle').textContent=won?'임무 완수':'임무 실패';
-  $('endTitle').style.color=won?'#ffb830':'#ff5544';
+  $('endTitle').style.color=won?'#eef1f4':'#ff7364';
   const fr=$('failReason');
   if(!won&&msg){fr.classList.remove('hide');fr.textContent='실패 원인: '+msg;}
   else if(msg){fr.classList.remove('hide');fr.style.color='#7dda58';fr.textContent=msg;}
@@ -2662,7 +2925,7 @@ function showEnd(won,stars,msg,gold){
   const ms=QM.ms,acc=ms.shots?(ms.hits/ms.shots*100|0):0;
   $('endStats').innerHTML=(QM.mode==='mission'?
     '시간 '+ms.t.toFixed(1)+'초 (별 조건 '+QM.m.par+'초) · 명중률 '+acc+'% · 피격 '+ms.dmg+'회<br>':'')
-    +'킬 '+ms.kills+' · 헤드샷 '+ms.heads+(gold?'<br><span style="color:#ffd94d">+'+gold+' G 획득</span>':'');
+    +'킬 '+ms.kills+' · 헤드샷 '+ms.heads+(gold?'<br><span style="color:#ffc668">+'+gold+' G 획득</span>':'');
   // 다음 임무 버튼
   const nx=$('btnNext');nx.classList.add('hide');
   if(won&&QM.mode==='mission'){
@@ -2731,7 +2994,7 @@ function wireUI(){
    메인 루프
    ===================================================================== */
 const _frustum=new THREE.Frustum(),_pv=new THREE.Matrix4();
-let _last=performance.now(),_acc30=0;
+let _last=performance.now(),_acc30=0,_menuT=rand(6.28);
 function frame(now){
   requestAnimationFrame(frame);
   let dt=Math.min((now-_last)/1000,.06);_last=now;
@@ -2739,14 +3002,21 @@ function frame(now){
   if(S.fps30){_acc30+=dt;if(_acc30<1/31)return;dt=Math.min(_acc30,.08);_acc30=0;} // 절전 모드
   if(paused)return;
   const dts=dt*timeScale;
+  if(QM.state==='idle'){ // 메뉴 배경: 전장 위 슬로우 드리프트 카메라
+    _menuT+=dt*.045;
+    camera.position.set(Math.sin(_menuT)*42,15+Math.sin(_menuT*.63)*2.5,Math.cos(_menuT)*34+6);
+    camera.lookAt(0,3.5,-4);
+    if(Math.abs(camera.fov-58)>.01){camera.fov=58;camera.updateProjectionMatrix();}
+    weapon.group.visible=false;
+  }
   if(QM.state==='playing'){
     input.tick(dt);
     player.update(dt);
     weapon.update(dt,input.lookVX,input.lookVY);
     updateBullets(dts);
-    EnemyMgr.update(dts);
     QM.update(dt);
   }
+  EnemyMgr.update(dts); // 메뉴 배경에서도 순찰·동물 배회 유지
   world.update(dts);
   PS.update(dts);
   world.flush();
@@ -2766,13 +3036,16 @@ function boot(){
     $('titleTap').textContent='Three.js 로드 실패 — 네트워크를 확인하세요';
     $('fadeBlack').style.opacity=0;return;
   }
-  buildMaterials();buildBlockGeo();buildMercSkins();buildTargetMats();drawLogo();
+  buildMaterials();buildBlockGeo();buildMercSkins();buildAnimalMats();buildTargetMats();drawLogo();
   init3D();
   world=new BlockWorld();scene.add(world.group);
   PS.init(scene);EnemyMgr.init(scene);
   world.generate(4242,{}); // 타이틀 배경
   applyEnv(CH_ENV[0]);
   player.reset();
+  // 타이틀/메뉴 배경 연출: 순찰병 + 야생동물
+  for(let i=0;i<3;i++)EnemyMgr.spawn('grunt',rand(-20,20),rand(-20,6));
+  for(let i=0;i<4;i++)new Animal(pick(['boar','hen','deer']),rand(-24,24),rand(-24,10));
   weapon.init(camera);
   input.init();HUD.init();wireUI();
   camera.position.copy(player.eyePos());
