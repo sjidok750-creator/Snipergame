@@ -27,7 +27,8 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--fb);color:var(--txt);touch-action:none;font-size:13px}
-#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;transition:filter .6s}
+#c.desat{filter:grayscale(.85) brightness(.6)} /* 시간 초과 실패 연출 */
 .hide{display:none!important}
 .chamfer{clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px)}
 /* ================= HUD ================= */
@@ -256,7 +257,7 @@ body.lefty #windFlag{right:auto;left:calc(14px + env(safe-area-inset-left));text
     <div class="ctrlCard"><b data-i18n="ctrl_fire">FIRE</b><span data-i18n="ctrl_fire_d">Shoot · bolt action</span></div>
     <div class="ctrlCard"><b data-i18n="ctrl_breath">HOLD BREATH</b><span data-i18n="ctrl_breath_d">Steady the shot</span></div>
   </div>
-  <div id="titleVer"><b>BLOCKSHOT</b> · <span data-i18n="ver">100% ORIGINAL ASSETS · V 1.2</span></div>
+  <div id="titleVer"><b>BLOCKSHOT</b> · <span data-i18n="ver">100% ORIGINAL ASSETS · V 1.3</span></div>
 </div>
 
 <div class="screen left hide" id="scrMenu">
@@ -355,7 +356,7 @@ const CAN_VIB=('vibrate' in navigator)&&!IS_IOS;
 let LANG='en';
 const I18N={
 en:{
-  tap:'[ TAP TO DEPLOY ]',ver:'100% ORIGINAL ASSETS · V 1.2',
+  tap:'[ TAP TO DEPLOY ]',ver:'100% ORIGINAL ASSETS · V 1.3',
   ctrl_look:'LEFT DRAG',ctrl_look_d:'Aim view',
   ctrl_aim:'AIM',ctrl_aim_d:'Scope · pinch zoom',
   ctrl_fire:'FIRE',ctrl_fire_d:'Shoot · bolt action',
@@ -395,9 +396,10 @@ en:{
   f_hs:'Not enough headshots',f_streak:'Streak broken — no hostiles left',
   f_lr:'Not enough 120m+ kills',f_vip:'The VIP escaped',f_truck:'The convoy got through',
   f_wave:'K.I.A. on wave {0} (best: {1})',
+  lb_h:'BEST RUNS',lb_row:'WAVE {0} · {1} KILLS · {2} HS',
 },
 ko:{
-  tap:'[ 화면을 터치해 작전 개시 ]',ver:'100% 독자 제작 에셋 · V 1.2',
+  tap:'[ 화면을 터치해 작전 개시 ]',ver:'100% 독자 제작 에셋 · V 1.3',
   ctrl_look:'좌측 드래그',ctrl_look_d:'시점 조작',
   ctrl_aim:'조준',ctrl_aim_d:'스코프 · 핀치 줌',
   ctrl_fire:'발사',ctrl_fire_d:'사격 · 볼트액션',
@@ -437,6 +439,7 @@ ko:{
   f_hs:'헤드샷이 부족합니다',f_streak:'연속 킬 실패 — 적이 남지 않았다',
   f_lr:'120m+ 저격이 부족합니다',f_vip:'VIP가 도주했습니다',f_truck:'호송 차량이 통과했습니다',
   f_wave:'WAVE {0}에서 전사 (최고 기록 {1})',
+  lb_h:'최고 기록',lb_row:'WAVE {0} · {1}킬 · 헤드샷 {2}',
 }};
 const T=(k,...a)=>{let s=(I18N[LANG]&&I18N[LANG][k])??I18N.en[k]??k;a.forEach((v,i)=>{s=s.split('{'+i+'}').join(v);});return s;};
 const tx=o=>(o&&typeof o==='object')?(o[LANG]??o.en):o;
@@ -449,6 +452,7 @@ const G={
   stars:{},cleared:{},                     // key 'c-m' → 별 수 / true
   up:{zoom:0,breath:0,speed:0,mag:0,reload:0,pierce:0,wind:0,vest:0},
   stats:{kills:0,heads:0,shots:0,hits:0,longest:0,blocks:0,bestWave:0},
+  runs:[],                                 // 무한 모드 기록 (세션)
 };
 const totalStars=()=>Object.values(G.stars).reduce((a,b)=>a+b,0);
 const gMag=()=>5+(G.up.mag?2:0);
@@ -823,6 +827,13 @@ const AE={
     [523,659,784,1046].forEach((f,i)=>{this.osc('square',f,.35,.22,this.mus,{delay:i*.12});this.osc('triangle',f/2,.4,.2,this.mus,{delay:i*.12});});},
   failSnd(){if(!this.started)return;[440,392,311,233].forEach((f,i)=>this.osc('sawtooth',f,.4,.16,this.mus,{delay:i*.18,f1:f*.94}));},
   click(){if(this.started)this.osc('square',900,.04,.12,this.sfx);},
+  failFx(mode){ // 실패 연출음
+    if(!this.started)return;
+    if(mode==='roll'){this.osc('sine',620,1.4,.22,this.mus,{f1:280,a:.05});}                  // 플랫라인 하강
+    else if(mode==='focus'){this.osc('square',760,.28,.2,this.mus);this.osc('square',560,.3,.2,this.mus,{delay:.32});
+      this.osc('square',760,.28,.16,this.mus,{delay:.66});}                                    // 경보 2톤
+    else if(mode==='desat'){for(let i=0;i<4;i++)this.osc('square',i%2?900:1200,.05,.16,this.mus,{delay:i*.3});} // 시계 틱톡
+  },
   radio(){ // 브리핑 무전: 크랙 + 삑 2회
     if(!this.started)return;
     this.noise(.09,.12,this.mus,{bp:1800,q:1.2});
@@ -1366,10 +1377,30 @@ const weapon={
     this.group.add(this.bolt);
     this.muzzleRef=new THREE.Object3D();this.muzzleRef.position.set(0,.025,-.41);this.group.add(this.muzzleRef);
     this.portRef=new THREE.Object3D();this.portRef.position.set(.04,.05,.03);this.group.add(this.portRef);
+    this.upGroup=new THREE.Group();this.group.add(this.upGroup); // 업그레이드 부착물
+    this._upMats=wm;
     this.group.scale.setScalar(1.6);
     this.group.position.copy(this.hipPos);
     this.group.rotation.y=-.04;
     cam.add(this.group);
+  },
+  /* 상점 업그레이드 → 총기 외형 반영 */
+  applyUpgrades(){
+    const wm=this._upMats;
+    this.upGroup.clear();
+    const U=(mat,x,y,z,sx,sy,sz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),mat);m.position.set(x,y,z);m.castShadow=false;this.upGroup.add(m);return m;};
+    if(G.up.zoom){                                   // 대형 대물렌즈 + 선셰이드
+      U(wm.scope,0,.085,-.104,.054,.054,.02);
+      U(wm.dark, 0,.085,-.122,.05,.05,.018);
+    }
+    if(G.up.speed){                                  // 연장 총열 + 컴펜세이터
+      U(wm.metal,0,.025,-.415,.02,.02,.05);
+      U(wm.dark, 0,.025,-.448,.034,.03,.03);
+    }
+    if(G.up.wind)U(wm.dark,0,.025,-.30,.036,.036,.13);          // 방풍 배럴 슈라우드
+    if(G.up.mag) U(wm.metal,0,-.084,-.03,.038,.03,.055);        // 연장 탄창
+    if(G.up.pierce)U(new THREE.MeshLambertMaterial({color:0x3f8a3a}),0,-.052,-.062,.042,.014,.008); // 관통탄 밴드
+    if(G.up.reload)U(new THREE.MeshLambertMaterial({color:0x151618}),0,-.062,.06,.044,.05,.054);    // 속사 그립 랩
   },
   muzzlePos(){const v=V3();this.muzzleRef.getWorldPosition(v);return v},
   onFire(){this.kick=1;const mp=this.muzzlePos();PS.flash(mp);PS.dust(mp,2);}, // 섬광 + 총구 연기
@@ -1575,7 +1606,7 @@ class Enemy{
         // 시체 발견
         if(this.stateT%.31<dt)for(const c of EnemyMgr.corpses){
           if(this.pos.distanceTo(c.pos)<12&&world.los(this.eyePos(),c.pos.clone().add(V3(0,.4,0)))){
-            QM.onCorpseSeen();EnemyMgr.alert(this.pos,18);break;
+            QM.onCorpseSeen(c.pos.clone());EnemyMgr.alert(this.pos,18);break;
           }
         }
         break;}
@@ -1834,7 +1865,7 @@ class Truck{
     if(this.dead)return;
     this.x+=5.2*dt;
     this.group.position.set(this.x,world.surfaceY(this.x,this.z)+.05,this.z);
-    if(this.x>44){this.dead=true;QM.fail(T('f_truck'));}
+    if(this.x>44){this.dead=true;QM.fail(T('f_truck'),{mode:'focus',pos:this.pos});}
   }
   dispose(){EnemyMgr.group.remove(this.group);}
 }
@@ -2119,7 +2150,13 @@ const player={
       const sp=.03*(1-this.adsT);
       dir.add(V3(rand(-sp,sp),rand(-sp,sp),rand(-sp,sp))).normalize();
     }
-    fireBullet(camera.position.clone().addScaledVector(dir,.5),dir);
+    const org=camera.position.clone().addScaledVector(dir,.5);
+    const b=fireBullet(org,dir);
+    // 5킬 주기 후보 + 사전 궤적 시뮬레이션 → 100m+ 헤드샷 확정 시 킬캠
+    if(!Killcam.active&&(G.stats.kills+1)%5===0){
+      const pred=simulateBullet(org,dir);
+      if(pred&&pred.head&&pred.dist>=100)Killcam.start(b);
+    }
     AE.shot();weapon.onFire();vib('shot');
     this.recoil+=.026;              // 카메라 킥 1.5도
     this.trauma(.32);               // trauma 셰이크 0.15초
@@ -2144,16 +2181,16 @@ const player={
     requestAnimationFrame(()=>{dv.style.transition='opacity .6s';dv.style.opacity=Math.max(0,(1-this.hp/this.maxHp)*.5);});
     vib('dmg');this.trauma(.4);
     HUD.hp();
-    if(this.hp<=0){this.dead=true;QM.fail(T('f_kia'));}
+    if(this.hp<=0){this.dead=true;QM.fail(T('f_kia'),{mode:'roll'});}
   },
   update(dt){
     // ADS 전환 0.15s easeOutQuad
     const tgt=this.ads?1:0;
     this.adsT=clamp(this.adsT+(tgt?1:-1)*dt/.15,0,1);
     const e=easeOutQuad(this.adsT);
-    const fovT=lerp(75,75/this.zoom,e);
+    const fovT=Killcam.active?62:lerp(75,75/this.zoom,e);
     if(Math.abs(camera.fov-fovT)>.01){camera.fov=fovT;camera.updateProjectionMatrix();}
-    HUD.scopeVis(this.adsT);
+    HUD.scopeVis(Killcam.active?0:this.adsT);
     // 무기 상태 머신
     this.wstateT+=dt;
     if(this.wstate==='bolt'&&this.wstateT>=CFG_BOLT){this.wstate='ready';this.wstateT=0;}
@@ -2194,9 +2231,11 @@ const player={
       if(this.slowmoT<=0){timeScale=1;$('kcT').style.height='0';$('kcB').style.height='0';$('kcTxt').style.opacity=0;}
       else timeScale=.25;
     }
-    // 카메라 합성
-    camera.position.copy(this.eyePos());
-    camera.rotation.set(this.pitch+this.recoil+swP+shP,this.yaw+swY+shY,0,'YXZ');
+    // 카메라 합성 (킬캠 중에는 Killcam이 카메라를 소유)
+    if(!Killcam.active){
+      camera.position.copy(this.eyePos());
+      camera.rotation.set(this.pitch+this.recoil+swP+shP,this.yaw+swY+shY,0,'YXZ');
+    }
   },
 };
 /* =====================================================================
@@ -2289,11 +2328,99 @@ function worldToScreen(v){
   return{x:(p.x+1)/2*innerWidth,y:(-p.y+1)/2*innerHeight};
 }
 /* =====================================================================
+   Killcam — 총알 추적 카메라 (발사 시 궤적 사전 시뮬레이션으로 판정)
+   ===================================================================== */
+const Killcam={
+  active:false,b:null,holdT:0,impact:null,
+  start(b){
+    this.active=true;this.b=b;b.cam=true;this.holdT=0;this.impact=null;
+    timeScale=.3;
+    $('kcT').style.height='12%';$('kcB').style.height='12%';$('kcTxt').style.opacity=1;
+  },
+  onBulletEnd(b){
+    if(!this.active||b!==this.b)return;
+    this.impact=(b.lastPoint||b.p).clone();this.holdT=.55;this.b=null;
+  },
+  stop(){
+    if(!this.active)return;
+    this.active=false;this.b=null;this.impact=null;
+    timeScale=1;
+    $('kcT').style.height='0';$('kcB').style.height='0';$('kcTxt').style.opacity=0;
+  },
+  update(dt){
+    if(!this.active)return;
+    if(this.b&&bullets.includes(this.b))this.applyCam(this.b.p,this.b.v);
+    else if(this.impact){
+      this.holdT-=dt;
+      if(this.holdT<=0)this.stop();
+      else camera.lookAt(this.impact);
+      weapon.group.visible=false;
+    }else this.stop();
+  },
+  applyCam(p,v){
+    const dir=v.clone().normalize();
+    const cp=p.clone().addScaledVector(dir,-2.6).add(V3(0,.55,0));
+    cp.y=Math.max(cp.y,world.surfaceY(cp.x,cp.z)+.4);
+    camera.position.copy(cp);
+    camera.lookAt(p.clone().addScaledVector(dir,4));
+    weapon.group.visible=false;
+  },
+};
+/* 발사 직후 가상 궤적 시뮬레이션 (월드 변형 없음) → 킬캠 여부 판정 */
+function simulateBullet(origin,dir){
+  const p=origin.clone(),v=dir.clone().multiplyScalar(gSpeed());
+  const windA=QM.windVec.clone().multiplyScalar(1.6*gWindMul());
+  const sdt=.016;
+  for(let t=0;t<2.5;t+=sdt){
+    v.y-=9.8*sdt;v.addScaledVector(windA,sdt);
+    const prev=p.clone();
+    p.addScaledVector(v,sdt);
+    const seg=p.clone().sub(prev),len=seg.length(),dn=seg.clone().divideScalar(len);
+    const hE=EnemyMgr.trace(prev,dn,len);
+    const hB=world.ray(prev,dn,len);
+    if(hE&&(!hB||hE.t<hB.t)){
+      if(hE.kind==='enemy'&&hE.part==='head'&&!hE.e.helmet)
+        return{head:true,dist:prev.clone().addScaledVector(dn,hE.t).distanceTo(origin)};
+      return null;
+    }
+    if(hB||p.y<=.02)return null;
+  }
+  return null;
+}
+/* =====================================================================
+   FailFX — 실패 원인별 연출 (전사 롤 / 대상 포커스 / 시간 초과 탈색)
+   ===================================================================== */
+const FailFX={
+  t:0,mode:null,pos:null,roll:0,
+  start(fx){
+    if(!fx)return;
+    this.t=1.4;this.mode=fx.mode;this.pos=fx.pos?fx.pos.clone():null;this.roll=camera.rotation.z;
+    if(fx.mode==='desat')$('c').classList.add('desat');
+    AE.failFx(fx.mode);
+  },
+  reset(){this.t=0;this.mode=null;this.pos=null;$('c').classList.remove('desat');},
+  update(dt){
+    if(this.t<=0||QM.state!=='failed')return;
+    this.t-=dt;
+    if(this.mode==='roll'){ // 전사: 카메라 쓰러짐
+      this.roll=lerp(this.roll,.62,Math.min(dt*2.8,1));
+      camera.rotation.z=this.roll;
+      camera.position.y=Math.max(camera.position.y-dt*1.1,player.pos.y+.5);
+    }else if(this.mode==='focus'&&this.pos){ // 실패 원인 대상 응시
+      const m=new THREE.Matrix4().lookAt(camera.position,this.pos.clone().add(V3(0,1,0)),V3(0,1,0));
+      const q=new THREE.Quaternion().setFromRotationMatrix(m);
+      camera.quaternion.slerp(q,Math.min(dt*3,1));
+    }
+  },
+};
+/* =====================================================================
    Ballistics — 발사체 + 중력 + 바람 + 트레이서
    ===================================================================== */
 const bullets=[];
 function fireBullet(origin,dir){
-  bullets.push({p:origin.clone(),v:dir.clone().multiplyScalar(gSpeed()),life:2.5,killed:false,org:origin.clone()});
+  const b={p:origin.clone(),v:dir.clone().multiplyScalar(gSpeed()),life:2.5,killed:false,org:origin.clone()};
+  bullets.push(b);
+  return b;
 }
 function updateBullets(dt){
   const windA=QM.windVec.clone().multiplyScalar(1.6*gWindMul());
@@ -2316,11 +2443,13 @@ function updateBullets(dt){
       if(hE&&(!hB||hE.t<hB.t))hit=hE;else if(hB)hit={t:hB.t,kind:'block',hB};
       if(hit){
         const point=prev.clone().addScaledVector(dirn,hit.t);
+        b.lastPoint=point;
         removed=resolveHit(b,hit,point,dirn);
         if(removed){finishBullet(b,i);break;}
       }
       PS.tracer(prev,b.p);
       if(b.p.y<=0.02){ // 지면 착탄 퍼프 — 어디로 빗나갔는지 보인다
+        b.lastPoint=V3(b.p.x,.1,b.p.z);
         PS.dust(V3(b.p.x,.1,b.p.z),5);
         AE.hit('dirt',b.p);
         EnemyMgr.alert(b.p,10);
@@ -2331,6 +2460,7 @@ function updateBullets(dt){
 }
 function finishBullet(b,i){
   bullets.splice(i,1);
+  Killcam.onBulletEnd(b);
   if(!b.killed)QM.onBulletMiss();
 }
 function resolveHit(b,hit,point,dirn){
@@ -2627,6 +2757,7 @@ const QM={
     for(let i=0;i<nAnim;i++)new Animal(pick(['boar','hen','hen','deer']),rand(-26,26),rand(-26,12));
     if(this.m&&this.m.type==='ammo'){player.reserve=2;} // 5+2=7발
     HUD.ammo();HUD.hp();HUD.hint(null);HUD.timer(null);
+    Killcam.stop();FailFX.reset();weapon.applyUpgrades();
     $('dropArrow').classList.add('hide');AE.heartbeat(false);
     AE.startAmb(env.night,Math.abs(this.windVec.x));
     Music.start();Music.setState('CALM');
@@ -2753,8 +2884,8 @@ const QM={
     this.mkTimer=1.2;
     if(this.mkCount===2){HUD.banner('DOUBLE KILL');AE.banner(2);}
     else if(this.mkCount>=3){HUD.banner('TRIPLE KILL');AE.banner(3);}
-    // 킬캠: 100m+ 헤드샷, 5킬당 1회
-    if(head&&dist>=100&&G.stats.kills%5===0)player.slowmo(.8);
+    // 킬캠 미발동 시 폴백 슬로모: 100m+ 헤드샷, 5킬당 1회
+    if(head&&dist>=100&&G.stats.kills%5===0&&!Killcam.active)player.slowmo(.8);
     vib(head?'head':'hit');
     // 미션별
     const ty=this.m?this.m.type:'';
@@ -2789,11 +2920,11 @@ const QM={
     if(ty==='demolish'&&sid===this.targetSid)setTimeout(()=>this.win(),800);
     if(ty==='chain'&&world.towerTops.every(t=>world.structs[t.sid].collapsed))setTimeout(()=>this.win(),800);
   },
-  onHostageHit(){this.fail(T('f_hostage'));},
+  onHostageHit(){this.fail(T('f_hostage'),this.hostage?{mode:'focus',pos:this.hostage.pos.clone().add(V3(0,1,0))}:null);},
   onTruckStopped(driver){HUD.banner(driver?T('driver_kill'):T('truck_kill'));setTimeout(()=>this.win(),600);},
   onBossDown(){HUD.banner(T('boss_kill'));setTimeout(()=>this.win(),1400);},
-  onCorpseSeen(){
-    if(this.m&&this.m.type==='silent')this.fail(T('f_seen'));
+  onCorpseSeen(pos){
+    if(this.m&&this.m.type==='silent')this.fail(T('f_seen'),pos?{mode:'focus',pos}:null);
   },
   onPlayerDamage(){this.ms.dmg++;},
   /* ---------- 진행 체크 ---------- */
@@ -2823,7 +2954,7 @@ const QM={
       case 'timed':
         this.timeLeft-=dt;HUD.timer(this.timeLeft);
         if(this.ms.kills>=this.m.count)this.win();
-        else if(this.timeLeft<=0)this.fail(T('f_time'));
+        else if(this.timeLeft<=0)this.fail(T('f_time'),{mode:'desat'});
         break;
       case 'oneshot':
         if(alive===0&&this.oneStreak<5)this.fail(T('f_streak'));
@@ -2833,7 +2964,8 @@ const QM={
         break;
       case 'vip':
         if(this.vipTimer>0){this.vipTimer-=dt;HUD.timer(this.vipTimer);
-          if(this.vipTimer<=0||(this.vip&&Math.abs(this.vip.pos.x)>31))this.fail(T('f_vip'));}
+          if(this.vipTimer<=0||(this.vip&&Math.abs(this.vip.pos.x)>31))
+            this.fail(T('f_vip'),this.vip?{mode:'focus',pos:this.vip.pos.clone().add(V3(0,1.5,0))}:null);}
         break;
       case 'counter':
         if(alive===0)this.win();
@@ -2880,18 +3012,21 @@ const QM={
     }
     setTimeout(()=>showEnd(true,stars,null,gold),1100);
   },
-  fail(reason){
+  fail(reason,fx){
     if(this.state!=='playing')return;
     this.state='failed';
+    Killcam.stop();
     Music.setState('CALM');AE.failSnd();AE.heartbeat(false);
     HUD.timer(null);HUD.hint(null);HUD.reloadHint();
     $('btnPause').classList.add('hide');
+    FailFX.start(fx);
     if(this.mode==='endless'){
       G.stats.bestWave=Math.max(G.stats.bestWave,this.wave);
-      setTimeout(()=>showEnd(false,0,T('f_wave',this.wave,G.stats.bestWave)),1000);
+      G.runs.push({wave:this.wave,kills:this.ms.kills,heads:this.ms.heads}); // 기록판 저장
+      setTimeout(()=>showEnd(false,0,T('f_wave',this.wave,G.stats.bestWave)),1400);
       return;
     }
-    setTimeout(()=>showEnd(false,0,reason),1000);
+    setTimeout(()=>showEnd(false,0,reason),1400);
   },
   restart(){
     if(this.mode==='tutorial')this.beginTutorial();
@@ -3094,10 +3229,22 @@ function showEnd(won,stars,msg,gold){
     }
   }
   const ms=QM.ms,acc=ms.shots?(ms.hits/ms.shots*100|0):0;
-  $('endStats').innerHTML=(QM.mode==='mission'?
+  let html=(QM.mode==='mission'?
     T('end_line1',ms.t.toFixed(1),QM.m.par,acc,ms.dmg)+'<br>':'')
     +T('end_line2',ms.kills,ms.heads)
     +(gold?'<br><span style="color:#ffc668">'+T('end_gold',gold)+'</span>':'');
+  // 무한 모드 기록판 (세션 상위 5개)
+  if(QM.mode==='endless'&&G.runs.length){
+    const cur=G.runs[G.runs.length-1];
+    const top=[...G.runs].sort((a,b)=>b.wave-a.wave||b.kills-a.kills).slice(0,5);
+    html+='<div style="margin-top:12px;font-family:var(--fn);font-size:11px;letter-spacing:3px;color:#ff9e1b">'+T('lb_h')+'</div>';
+    top.forEach((r,i)=>{
+      const me=r===cur;
+      html+='<div style="font-family:var(--fn);font-size:13px;letter-spacing:1px;'+(me?'color:#ffc668':'color:#8d98a1')+'">'
+        +(i+1)+'.  '+T('lb_row',r.wave,r.kills,r.heads)+(me?' ◄':'')+'</div>';
+    });
+  }
+  $('endStats').innerHTML=html;
   // 다음 임무 버튼
   const nx=$('btnNext');nx.classList.add('hide');nx.textContent=T('next');
   if(won&&QM.mode==='mission'){
@@ -3204,6 +3351,8 @@ function frame(now){
     updateBullets(dts);
     QM.update(dt);
   }
+  Killcam.update(dt);   // 총알 추적 킬캠 카메라
+  FailFX.update(dt);    // 실패 연출 카메라
   EnemyMgr.update(dts); // 메뉴 배경에서도 순찰·동물 배회 유지
   world.update(dts);
   PS.update(dts);

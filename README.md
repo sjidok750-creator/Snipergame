@@ -4,12 +4,14 @@ A touch-first voxel sniper game built on Three.js. **Single HTML file**, zero ex
 
 **English by default · 한국어 지원** (language toggle on the title screen and in Settings).
 
-## Run
+## Play
 
-Open `index.html` in a browser. (Internet required once, for the Three.js CDN and fonts.)
+**▶ https://sjidok750-creator.github.io/Snipergame/**
+
+Or open `index.html` in a browser. (Internet required for the Three.js CDN and fonts.)
 
 - Designed for mobile (touch-only controls); works with a mouse on desktop too
-- Deploy instantly with GitHub Pages: Settings → Pages → select the branch
+- Auto-deployed to GitHub Pages by `.github/workflows/pages.yml` on every push
 
 ## Controls
 
